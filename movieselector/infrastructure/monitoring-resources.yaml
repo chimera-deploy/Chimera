@@ -1,0 +1,106 @@
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Name for the project
+
+Resources:
+  ###################################################
+  # ECS Services & Tasks
+  ###################################################
+  CWAgentService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Fn::ImportValue: !Sub '${ProjectName}:Cluster'
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - 'Fn::ImportValue': !Sub "${ProjectName}:ContainerSecurityGroup"
+          Subnets:
+            - 'Fn::ImportValue': !Sub "${ProjectName}:PrivateSubnet1"
+            - 'Fn::ImportValue': !Sub "${ProjectName}:PrivateSubnet2"
+      TaskDefinition: !Ref CWAgentTaskDef
+
+  CWAgentTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: 512
+      Memory: 1024
+      TaskRoleArn:
+        Fn::ImportValue: !Sub '${ProjectName}:CWTaskRole'
+      ExecutionRoleArn:
+        Fn::ImportValue: !Sub '${ProjectName}:CWExecutionRole'
+      ContainerDefinitions:
+        - Name: cwagent
+          Image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
+          Essential: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Fn::ImportValue: !Sub '${ProjectName}:CWLogGroup'
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: cwagent
+          Environment:
+            - Name: PROMETHEUS_CONFIG_CONTENT
+              Value: |
+                global:
+                  scrape_interval: 1m
+                  scrape_timeout: 10s
+                scrape_configs:
+                  - job_name: cwagent-ecs-file-sd-config
+                    sample_limit: 10000
+                    file_sd_configs:
+                      - files: [ /tmp/cwagent_ecs_auto_sd.yaml ]
+                    metric_relabel_configs:
+                      - source_labels: [ __name__ ]
+                        regex: ^envoy_appmesh_.+$
+                        action: keep
+            - Name: CW_CONFIG_CONTENT
+              Value: !Sub >
+                {
+                  "logs": {
+                    "force_flush_interval": 5,
+                    "metrics_collected": {
+                      "prometheus": {
+                        "log_group_name": "chimera-log-group",
+                        "prometheus_config_path": "env:PROMETHEUS_CONFIG_CONTENT",
+                        "ecs_service_discovery": {
+                          "sd_frequency": "1m",
+                          "docker_label": {},
+                          "sd_result_file": "/tmp/cwagent_ecs_auto_sd.yaml"
+                        },
+                        "emf_processor": {
+                          "metric_namespace": "${ProjectName}",
+                          "metric_declaration_dedup": true,
+                          "metric_declaration": [
+                            {
+                              "source_labels": [ "container_name" ],
+                              "label_matcher": "^envoy$",
+                              "dimensions": [
+                                ["Mesh", "VirtualNode"],
+                                ["Mesh", "VirtualNode", "TargetVirtualNode"],
+                                ["Mesh", "VirtualNode", "TargetVirtualNode", "TargetVirtualService"],
+                                ["Mesh", "VirtualGateway"],
+                                ["Mesh", "VirtualGateway", "TargetVirtualNode"],
+                                ["Mesh", "VirtualGateway", "TargetVirtualNode", "TargetVirtualService"]
+                              ],
+                              "metric_selectors": [
+                                "^.+$"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }

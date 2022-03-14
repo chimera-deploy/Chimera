@@ -1,0 +1,163 @@
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Name for the project
+
+  EnvoyImage:
+    Type: String
+
+  MovieServerImage:
+    Type: String
+
+  ContainerPort:
+    Type: Number
+    Default: 8080
+
+  Version:
+    Type: String
+
+Resources:
+
+  ###################################################
+  # ECS Services & Tasks
+  ###################################################
+  MovieServerService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Fn::ImportValue: !Sub '${ProjectName}:Cluster'
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: 2
+      LaunchType: FARGATE
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::ImportValue: !Sub "${ProjectName}:ARNOfSixtiesMovieServerServiceRegistryEntry"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - 'Fn::ImportValue': !Sub "${ProjectName}:ContainerSecurityGroup"
+          Subnets:
+            - 'Fn::ImportValue': !Sub "${ProjectName}:PrivateSubnet1"
+            - 'Fn::ImportValue': !Sub "${ProjectName}:PrivateSubnet2"
+      TaskDefinition: !Ref MovieServerTaskDef
+
+  MovieServerTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities:
+        - FARGATE
+      Family: !Sub '${ProjectName}-sixtiesserver-${Version}'
+      NetworkMode: awsvpc
+      Cpu: 256
+      Memory: 512
+      TaskRoleArn:
+        Fn::ImportValue: !Sub '${ProjectName}:TaskRole'
+      ExecutionRoleArn:
+        Fn::ImportValue: !Sub '${ProjectName}:ExecutionRole'
+      ProxyConfiguration:
+        Type: APPMESH
+        ContainerName: envoy
+        ProxyConfigurationProperties:
+          - Name: IgnoredUID
+            Value: '1337'
+          - Name: ProxyIngressPort
+            Value: '15000'
+          - Name: ProxyEgressPort
+            Value: '15001'
+          - Name: AppPorts
+            Value: !Ref ContainerPort
+          - Name: EgressIgnoredIPs
+            Value: '169.254.170.2,169.254.169.254'
+      ContainerDefinitions:
+        - Name: envoy
+          Image: !Ref EnvoyImage
+          Essential: true
+          User: '1337'
+          Ulimits:
+            - Name: nofile
+              HardLimit: 15000
+              SoftLimit: 15000
+          PortMappings:
+            - ContainerPort: 9901
+              Protocol: tcp
+            - ContainerPort: 15000
+              Protocol: tcp
+            - ContainerPort: 15001
+              Protocol: tcp
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - curl -s http://localhost:9901/ready
+            Interval: 5
+            Timeout: 10
+            Retries: 10
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Fn::ImportValue: !Sub '${ProjectName}:CWLogGroup'
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: !Sub 'sixtiesserver-${Version}'
+          DockerLabels:
+            ECS_PROMETHEUS_METRICS_PATH: /stats/prometheus
+            ECS_PROMETHEUS_EXPORTER_PORT: 9901
+          Environment:
+            - Name: ENVOY_LOG_LEVEL
+              Value: debug
+            - Name: APPMESH_METRIC_EXTENSION_VERSION
+              Value: 1
+            - Name: APPMESH_RESOURCE_ARN
+              Value: !Ref SixtiesServerVirtualNode
+        - Name: app
+          Image: !Ref MovieServerImage
+          Essential: true
+          Ulimits:
+            - Name: nofile
+              HardLimit: 15000
+              SoftLimit: 15000
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Fn::ImportValue: !Sub '${ProjectName}:CWLogGroup'
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: !Sub 'sixtiesserver-${Version}'
+          Environment:
+            - Name: PORT
+              Value: !Ref ContainerPort
+            - Name: RESPONSES
+              Value: >
+                [
+                  "Persona (1966)",
+                  "Jules et Jim (1962)",
+                  "2001: A Space Odyssey (1968)",
+                  "8 1/2 (1963)",
+                  "Breathless (1960)"
+                ]
+
+  ###################################################
+  # App Mesh
+  ###################################################
+  SixtiesServerVirtualNode:
+    Type: AWS::AppMesh::VirtualNode
+    Properties:
+      MeshName: !Ref ProjectName
+      VirtualNodeName: !Sub 'sixtiesserver-${Version}'
+      Spec:
+        Listeners:
+          - PortMapping:
+              Port: !Ref ContainerPort
+              Protocol: http
+        ServiceDiscovery:
+          AWSCloudMap:
+            NamespaceName: !Sub '${ProjectName}.local'
+            ServiceName: sixtiesmovieserver
+            Attributes:
+              - Key: ECS_TASK_DEFINITION_FAMILY
+                Value: !Sub '${ProjectName}-sixtiesserver-${Version}'

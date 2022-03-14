@@ -1,0 +1,17 @@
+{
+  "name": "autocanarysdk",
+  "version": "1.0.0",
+  "description": "## Required Packages ## - @aws-sdk/client-servicediscovery - @aws-sdk/client-ecs - @aws-sdk/client-ecr and/or @aws-sdk/client-ecr-public - @aws-sdk/client-app-mesh",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-app-mesh": "^3.53.0",
+    "@aws-sdk/client-ecs": "^3.54.0",
+    "@aws-sdk/client-servicediscovery": "^3.53.0",
+    "axios": "^0.26.1"
+  }
+}
