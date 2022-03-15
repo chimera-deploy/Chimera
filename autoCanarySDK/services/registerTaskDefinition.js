@@ -6,6 +6,8 @@ const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) 
   const executionIAMRole = 'chimera-base-TaskExecutionIAMRole-O2S5Y8J5XWU5';
   const taskIAMRole = 'chimera-base-TaskIAMRole-1O0KKQBI4I33G';
 
+  const backends = chimeraConfig.backends.map(backend => `${backend.virtualServiceName}:${backend.port}`);
+
   const registerTaskDefinitionInput = {
     family: taskName,
     containerDefinitions: [
@@ -31,7 +33,7 @@ const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) 
           },
           {
             name: 'BACKENDS',
-            value: JSON.stringify(chimeraConfig.backends),
+            value: JSON.stringify(backends),
           },
         ],
       },
@@ -114,15 +116,11 @@ const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) 
     },
   };
 
-  console.log('task definition input');
-  console.log(registerTaskDefinitionInput);
-  console.log();
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(registerTaskDefinitionInput);
 
   try {
     const response = await client.send(registerTaskDefinitionCommand);
     console.log(`Success registering new Task Definition named ${taskName}`);
-    console.log(response);
     return response;
   } catch(err) {
     console.log(`ERROR registering new Task Definition named ${taskName}`);

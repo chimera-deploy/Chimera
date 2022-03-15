@@ -29,7 +29,6 @@ const createService = async (chimeraConfig, taskName, virtualNodeName) => {
   try {
     const response = await client.send(command)
     console.log(`Success creating new Service named ${newServiceName}`)
-    console.log(response)
     return response
   } catch(err){
     console.log(`ERROR creating new Service named ${newServiceName}`)

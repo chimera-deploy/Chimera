@@ -12,7 +12,6 @@ const updateECSService = async (chimeraConfig, desiredCount, ecsServiceName) => 
   try {
     const response = await client.send(command)
     console.log(`Success updating service named ${ecsServiceName}`);
-    console.log(response);
     return response;
   } catch(err) {
     console.log(`ERROR updating service named ${ecsServiceName}`);

@@ -10,7 +10,6 @@ const getService = async (serviceId, clientConfig) => {
   try {
     const serviceResponse = await serviceClient.send(serviceCommand)
     console.log(`Success retrieving service details for ID ${serviceId}`)
-    console.log(serviceResponse)
     return serviceResponse
   } catch(err) {
     console.log(`ERROR retrieving service details for ID ${serviceId}`)
