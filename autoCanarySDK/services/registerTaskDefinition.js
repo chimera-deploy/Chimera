@@ -116,15 +116,11 @@ const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) 
     },
   };
 
-  console.log('task definition input');
-  console.log(registerTaskDefinitionInput);
-  console.log();
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(registerTaskDefinitionInput);
 
   try {
     const response = await client.send(registerTaskDefinitionCommand);
     console.log(`Success registering new Task Definition named ${taskName}`);
-    console.log(response);
     return response;
   } catch(err) {
     console.log(`ERROR registering new Task Definition named ${taskName}`);
