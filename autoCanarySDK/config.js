@@ -22,6 +22,10 @@ const clientConfiguration = {
     "subnet-0620eb34e4f49abb0",
   ],
   "serviceRegistryARN": "arn:aws:servicediscovery:us-east-2:427813416040:service/srv-2rdzmargnx3376ok",
+  "originalNodeName": "movieselector-1",
+  "routeName": "movieselector-route",
+  "routerName": "movieselector-vr",
+  "pathPrefix": "/",
 };
 
 module.exports = clientConfiguration;
