@@ -12,7 +12,6 @@ const stopTask = async (clientConfig, cluster, reason, task) => {
   try {
     const response = await client.send(command)
     console.log(`Success stopping task ID# ${task}`)
-    console.log(response)
     return response
   } catch(err) {
     console.log(`ERROR stopping task ID# ${task}`)

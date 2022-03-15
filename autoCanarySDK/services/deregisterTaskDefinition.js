@@ -11,7 +11,6 @@ const deregisterTaskDefinition = async (taskDefinitionName) => {
   try {
     const response = await client.send(command)
     console.log(`Success deregistering Task Definition named ${taskDefinitionName}`)
-    console.log(response)
     return response
   } catch(err) {
     console.log(`ERROR deregistering Task Definition named ${taskDefinitionName}`)

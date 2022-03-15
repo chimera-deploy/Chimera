@@ -6,7 +6,7 @@ const createVirtualNode = async (chimeraConfig, virtualNodeName, taskName) => {
   const backends = chimeraConfig.backends.map(backend => {
     return {
       virtualService: {
-        virtualServiceName: backend,
+        virtualServiceName: backend.virtualServiceName,
       },
     };
   });
@@ -45,7 +45,6 @@ const createVirtualNode = async (chimeraConfig, virtualNodeName, taskName) => {
   try {
     const response = await appMeshClient.send(createVirtualNode)
     console.log(`Success creating Virtual Node named ${virtualNodeName}`)
-    console.log(response)
     return response
   } catch(err) {
     console.log(`ERROR creating Virtual Node named ${virtualNodeName}`)

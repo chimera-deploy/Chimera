@@ -6,6 +6,8 @@ const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) 
   const executionIAMRole = 'chimera-base-TaskExecutionIAMRole-O2S5Y8J5XWU5';
   const taskIAMRole = 'chimera-base-TaskIAMRole-1O0KKQBI4I33G';
 
+  const backends = chimeraConfig.backends.map(backend => `${backend.virtualServiceName}:${backend.port}`);
+
   const registerTaskDefinitionInput = {
     family: taskName,
     containerDefinitions: [
@@ -31,7 +33,7 @@ const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) 
           },
           {
             name: 'BACKENDS',
-            value: JSON.stringify(chimeraConfig.backends),
+            value: JSON.stringify(backends),
           },
         ],
       },

@@ -13,7 +13,6 @@ const deleteVirtualNode = async (chimeraConfig, virtualNodeName) => {
   try {
     const response = await client.send(command)
     console.log(`Success deleting Virtual Node named ${virtualNodeName}`)
-    console.log(response)
     return response
   } catch(err) {
     console.log(`ERROR trying to delete Virtual Node named ${virtualNodeName}`)
