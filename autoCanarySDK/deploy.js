@@ -1,7 +1,6 @@
 const { AppMeshClient, CreateVirtualNodeCommand, AwsCloudMapInstanceAttribute, ServiceDiscovery } = require("@aws-sdk/client-app-mesh")
-// const createServiceName = require('./services/createServiceName')
 const createVirtualNode = require('./services/createVirtualNode')
-// const createService = require('./services/createService')
+const createService = require('./services/createService')
 const registerTaskDefinition = require('./services/registerTaskDefinition')
 // const updateRoute = require('./services/updateRoute')
 // const testCanary = require('./services/testCanary')
@@ -12,5 +11,9 @@ const registerTaskDefinition = require('./services/registerTaskDefinition')
 
 const chimeraConfig = require('./config');
 
-createVirtualNode(chimeraConfig);
-// registerTaskDefinition(chimeraConfig);
+const virtualNodeName = `${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`
+const taskName = `${chimeraConfig.meshName}-${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`;
+
+// const virtualNode = createVirtualNode(chimeraConfig, virtualNodeName, taskName);
+// const taskDef = registerTaskDefinition(chimeraConfig, taskName, virtualNodeName);
+const service = createService(chimeraConfig, taskName, virtualNodeName);

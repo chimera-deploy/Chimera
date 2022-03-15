@@ -1,24 +1,25 @@
 const { ECSClient, CreateServiceCommand } = require("@aws-sdk/client-ecs")
 
-const createService = async (clientConfig, clusterName, securityGroups, subnets, newServiceName, taskName, containerName, registryArn) => {
-  const client = new ECSClient(clientConfig)
+const createService = async (chimeraConfig, taskName, virtualNodeName) => {
+  const client = new ECSClient();
+  
+  const newServiceName = `${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`;
 
   const createServiceInput = {
-    cluster: clusterName,
-    desiredCount: 1,
+    cluster: chimeraConfig.clusterName,
+    desiredCount: Number(chimeraConfig.numInstances),
     launchType: "FARGATE",
     networkConfiguration: {
       awsvpcConfiguration: {
         assignPublicIp: "ENABLED",
-        securityGroups: securityGroups, // string[]
-        subnets: subnets, // string[]
+        securityGroups: chimeraConfig.securityGroups,
+        subnets: chimeraConfig.subnets,
       }
     },
-    serviceName: newServiceName,
+    serviceName: virtualNodeName,
     serviceRegistries: [
       {
-        containerName: containerName,
-        registryArn: registryArn // was only able to discover by using getService.js, find via the service ID of the cloud map service name to use
+        registryArn: chimeraConfig.serviceRegistryARN,
       }
     ],
     taskDefinition: taskName

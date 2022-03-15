@@ -1,11 +1,10 @@
-const { ECSClient, RegisterTaskDefinitionCommand } = require("@aws-sdk/client-ecs")
+const { ECSClient, RegisterTaskDefinitionCommand } = require("@aws-sdk/client-ecs");
 
-const registerTaskDefinition = async (chimeraConfig) => {
+const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) => {
   const client = new ECSClient();
-  const taskName = `${chimeraConfig.meshName}-${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`;
 
-  const executionIAMRole = 'chimera-base-TaskExecutionIAMRole-WMD65MW6ITDB';
-  const taskIAMRole = 'chimera-base-TaskIAMRole-YYP4E9K0WEKZ';
+  const executionIAMRole = 'chimera-base-TaskExecutionIAMRole-O2S5Y8J5XWU5';
+  const taskIAMRole = 'chimera-base-TaskIAMRole-1O0KKQBI4I33G';
 
   const registerTaskDefinitionInput = {
     family: taskName,
@@ -16,14 +15,14 @@ const registerTaskDefinition = async (chimeraConfig) => {
           {
             condition: 'START',
             containerName: 'envoy'
-          }
+          },
         ],
         image: chimeraConfig.imageURL,
         portMappings: [
           {
             containerPort: Number(chimeraConfig.containerPort),
             protocol: chimeraConfig.containerProtocol
-          }
+          },
         ],
         environment: [
           {
@@ -33,8 +32,8 @@ const registerTaskDefinition = async (chimeraConfig) => {
           {
             name: 'BACKENDS',
             value: JSON.stringify(chimeraConfig.backends),
-          }
-        ]
+          },
+        ],
       },
       {
         portMappings: [
@@ -54,7 +53,7 @@ const registerTaskDefinition = async (chimeraConfig) => {
         environment: [
           {
             name: "APPMESH_VIRTUAL_NODE_NAME",
-            value: `mesh/${chimeraConfig.meshName}/virtualNode/${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`,
+            value: `mesh/${chimeraConfig.meshName}/virtualNode/${virtualNodeName}`,
           },
         ],
         memory: 500,
@@ -72,7 +71,7 @@ const registerTaskDefinition = async (chimeraConfig) => {
         essential: true,
         user: "1337",
         name: "envoy"
-      }
+      },
     ],
     cpu: '256',
     memory: '512',
@@ -110,23 +109,26 @@ const registerTaskDefinition = async (chimeraConfig) => {
         {
           name: "ProxyEgressPort",
           value: "15001"
-        }
-      ]
+        },
+      ],
     },
-  }
+  };
 
+  console.log('task definition input');
+  console.log(registerTaskDefinitionInput);
+  console.log();
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(registerTaskDefinitionInput);
 
   try {
-    const response = await client.send(registerTaskDefinitionCommand)
-    console.log(`Success registering new Task Definition named ${taskName}`)
-    console.log(response)
-    return response
+    const response = await client.send(registerTaskDefinitionCommand);
+    console.log(`Success registering new Task Definition named ${taskName}`);
+    console.log(response);
+    return response;
   } catch(err) {
-    console.log(`ERROR registering new Task Definition named ${taskName}`)
-    console.log(err)
-    return err
+    console.log(`ERROR registering new Task Definition named ${taskName}`);
+    console.log(err);
+    return err;
   }
 }
 
-module.exports = registerTaskDefinition
+module.exports = registerTaskDefinition;

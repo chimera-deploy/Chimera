@@ -1,10 +1,7 @@
 const { AppMeshClient, CreateVirtualNodeCommand } = require("@aws-sdk/client-app-mesh")
 
-const createVirtualNode = async (chimeraConfig) => {
+const createVirtualNode = async (chimeraConfig, virtualNodeName, taskName) => {
   const appMeshClient = new AppMeshClient();
-
-  const virtualNodeName = `${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`
-  const serviceDiscoveryName = `${chimeraConfig.serviceName}.${chimeraConfig.domain}`;
 
   const backends = chimeraConfig.backends.map(backend => {
     return {
@@ -27,10 +24,16 @@ const createVirtualNode = async (chimeraConfig) => {
         }
       ],
       serviceDiscovery: 
-        { dns: 
+      /*
+        TODO: We will need to generalize this so that the user can specify whether dns or cloudmap should
+        be used. For now we are assuming cloudmap service discovery. We may also be able to use one option either way.
+        We will have to look into this.
+      */
+        { awsCloudMap: 
           {
-            hostname: serviceDiscoveryName,
-            name: virtualNodeName,
+            attributes: [{ key: 'ECS_TASK_DEFINITION_FAMILY', value: taskName }],
+            namespaceName: chimeraConfig.domain,
+            serviceName: chimeraConfig.serviceName,
           }
       },
     },
