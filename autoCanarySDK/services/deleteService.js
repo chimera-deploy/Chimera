@@ -1,24 +1,24 @@
 const { ECSClient, DeleteServiceCommand } = require("@aws-sdk/client-ecs")
 
-const deleteService = async (clientConfig, clusterARN, serviceName) => {
-  const client = new ECSClient(clientConfig)
+const deleteECSService = async (chimeraConfig, ecsServiceName) => {
+  const client = new ECSClient()
   const input = {
-    cluster: clusterARN,
-    service: serviceName
-  }
+    cluster: chimeraConfig.clusterARN,
+    service: ecsServiceName,
+  };
 
   const command = new DeleteServiceCommand(input)
 
   try {
     const response = await client.send(command)
-    console.log(`Success deleteing Service named ${serviceName}`)
+    console.log(`Success deleteing Service named ${ecsServiceName}`)
     console.log(response)
     return response
   } catch(err) {
-    console.log(`ERROR deleting Service named ${serviceName}`)
+    console.log(`ERROR deleting Service named ${ecsServiceName}`)
     console.log(err)
     return err
   }  
 }
 
-module.exports = deleteService
+module.exports = deleteECSService

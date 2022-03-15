@@ -1,11 +1,11 @@
 const { AppMeshClient, DeleteVirtualNodeCommand } = require("@aws-sdk/client-app-mesh")
 
 // CANNOT DELETE VIRTUAL NODE UNTIL ALL SERVICES THAT LIST VIRTUAL NODE AS A SERVICE PROVIDER ARE DELETED
-const deleteVirtualNode = async (clientConfig, meshName, virtualNodeName) => {
-  const client = new AppMeshClient(clientConfig)
+const deleteVirtualNode = async (chimeraConfig, virtualNodeName) => {
+  const client = new AppMeshClient();
   const input = {
-    meshName,
-    virtualNodeName,
+    meshName: chimeraConfig.meshName,
+    virtualNodeName: virtualNodeName,
   }
 
   const command = new DeleteVirtualNodeCommand(input)
