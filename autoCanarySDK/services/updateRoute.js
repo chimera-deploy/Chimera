@@ -21,15 +21,7 @@ const updateRoute = async (chimeraConfig, weightedTargets) => {
 
   const command = new UpdateRouteCommand(updateRouteCommandInput);
 
-  try {
-    const response = await client.send(command);
-    console.log(`Success updating mesh Route named ${chimeraConfig.routeName}`);
-    return response;
-  } catch(err) {
-    console.log(`ERROR updating mesh Route named ${chimeraConfig.routeName}`);
-    console.log(err);
-    return err;
-  }  
+  await client.send(command);
 }
 
 module.exports = updateRoute;

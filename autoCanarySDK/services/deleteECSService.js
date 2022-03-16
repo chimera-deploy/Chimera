@@ -11,7 +11,7 @@ const deleteECSService = async (chimeraConfig, ecsServiceName) => {
 
   try {
     const response = await client.send(command)
-    console.log(`Success deleteing Service named ${ecsServiceName}`)
+    console.log(`Success deleting Service named ${ecsServiceName}`)
     return response
   } catch(err) {
     console.log(`ERROR deleting Service named ${ecsServiceName}`)

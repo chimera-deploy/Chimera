@@ -1,6 +1,6 @@
 const { ECSClient, RegisterTaskDefinitionCommand } = require("@aws-sdk/client-ecs");
 
-const registerTaskDefinition = async (chimeraConfig, taskName, virtualNodeName) => {
+const registerTaskDefinition = async (chimeraConfig, virtualNodeName, taskName) => {
   const client = new ECSClient();
 
   const executionIAMRole = 'chimera-base-TaskExecutionIAMRole-O2S5Y8J5XWU5';

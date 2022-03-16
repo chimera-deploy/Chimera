@@ -1,6 +1,6 @@
 const { ECSClient, CreateServiceCommand } = require("@aws-sdk/client-ecs")
 
-const createService = async (chimeraConfig, taskName, virtualNodeName) => {
+const createECSService = async (chimeraConfig, virtualNodeName, taskName) => {
   const client = new ECSClient();
   
   const newServiceName = `${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`;
@@ -37,4 +37,4 @@ const createService = async (chimeraConfig, taskName, virtualNodeName) => {
   }  
 }
 
-module.exports = createService
+module.exports = createECSService

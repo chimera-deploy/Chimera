@@ -42,15 +42,15 @@ const createVirtualNode = async (chimeraConfig, virtualNodeName, taskName) => {
   
   const createVirtualNode = new CreateVirtualNodeCommand(virtualNodeInput)
   
-  try {
-    const response = await appMeshClient.send(createVirtualNode)
-    console.log(`Success creating Virtual Node named ${virtualNodeName}`)
+  // try {
+    const response = await appMeshClient.send(createVirtualNode);
+    // console.log(`Success creating Virtual Node named ${virtualNodeName}`)
     return response
-  } catch(err) {
-    console.log(`ERROR creating Virtual Node named ${virtualNodeName}`)
-    console.log(err)
-    return err
-  }
+  // } catch(err) {
+  //   console.log(`ERROR creating Virtual Node named ${virtualNodeName}`)
+  //   console.log(err)
+  //   return err
+  // }
 }
 
 module.exports = createVirtualNode;

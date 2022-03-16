@@ -1,7 +1,7 @@
 const clientConfiguration = {
   "region": "us-east-2",
   "meshName": "chimera",
-  "newVersionNumber": "1",
+  "newVersionNumber": "3",
   "domain": "chimera.local",
   "serviceName": "movieselector",
   "containerPort": "8080",
@@ -17,7 +17,7 @@ const clientConfiguration = {
       "port": "8080",
     },
   ],
-  "imageURL": '427813416040.dkr.ecr.us-east-2.amazonaws.com/movieselector:1.0',
+  "imageURL": '427813416040.dkr.ecr.us-east-2.amazonaws.com/movieselector:3.0',
   "numInstances": "3",
   "securityGroups": [
     "sg-03c6b2529647457e6"
@@ -30,12 +30,12 @@ const clientConfiguration = {
   ],
   "serviceRegistryARN": "arn:aws:servicediscovery:us-east-2:427813416040:service/srv-2rdzmargnx3376ok",
   "serviceDiscoveryID": "srv-2rdzmargnx3376ok",
-  "originalNodeName": "movieselector-3",
-  "originalECSServiceName": "movieselector-3",
+  "originalNodeName": "movieselector-2",
+  "originalECSServiceName": "movieselector-2",
   "routeName": "movieselector-route",
   "routerName": "movieselector-vr",
   "pathPrefix": "/",
-  "originalTaskDefinition": "chimera-movieselector-3:7",
+  "originalTaskDefinition": "chimera-movieselector-2:16",
 };
 
 module.exports = clientConfiguration;
