@@ -15,17 +15,23 @@ const Chimera = {
   config: null,
 
   async deploy(config) {
+    let newVersionDeployed = false;
     this.config = config;
     try {
       await this.buildCanary();
       await this.shiftTraffic(2000, 100);
-      // Need to handle the case where the old service has been partially removed
-      // and then fails
-      await this.removeOldVersion();
+      newVersionDeployed = true;
     } catch (err) {
       console.log('deployment failed');
       console.log(err);
       await this.rollbackToOldVersion();
+    }
+    if (newVersionDeployed) {
+      try {
+        await this.removeOldVersion();
+      } catch (err) {
+        throw new Error('Failed to remove original version of service', { cause: err });
+      }
     }
   },
 
