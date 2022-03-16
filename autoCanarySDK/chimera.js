@@ -105,12 +105,12 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      // await updateRoute(this.config, [
-      //   {
-      //     virtualNode: this.config.originalNodeName,
-      //     weight: 100,
-      //   },
-      // ]);
+      await updateRoute(this.config, [
+        {
+          virtualNode: this.config.originalNodeName,
+          weight: 100,
+        },
+      ]);
       if (this.virtualNode !== null) {
         console.log(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
         await deleteVirtualNode(this.config, this.virtualNode.virtualNodeName);
