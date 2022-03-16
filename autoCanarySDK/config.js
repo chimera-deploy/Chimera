@@ -35,7 +35,7 @@ const clientConfiguration = {
   "routeName": "movieselector-route",
   "routerName": "movieselector-vr",
   "pathPrefix": "/",
-  "originalTaskDefinition": "chimera-movieselector-2:16",
+  "originalTaskDefinition": "chimera-movieselector-2:18",
 };
 
 module.exports = clientConfiguration;
