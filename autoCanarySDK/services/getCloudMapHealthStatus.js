@@ -1,5 +1,7 @@
 const { ServiceDiscoveryClient, GetInstancesHealthStatusCommand } = require("@aws-sdk/client-servicediscovery");
 
+const cloudMapCheckInterval = 5 * 1000;
+
 const getCloudMapHealth = async (serviceDiscoveryID) => {
   const client = new ServiceDiscoveryClient();
 
@@ -17,4 +19,28 @@ const getCloudMapHealth = async (serviceDiscoveryID) => {
   }
 };
 
-module.exports = getCloudMapHealth;
+const currentCloudmapInstanceCount = async (serviceDiscoveryID) => {
+  const health = await getCloudMapHealth(serviceDiscoveryID);
+  return Object.values(health).length;
+};
+
+const cloudMapHealthy = async (serviceDiscoveryID, originalInstanceCount) => {
+  const p = new Promise((resolve, reject) => {
+    let intervalId;
+    intervalId = setInterval(async () => {
+      const updatedInstanceHealth = await getCloudMapHealth(serviceDiscoveryID);
+      const allHealthy = Object.values(updatedInstanceHealth).every(status => status === 'HEALTHY');
+      if (Object.values(updatedInstanceHealth).length !== originalInstanceCount && allHealthy) {
+        clearInterval(intervalId);
+        resolve();
+      }
+    }, cloudMapCheckInterval);
+  });
+  await p;
+};
+
+module.exports = {
+  getCloudMapHealth,
+  currentCloudmapInstanceCount,
+  cloudMapHealthy,
+};
