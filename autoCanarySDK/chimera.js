@@ -78,7 +78,7 @@ const Chimera = {
           clearInterval(intervalID);
         }
         try {
-          await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, this.config.pathPrefix, weightedTargets);
+          await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
         } catch (err) {
           clearInterval(intervalID);
           reject(new Error('error updating app mesh route', { cause: err }));
@@ -95,7 +95,7 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, this.config.pathPrefix, [
+    await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
       {
         virtualNode: this.virtualNode.virtualNodeName,
         weight: 100,
@@ -113,7 +113,7 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, this.config.pathPrefix, [
+      await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
         {
           virtualNode: this.config.originalNodeName,
           weight: 100,
