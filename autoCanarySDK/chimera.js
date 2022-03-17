@@ -78,7 +78,7 @@ const Chimera = {
           clearInterval(intervalID);
         }
         try {
-          await updateRoute(this.config, weightedTargets);
+          await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, this.config.pathPrefix, weightedTargets);
         } catch (err) {
           clearInterval(intervalID);
           reject(new Error('error updating app mesh route', { cause: err }));
@@ -95,12 +95,12 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await updateRoute(this.config, [
+    await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, this.config.pathPrefix, [
       {
         virtualNode: this.virtualNode.virtualNodeName,
-        weight: 100}
-      ]
-    );
+        weight: 100,
+      },
+    ]);
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
     await deleteVirtualNode(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
@@ -113,7 +113,7 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await updateRoute(this.config, [
+      await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, this.config.pathPrefix, [
         {
           virtualNode: this.config.originalNodeName,
           weight: 100,
