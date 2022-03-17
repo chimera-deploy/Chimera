@@ -37,9 +37,10 @@ const Chimera = {
 
   async buildCanary() {
     const originalInstanceCount = await currentCloudmapInstanceCount(this.config.serviceDiscoveryID);
+    // User will have to provide meshName, serviceName and version
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
-    const vnResponse = await createVirtualNode(this.config, virtualNodeName, taskName);
+    const vnResponse = await createVirtualNode(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
     this.virtualNode = vnResponse.virtualNode;
     const taskResponse = await registerTaskDefinition(this.config, virtualNodeName, taskName);
     this.taskDefinition = taskResponse.taskDefinition;
