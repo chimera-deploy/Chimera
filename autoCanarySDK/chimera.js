@@ -102,11 +102,11 @@ const Chimera = {
       ]
     );
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
-    await deleteVirtualNode(this.config, this.config.originalNodeName);
+    await deleteVirtualNode(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
     await updateECSService(this.config, 0, this.config.originalECSServiceName);
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
-    await deleteECSService(this.config, this.config.originalECSServiceName);
+    await deleteECSService(this.config.clusterName, this.config.originalECSServiceName);
     console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
     await deregisterTaskDefinition(this.config.originalTaskDefinition);
   },
