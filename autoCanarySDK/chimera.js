@@ -42,7 +42,14 @@ const Chimera = {
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
     const vnResponse = await createVirtualNode(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
     this.virtualNode = vnResponse.virtualNode;
-    const taskResponse = await registerTaskDefinition(this.config, virtualNodeName, taskName);
+    const taskResponse = await registerTaskDefinition(
+      this.config.imageURL,
+      this.config.containerName,
+      this.config.envoyContainerName,
+      virtualNodeName,
+      this.config.originalTaskDefinition,
+      taskName,
+      this.config.meshName);
     this.taskDefinition = taskResponse.taskDefinition;
     const serviceResponse = await createECSService(this.config, virtualNodeName, taskName)
     this.ECSService = serviceResponse.service;

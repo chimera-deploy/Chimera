@@ -2,7 +2,7 @@ const { ECSClient, ListTasksCommand,  ListTaskDefinitionsCommand, DescribeTasksC
 
 const describeTaskDefinition = async () => {
   const input = {
-    taskDefinition: "chimera-movieselector-1:4"
+    taskDefinition: "chimera-movieselector-1:12"
   };
   let response;
   try {
@@ -14,8 +14,10 @@ const describeTaskDefinition = async () => {
     return
   }
   console.log(`received response`);
-  return response;
+  return response.taskDefinition;
 };
+
+describeTaskDefinition();
 
 const describeTasks = async () => {
   const input = {
@@ -28,6 +30,7 @@ const describeTasks = async () => {
     const client = new ECSClient();
     const command = new DescribeTasksCommand(input);
     response = await client.send(command);
+    console.log(response);
   } catch (err) {
     console.log(`received error:`, err);
     return
@@ -35,6 +38,8 @@ const describeTasks = async () => {
   console.log(`received response`);
   return response;
 };
+
+// describeTasks();
 
 const listTaskDefinitions = async () => {
   const input = {
@@ -70,7 +75,11 @@ const listTasks = async () => {
   return response;
 };
 
-(async () => {
-  const data = await listTaskDefinitions();
-  console.log(data);
-})();
+// (async () => {
+//   const data = await listTaskDefinitions();
+//   console.log(data);
+// })();
+
+module.exports = {
+  describeTaskDefinition,
+};
