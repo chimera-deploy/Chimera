@@ -1,13 +1,12 @@
-const { AppMeshClient, ListRoutesCommand } = require("@aws-sdk/client-app-mesh"); // CommonJS import
+const { AppMeshClient, ListRoutesCommand, DescribeRouteCommand } = require("@aws-sdk/client-app-mesh"); // CommonJS import
 
-const getRoutes = async () => {
+const getRoutes = async (meshName, virtualRouterName) => {
   const input = {
-    meshName: "chimera",
-    virtualRouterName: "movieselector-vr"
+    meshName,
+    virtualRouterName,
   };
   let response;
   try {
-    console.log(`requesting list routes`)
     const client = new AppMeshClient();
     const command = new ListRoutesCommand(input);
     response = await client.send(command);
@@ -16,10 +15,27 @@ const getRoutes = async () => {
     return
   }
   console.log(`received response`);
-  return response;
+  return response.routes;
 };
 
-(async () => {
-  const data = await getRoutes();
-  console.log(data);
-})();
+const getRoute = async (meshName, virtualRouterName, routeName) => {
+  const input = {
+    meshName,
+    virtualRouterName,
+    routeName,
+  };
+  try {
+    const client = new AppMeshClient();
+    const command = new DescribeRouteCommand(input);
+    response = await client.send(command);
+    return response.route;
+  } catch (err) {
+    console.log('received error:', err);
+    return err
+  }
+};
+
+module.exports = {
+  getRoutes,
+  getRoute,
+};

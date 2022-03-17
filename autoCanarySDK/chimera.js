@@ -37,13 +37,21 @@ const Chimera = {
 
   async buildCanary() {
     const originalInstanceCount = await currentCloudmapInstanceCount(this.config.serviceDiscoveryID);
+    // User will have to provide meshName, serviceName and version
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
-    const vnResponse = await createVirtualNode(this.config, virtualNodeName, taskName);
+    const vnResponse = await createVirtualNode(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
     this.virtualNode = vnResponse.virtualNode;
-    const taskResponse = await registerTaskDefinition(this.config, virtualNodeName, taskName);
+    const taskResponse = await registerTaskDefinition(
+      this.config.imageURL,
+      this.config.containerName,
+      this.config.envoyContainerName,
+      virtualNodeName,
+      this.config.originalTaskDefinition,
+      taskName,
+      this.config.meshName);
     this.taskDefinition = taskResponse.taskDefinition;
-    const serviceResponse = await createECSService(this.config, virtualNodeName, taskName)
+    const serviceResponse = await createECSService(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
     this.ECSService = serviceResponse.service;
     await cloudMapHealthy(this.config.serviceDiscoveryID, originalInstanceCount);
   },
@@ -70,7 +78,7 @@ const Chimera = {
           clearInterval(intervalID);
         }
         try {
-          await updateRoute(this.config, weightedTargets);
+          await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
         } catch (err) {
           clearInterval(intervalID);
           reject(new Error('error updating app mesh route', { cause: err }));
@@ -87,25 +95,25 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await updateRoute(this.config, [
+    await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
       {
         virtualNode: this.virtualNode.virtualNodeName,
-        weight: 100}
-      ]
-    );
+        weight: 100,
+      },
+    ]);
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
-    await deleteVirtualNode(this.config, this.config.originalNodeName);
+    await deleteVirtualNode(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
     await updateECSService(this.config, 0, this.config.originalECSServiceName);
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
-    await deleteECSService(this.config, this.config.originalECSServiceName);
+    await deleteECSService(this.config.clusterName, this.config.originalECSServiceName);
     console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
     await deregisterTaskDefinition(this.config.originalTaskDefinition);
   },
 
   async rollbackToOldVersion() {
     try {
-      await updateRoute(this.config, [
+      await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
         {
           virtualNode: this.config.originalNodeName,
           weight: 100,

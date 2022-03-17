@@ -23,3 +23,7 @@ const getECSServiceInfo = async (clusterName, originalECSServiceName) => {
 
   return response.services[0];
 };
+
+module.exports = {
+  getECSServiceInfo,
+}

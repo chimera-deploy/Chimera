@@ -1,9 +1,9 @@
 const { ECSClient, DeleteServiceCommand } = require("@aws-sdk/client-ecs")
 
-const deleteECSService = async (chimeraConfig, ecsServiceName) => {
+const deleteECSService = async (clusterName, ecsServiceName) => {
   const client = new ECSClient()
   const input = {
-    cluster: chimeraConfig.clusterARN,
+    cluster: clusterName,
     service: ecsServiceName,
   };
 
