@@ -51,7 +51,7 @@ const Chimera = {
       taskName,
       this.config.meshName);
     this.taskDefinition = taskResponse.taskDefinition;
-    const serviceResponse = await createECSService(this.config, virtualNodeName, taskName)
+    const serviceResponse = await createECSService(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
     this.ECSService = serviceResponse.service;
     await cloudMapHealthy(this.config.serviceDiscoveryID, originalInstanceCount);
   },

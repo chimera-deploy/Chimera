@@ -1,40 +1,25 @@
 const { ECSClient, CreateServiceCommand } = require("@aws-sdk/client-ecs")
+const { getECSServiceInfo } = require('../pullInfo/getECSService');
 
-const createECSService = async (chimeraConfig, virtualNodeName, taskName) => {
+const createECSService = async (clusterName, originalECSServiceName, newECSServiceName, taskName) => {
   const client = new ECSClient();
   
-  const newServiceName = `${chimeraConfig.serviceName}-${chimeraConfig.newVersionNumber}`;
+  const serviceInfo = await getECSServiceInfo(clusterName, originalECSServiceName);
 
-  const createServiceInput = {
-    cluster: chimeraConfig.clusterName,
-    desiredCount: Number(chimeraConfig.numInstances),
-    launchType: "FARGATE",
-    networkConfiguration: {
-      awsvpcConfiguration: {
-        assignPublicIp: "ENABLED",
-        securityGroups: chimeraConfig.securityGroups,
-        subnets: chimeraConfig.subnets,
-      }
-    },
-    serviceName: virtualNodeName,
-    serviceRegistries: [
-      {
-        registryArn: chimeraConfig.serviceRegistryARN,
-      }
-    ],
-    taskDefinition: taskName
-  }
+  serviceInfo.cluster = clusterName;
+  serviceInfo.serviceName = newECSServiceName;
+  serviceInfo.taskDefinition = taskName;
 
-  const command = new CreateServiceCommand(createServiceInput)
+  const command = new CreateServiceCommand(serviceInfo)
   try {
     const response = await client.send(command)
-    console.log(`Success creating new Service named ${newServiceName}`)
+    console.log(`Success creating new Service named ${newECSServiceName}`)
     return response
   } catch(err){
-    console.log(`ERROR creating new Service named ${newServiceName}`)
+    console.log(`ERROR creating new Service named ${newECSServiceName}`)
     console.log(err)
     return err
   }  
 }
 
-module.exports = createECSService
+module.exports = createECSService;
