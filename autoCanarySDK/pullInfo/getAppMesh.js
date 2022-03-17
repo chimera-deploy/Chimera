@@ -12,6 +12,4 @@ const getAppMesh = async (meshName) => {
   return response.mesh;
 }
 
-exports.module = {
-  getAppMesh,
-}
+module.exports = getAppMesh;
