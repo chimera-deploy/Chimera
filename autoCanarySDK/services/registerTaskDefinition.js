@@ -1,122 +1,35 @@
 const { ECSClient, RegisterTaskDefinitionCommand } = require("@aws-sdk/client-ecs");
+const { describeTaskDefinition } = require('../pullInfo/tasks');
 
-const registerTaskDefinition = async (chimeraConfig, virtualNodeName, taskName) => {
+const registerTaskDefinition = async (appImageURL, appContainerName, envoyContainerName, virtualNodeName, originalTaskName, taskName, meshName) => {
   const client = new ECSClient();
+  const taskDefinition = await describeTaskDefinition(originalTaskName);
 
-  const executionIAMRole = 'chimera-base-TaskExecutionIAMRole-O2S5Y8J5XWU5';
-  const taskIAMRole = 'chimera-base-TaskIAMRole-1O0KKQBI4I33G';
+  taskDefinition.family = taskName;
 
-  const backends = chimeraConfig.backends.map(backend => `${backend.virtualServiceName}:${backend.port}`);
+  // Set imageURL for app container, this will need to be changed
+  // if we allow the user to select multiple containers
+  const appContainerDef = taskDefinition.containerDefinitions.find(def => {
+    return def.name === appContainerName;
+  });
+  appContainerDef.image = appImageURL;
 
-  const registerTaskDefinitionInput = {
-    family: taskName,
-    containerDefinitions: [
-      {
-        name: chimeraConfig.containerName,
-        dependsOn: [
-          {
-            condition: 'START',
-            containerName: 'envoy'
-          },
-        ],
-        image: chimeraConfig.imageURL,
-        portMappings: [
-          {
-            containerPort: Number(chimeraConfig.containerPort),
-            protocol: chimeraConfig.containerProtocol
-          },
-        ],
-        environment: [
-          {
-            name: 'PORT',
-            value: chimeraConfig.containerPort,
-          },
-          {
-            name: 'BACKENDS',
-            value: JSON.stringify(backends),
-          },
-        ],
-      },
-      {
-        portMappings: [
-          {
-            containerPort: 9901,
-            protocol: 'tcp',
-          },
-          {
-            containerPort: 15000,
-            protocol: 'tcp',
-          },
-          {
-            containerPort: 15001,
-            protocol: 'tcp',
-          },
-        ],
-        environment: [
-          {
-            name: "APPMESH_VIRTUAL_NODE_NAME",
-            value: `mesh/${chimeraConfig.meshName}/virtualNode/${virtualNodeName}`,
-          },
-        ],
-        memory: 500,
-        image: "840364872350.dkr.ecr.us-west-2.amazonaws.com/aws-appmesh-envoy:v1.21.1.0-prod",
-        healthCheck: {
-          retries: 3,
-          command: [
-            "CMD-SHELL",
-            "curl -s http://localhost:9901/server_info | grep state | grep -q LIVE"
-          ],
-          timeout: 2,
-          interval: 5,
-          startPeriod: 10
-        },
-        essential: true,
-        user: "1337",
-        name: "envoy"
-      },
-    ],
-    cpu: '256',
-    memory: '512',
-    executionRoleArn: executionIAMRole,
-    taskRoleArn: taskIAMRole,
-    networkMode: 'awsvpc',
-    proxyConfiguration: {
-      type: "APPMESH",
-      containerName: "envoy",
-      properties: [
-        {
-          name: "ProxyIngressPort",
-          value: "15000"
-        },
-        {
-          name: "AppPorts",
-          value: chimeraConfig.containerPort,
-        },
-        {
-          name: "EgressIgnoredIPs",
-          value: "169.254.170.2,169.254.169.254"
-        },
-        {
-          name: "IgnoredGID",
-          value: ""
-        },
-        {
-          name: "EgressIgnoredPorts",
-          value: ""
-        },
-        {
-          name: "IgnoredUID",
-          value: "1337"
-        },
-        {
-          name: "ProxyEgressPort",
-          value: "15001"
-        },
-      ],
-    },
-  };
+  const envoyContainerDef = taskDefinition.containerDefinitions.find(def => {
+    return def.name === envoyContainerName;
+  });
+  const updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
+    if (env.name !== 'APPMESH_VIRTUAL_NODE_NAME') {
+      return env;
+    } else {
+      return {
+        name: 'APPMESH_VIRTUAL_NODE_NAME',
+        value: `mesh/${meshName}/virtualNode/${virtualNodeName}`
+      }
+    }
+  });
+  envoyContainerDef.environment = updatedEnvoyEnvironment;
 
-  const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(registerTaskDefinitionInput);
+  const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(taskDefinition);
 
   try {
     const response = await client.send(registerTaskDefinitionCommand);

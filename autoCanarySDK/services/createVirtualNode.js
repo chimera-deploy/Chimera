@@ -1,56 +1,24 @@
 const { AppMeshClient, CreateVirtualNodeCommand } = require("@aws-sdk/client-app-mesh")
+const { getVirtualNode } = require('../pullInfo/getVirtualNode');
 
-const createVirtualNode = async (chimeraConfig, virtualNodeName, taskName) => {
+const createVirtualNode = async (meshName, virtualNodeName, originalNodeName, taskName) => {
   const appMeshClient = new AppMeshClient();
+  const originalNode = await getVirtualNode(meshName, originalNodeName);
+  originalNode.virtualNodeName = virtualNodeName;
+  if (originalNode.spec.serviceDiscovery.awsCloudMap) {
+    const newAttributes = originalNode.spec.serviceDiscovery.awsCloudMap.attributes.map(attr => {
+      if (attr.key !== 'ECS_TASK_DEFINITION_FAMILY') {
+        return attr;
+      } else {
+        return { key: 'ECS_TASK_DEFINITION_FAMILY', value: taskName };
+      }
+    });
+    originalNode.spec.serviceDiscovery.awsCloudMap.attributes = newAttributes;
+  }
 
-  const backends = chimeraConfig.backends.map(backend => {
-    return {
-      virtualService: {
-        virtualServiceName: backend.virtualServiceName,
-      },
-    };
-  });
-
-  const virtualNodeInput = {
-    meshName: chimeraConfig.meshName,
-    spec: {
-      backends,
-      listeners: [ 
-        {
-          portMapping: {
-            port: Number(chimeraConfig.containerPort),
-            protocol: chimeraConfig.containerProtocol,
-          }
-        }
-      ],
-      serviceDiscovery: 
-      /*
-        TODO: We will need to generalize this so that the user can specify whether dns or cloudmap should
-        be used. For now we are assuming cloudmap service discovery. We may also be able to use one option either way.
-        We will have to look into this.
-      */
-        { awsCloudMap: 
-          {
-            attributes: [{ key: 'ECS_TASK_DEFINITION_FAMILY', value: taskName }],
-            namespaceName: chimeraConfig.domain,
-            serviceName: chimeraConfig.serviceName,
-          }
-      },
-    },
-    virtualNodeName,
-  };
-  
-  const createVirtualNode = new CreateVirtualNodeCommand(virtualNodeInput)
-  
-  // try {
-    const response = await appMeshClient.send(createVirtualNode);
-    // console.log(`Success creating Virtual Node named ${virtualNodeName}`)
-    return response
-  // } catch(err) {
-  //   console.log(`ERROR creating Virtual Node named ${virtualNodeName}`)
-  //   console.log(err)
-  //   return err
-  // }
-}
+  const createVirtualNode = new CreateVirtualNodeCommand(originalNode);
+  const response = await appMeshClient.send(createVirtualNode);
+  return response;
+};
 
 module.exports = createVirtualNode;
