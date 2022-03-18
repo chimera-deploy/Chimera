@@ -57,7 +57,7 @@ const create = async (clusterName, originalECSServiceName, newECSServiceName, ta
 
   const command = new CreateServiceCommand(serviceInfo);
   const response = await client.send(command)
-  return response;
+  return response.service;
 };
 
 module.exports = {

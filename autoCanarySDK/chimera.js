@@ -1,8 +1,8 @@
 const ECSService = require('./services/ECSService');
 const VirtualNode = require('./services/VirtualNode');
 const TaskDefinition = require('./services/TaskDefinition');
-const updateRoute = require('./services/updateRoute');
-const { cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
+const VirtualRoute = require('./services/VirtualRoute');
+const ServiceDiscovery = require('./services/ServiceDiscovery');
 
 const Chimera = {
   virtualNode: null,
@@ -36,6 +36,7 @@ const Chimera = {
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
     this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
+    console.log('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
       this.config.containerName,
@@ -45,9 +46,11 @@ const Chimera = {
       taskName,
       this.config.meshName
     );
-    const serviceResponse = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
-    this.ECSService = serviceResponse.service;
-    await cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
+    console.log('registered task definition');
+    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
+    console.log('created ECS service');
+    console.log('waiting for cloudmap');
+    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck) {
@@ -72,7 +75,8 @@ const Chimera = {
           clearInterval(intervalID);
         }
         try {
-          await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
+          await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
+          console.log('shifted traffic');
         } catch (err) {
           clearInterval(intervalID);
           reject(new Error('error updating app mesh route', { cause: err }));
@@ -89,7 +93,7 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, [
       {
         virtualNode: this.virtualNode.virtualNodeName,
         weight: 100,
@@ -107,7 +111,7 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
+      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, [
         {
           virtualNode: this.config.originalNodeName,
           weight: 100,
@@ -117,11 +121,11 @@ const Chimera = {
         console.log(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
         await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName);
       }
-      if (this.ECSService !== null) {
-        console.log(`setting desired count for service ${this.ECSService.serviceName} to 0`);
-        await ECSService.update(this.config, 0, this.ECSService.serviceName);
-        console.log(`deleting ECS service ${this.ECSService.serviceName}`);
-        await ECSService.destroy(this.config, this.ECSService.serviceName);
+      if (this.newECSService !== null) {
+        console.log(`setting desired count for service ${this.newECSService.serviceName} to 0`);
+        await ECSService.update(this.config, 0, this.newECSService.serviceName);
+        console.log(`deleting ECS service ${this.newECSService.serviceName}`);
+        await ECSService.destroy(this.config, this.newECSService.serviceName);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
