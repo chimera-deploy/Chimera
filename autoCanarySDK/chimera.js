@@ -1,8 +1,7 @@
-const createVirtualNode = require('./services/createVirtualNode');
 const ECSService = require('./services/ECSService');
+const VirtualNode = require('./services/VirtualNode');
 const registerTaskDefinition = require('./services/registerTaskDefinition');
 const updateRoute = require('./services/updateRoute');
-const deleteVirtualNode = require('./services/deleteVirtualNode')
 const deregisterTaskDefinition = require('./services/deregisterTaskDefinition')
 const { cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
 
@@ -37,8 +36,7 @@ const Chimera = {
     // User will have to provide meshName, serviceName and version
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
-    const vnResponse = await createVirtualNode(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
-    this.virtualNode = vnResponse.virtualNode;
+    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
     const taskResponse = await registerTaskDefinition(
       this.config.imageURL,
       this.config.containerName,
@@ -99,7 +97,7 @@ const Chimera = {
       },
     ]);
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
-    await deleteVirtualNode(this.config.meshName, this.config.originalNodeName);
+    await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
     await ECSService.update(this.config, 0, this.config.originalECSServiceName);
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
@@ -118,7 +116,7 @@ const Chimera = {
       ]);
       if (this.virtualNode !== null) {
         console.log(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
-        await deleteVirtualNode(this.config.meshName, this.virtualNode.virtualNodeName);
+        await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName);
       }
       if (this.ECSService !== null) {
         console.log(`setting desired count for service ${this.ECSService.serviceName} to 0`);
