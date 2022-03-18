@@ -1,8 +1,7 @@
 const ECSService = require('./services/ECSService');
 const VirtualNode = require('./services/VirtualNode');
-const registerTaskDefinition = require('./services/registerTaskDefinition');
+const TaskDefinition = require('./services/TaskDefinition');
 const updateRoute = require('./services/updateRoute');
-const deregisterTaskDefinition = require('./services/deregisterTaskDefinition')
 const { cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
 
 const Chimera = {
@@ -37,15 +36,15 @@ const Chimera = {
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
     this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
-    const taskResponse = await registerTaskDefinition(
+    this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
       this.config.containerName,
       this.config.envoyContainerName,
       virtualNodeName,
       this.config.originalTaskDefinition,
       taskName,
-      this.config.meshName);
-    this.taskDefinition = taskResponse.taskDefinition;
+      this.config.meshName
+    );
     const serviceResponse = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
     this.ECSService = serviceResponse.service;
     await cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
@@ -103,7 +102,7 @@ const Chimera = {
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
     await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName);
     console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
-    await deregisterTaskDefinition(this.config.originalTaskDefinition);
+    await TaskDefinition.deregister(this.config.originalTaskDefinition);
   },
 
   async rollbackToOldVersion() {
@@ -127,7 +126,7 @@ const Chimera = {
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
         console.log(`deregistering task definition ${taskDefinitionName}`);
-        await deregisterTaskDefinition(taskDefinitionName);
+        await TaskDefinition.deregister(taskDefinitionName);
       }
     } catch (err) {
       console.log('Failed to rollback to old version');
