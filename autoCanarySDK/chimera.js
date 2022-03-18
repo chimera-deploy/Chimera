@@ -6,7 +6,7 @@ const deleteVirtualNode = require('./services/deleteVirtualNode')
 const updateECSService = require('./services/updateECSService')
 const deleteECSService = require('./services/deleteECSService')
 const deregisterTaskDefinition = require('./services/deregisterTaskDefinition')
-const { currentCloudmapInstanceCount, cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
+const { cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
 
 const Chimera = {
   virtualNode: null,
@@ -36,7 +36,6 @@ const Chimera = {
   },
 
   async buildCanary() {
-    const originalInstanceCount = await currentCloudmapInstanceCount(this.config.serviceDiscoveryID);
     // User will have to provide meshName, serviceName and version
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
@@ -53,7 +52,7 @@ const Chimera = {
     this.taskDefinition = taskResponse.taskDefinition;
     const serviceResponse = await createECSService(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
     this.ECSService = serviceResponse.service;
-    await cloudMapHealthy(this.config.serviceDiscoveryID, originalInstanceCount);
+    await cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck) {

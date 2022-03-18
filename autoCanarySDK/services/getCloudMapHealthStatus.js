@@ -1,4 +1,5 @@
 const { ServiceDiscoveryClient, GetInstancesHealthStatusCommand } = require("@aws-sdk/client-servicediscovery");
+const { listTasks } = require('../pullInfo/tasks');
 
 const cloudMapCheckInterval = 5 * 1000;
 
@@ -24,13 +25,25 @@ const currentCloudmapInstanceCount = async (serviceDiscoveryID) => {
   return Object.values(health).length;
 };
 
-const cloudMapHealthy = async (serviceDiscoveryID, originalInstanceCount) => {
+const allHealthy = (instanceStates, taskIDs) => {
+  return taskIDs.length > 0 && taskIDs.every(id => {
+    return instanceStates[id] === 'HEALTHY';
+  });
+};
+
+const cloudMapHealthy = async (serviceDiscoveryID, clusterName, taskName) => {
   const p = new Promise((resolve, reject) => {
     let intervalId;
+    let taskIDs = [];
     intervalId = setInterval(async () => {
-      const updatedInstanceHealth = await getCloudMapHealth(serviceDiscoveryID);
-      const allHealthy = Object.values(updatedInstanceHealth).every(status => status === 'HEALTHY');
-      if (Object.values(updatedInstanceHealth).length !== originalInstanceCount && allHealthy) {
+      const instanceStates = await getCloudMapHealth(serviceDiscoveryID);
+      if (taskIDs.length === 0) {
+        const taskArns = await listTasks(clusterName, taskName);
+        taskIDs = taskArns.map(taskArn => {
+          const parts = taskArn.split('/');
+          return parts[parts.length - 1];
+        });
+      } else if (allHealthy(instanceStates, taskIDs)) {
         clearInterval(intervalId);
         resolve();
       }

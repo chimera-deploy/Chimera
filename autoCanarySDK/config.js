@@ -10,7 +10,7 @@ const clientConfiguration = {
   "originalECSServiceName": "movieselector-2",
   "routeName": "movieselector-route",
   "routerName": "movieselector-vr",
-  "originalTaskDefinition": "chimera-movieselector-2:20",
+  "originalTaskDefinition": "chimera-movieselector-2:22",
   "envoyContainerName": "envoy",
 };
 
