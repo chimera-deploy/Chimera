@@ -1,12 +1,8 @@
-const createVirtualNode = require('./services/createVirtualNode');
-const createECSService = require('./services/createECSService');
-const registerTaskDefinition = require('./services/registerTaskDefinition');
-const updateRoute = require('./services/updateRoute');
-const deleteVirtualNode = require('./services/deleteVirtualNode')
-const updateECSService = require('./services/updateECSService')
-const deleteECSService = require('./services/deleteECSService')
-const deregisterTaskDefinition = require('./services/deregisterTaskDefinition')
-const { cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
+const ECSService = require('./services/ECSService');
+const VirtualNode = require('./services/VirtualNode');
+const TaskDefinition = require('./services/TaskDefinition');
+const VirtualRoute = require('./services/VirtualRoute');
+const ServiceDiscovery = require('./services/ServiceDiscovery');
 
 const Chimera = {
   virtualNode: null,
@@ -39,20 +35,22 @@ const Chimera = {
     // User will have to provide meshName, serviceName and version
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
     const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
-    const vnResponse = await createVirtualNode(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
-    this.virtualNode = vnResponse.virtualNode;
-    const taskResponse = await registerTaskDefinition(
+    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
+    console.log('created virtual node');
+    this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
       this.config.containerName,
       this.config.envoyContainerName,
       virtualNodeName,
       this.config.originalTaskDefinition,
       taskName,
-      this.config.meshName);
-    this.taskDefinition = taskResponse.taskDefinition;
-    const serviceResponse = await createECSService(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
-    this.ECSService = serviceResponse.service;
-    await cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
+      this.config.meshName
+    );
+    console.log('registered task definition');
+    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
+    console.log('created ECS service');
+    console.log('waiting for cloudmap');
+    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck) {
@@ -77,7 +75,8 @@ const Chimera = {
           clearInterval(intervalID);
         }
         try {
-          await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
+          await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
+          console.log('shifted traffic');
         } catch (err) {
           clearInterval(intervalID);
           reject(new Error('error updating app mesh route', { cause: err }));
@@ -94,25 +93,25 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, [
       {
         virtualNode: this.virtualNode.virtualNodeName,
         weight: 100,
       },
     ]);
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
-    await deleteVirtualNode(this.config.meshName, this.config.originalNodeName);
+    await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
-    await updateECSService(this.config, 0, this.config.originalECSServiceName);
+    await ECSService.update(this.config, 0, this.config.originalECSServiceName);
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
-    await deleteECSService(this.config.clusterName, this.config.originalECSServiceName);
+    await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName);
     console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
-    await deregisterTaskDefinition(this.config.originalTaskDefinition);
+    await TaskDefinition.deregister(this.config.originalTaskDefinition);
   },
 
   async rollbackToOldVersion() {
     try {
-      await updateRoute(this.config.meshName, this.config.routeName, this.config.routerName, [
+      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, [
         {
           virtualNode: this.config.originalNodeName,
           weight: 100,
@@ -120,18 +119,18 @@ const Chimera = {
       ]);
       if (this.virtualNode !== null) {
         console.log(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
-        await deleteVirtualNode(this.config, this.virtualNode.virtualNodeName);
+        await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName);
       }
-      if (this.ECSService !== null) {
-        console.log(`setting desired count for service ${this.ECSService.serviceName} to 0`);
-        await updateECSService(this.config, 0, this.ECSService.serviceName);
-        console.log(`deleting ECS service ${this.ECSService.serviceName}`);
-        await deleteECSService(this.config, this.ECSService.serviceName);
+      if (this.newECSService !== null) {
+        console.log(`setting desired count for service ${this.newECSService.serviceName} to 0`);
+        await ECSService.update(this.config, 0, this.newECSService.serviceName);
+        console.log(`deleting ECS service ${this.newECSService.serviceName}`);
+        await ECSService.destroy(this.config, this.newECSService.serviceName);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
         console.log(`deregistering task definition ${taskDefinitionName}`);
-        await deregisterTaskDefinition(taskDefinitionName);
+        await TaskDefinition.deregister(taskDefinitionName);
       }
     } catch (err) {
       console.log('Failed to rollback to old version');
