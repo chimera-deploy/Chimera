@@ -1,10 +1,8 @@
 const createVirtualNode = require('./services/createVirtualNode');
-const createECSService = require('./services/createECSService');
+const ECSService = require('./services/ECSService');
 const registerTaskDefinition = require('./services/registerTaskDefinition');
 const updateRoute = require('./services/updateRoute');
 const deleteVirtualNode = require('./services/deleteVirtualNode')
-const updateECSService = require('./services/updateECSService')
-const deleteECSService = require('./services/deleteECSService')
 const deregisterTaskDefinition = require('./services/deregisterTaskDefinition')
 const { cloudMapHealthy } = require('./services/getCloudMapHealthStatus');
 
@@ -50,7 +48,7 @@ const Chimera = {
       taskName,
       this.config.meshName);
     this.taskDefinition = taskResponse.taskDefinition;
-    const serviceResponse = await createECSService(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
+    const serviceResponse = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
     this.ECSService = serviceResponse.service;
     await cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
   },
@@ -103,9 +101,9 @@ const Chimera = {
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
     await deleteVirtualNode(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
-    await updateECSService(this.config, 0, this.config.originalECSServiceName);
+    await ECSService.update(this.config, 0, this.config.originalECSServiceName);
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
-    await deleteECSService(this.config.clusterName, this.config.originalECSServiceName);
+    await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName);
     console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
     await deregisterTaskDefinition(this.config.originalTaskDefinition);
   },
@@ -120,13 +118,13 @@ const Chimera = {
       ]);
       if (this.virtualNode !== null) {
         console.log(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
-        await deleteVirtualNode(this.config, this.virtualNode.virtualNodeName);
+        await deleteVirtualNode(this.config.meshName, this.virtualNode.virtualNodeName);
       }
       if (this.ECSService !== null) {
         console.log(`setting desired count for service ${this.ECSService.serviceName} to 0`);
-        await updateECSService(this.config, 0, this.ECSService.serviceName);
+        await ECSService.update(this.config, 0, this.ECSService.serviceName);
         console.log(`deleting ECS service ${this.ECSService.serviceName}`);
-        await deleteECSService(this.config, this.ECSService.serviceName);
+        await ECSService.destroy(this.config, this.ECSService.serviceName);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
