@@ -138,9 +138,9 @@ Resources:
                 Fn::ImportValue: !Sub "${ProjectName}:CWLogGroup"
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: gateway
-          DockerLabels:
-            ECS_PROMETHEUS_METRICS_PATH: /stats/prometheus
-            ECS_PROMETHEUS_EXPORTER_PORT: 9901
+          #DockerLabels:
+          #  ECS_PROMETHEUS_METRICS_PATH: /stats/prometheus
+          #  ECS_PROMETHEUS_EXPORTER_PORT: 9901
           Environment:
             - Name: ENVOY_LOG_LEVEL
               Value: debug
