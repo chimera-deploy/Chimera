@@ -406,18 +406,6 @@ Outputs:
     Export:
       Name: !Sub "${ProjectName}:ExecutionRole"
 
-  CWTaskRole:
-    Description: cw-agent task iam role
-    Value: !Ref CWAgentTaskIAMRole
-    Export:
-      Name: !Sub "${ProjectName}:CWTaskRole"
-
-  CWExecutionRole:
-    Description: cw-agent execution role
-    Value: !Ref CWAgentTaskExecutionIAMRole
-    Export:
-      Name: !Sub "${ProjectName}:CWExecutionRole"
-
   CWLogGroup:
     Description: cw log group
     Value: !Ref LogGroup
