@@ -1,35 +1,56 @@
-const { 
-  ECSClient, 
+const {
+  ECSClient,
   RegisterTaskDefinitionCommand,
   DescribeTaskDefinitionCommand,
   ListTasksCommand,
   DeregisterTaskDefinitionCommand
 } = require("@aws-sdk/client-ecs");
 
-const register = async (appImageURL, appContainerName, envoyContainerName, virtualNodeName, originalTaskName, taskName, meshName) => {
+const register = async (appImageURL, appContainerName, virtualNodeName, virtualGatewayName, envoyContainerName, originalTaskName, taskName, meshName, region, account) => {
   const client = new ECSClient();
   const taskDefinition = await describe(originalTaskName);
   taskDefinition.family = taskName;
 
-  const appContainerDef = taskDefinition.containerDefinitions.find(def => {
-    return def.name === appContainerName;
-  });
-  appContainerDef.image = appImageURL;
+  if (appImageURL && appContainerName) {
+    const appContainerDef = taskDefinition.containerDefinitions.find(def => {
+      return def.name === appContainerName;
+    });
+    appContainerDef.image = appImageURL;
+  }
 
   const envoyContainerDef = taskDefinition.containerDefinitions.find(def => {
     return def.name === envoyContainerName;
   });
 
-  const updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
-    if (env.name !== 'APPMESH_VIRTUAL_NODE_NAME') {
-      return env;
-    } else {
-      return {
-        name: 'APPMESH_VIRTUAL_NODE_NAME',
-        value: `mesh/${meshName}/virtualNode/${virtualNodeName}`
+  envoyContainerDef.dockerLabels = {
+    "ECS_PROMETHEUS_METRICS_PATH": "/stats/prometheus",
+    "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
+  };
+
+  let updatedEnvoyEnvironment;
+  if (virtualNodeName) {
+    updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
+      if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" || env.name !== "APPMESH_RESOURCE_ARN") {
+        return env;
+      } else {
+        return {
+          name: "APPMESH_RESOURCE_ARN",
+          value: `arn:aws:appmesh:${region}:${account}:mesh/${meshName}/virtualNode/${virtualNodeName}`
+        }
       }
-    }
-  });
+    });
+  } else {
+    updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
+      if (env.name !== "APPMESH_RESOURCE_ARN") {
+        return env;
+      } else {
+        return {
+          name: "APPMESH_RESOURCE_ARN",
+          value: `arn:aws:appmesh:${region}:${account}:mesh/${meshName}/virtualGateway/${virtualGatewayName}`
+        }
+      }
+    });
+  }
   envoyContainerDef.environment = updatedEnvoyEnvironment;
 
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(taskDefinition);

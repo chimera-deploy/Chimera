@@ -7,8 +7,46 @@ const ServiceDiscovery = require('./services/ServiceDiscovery');
 const Chimera = {
   virtualNode: null,
   taskDefinition: null,
-  ECSService: null,
+  newECSService: null,
   config: null,
+  gatewayTaskDefinition: null,
+
+  async setup(config) {
+    this.config = config;
+    try {
+      await this.updateGateway();
+    } catch (err) {
+      console.log('setup failed');
+      console.log(err);
+    }
+  },
+
+  async updateGateway() {
+    if (this.config.originalGatewayTaskDefinition) {
+      console.log("updating gateway task definition");
+      this.gatewayTaskDefinition = await TaskDefinition.register(
+        null,
+        null,
+        null,
+        this.config.virtualGatewayName,
+        this.config.envoyContainerName,
+        this.config.originalGatewayTaskDefinition,
+        this.config.originalGatewayTaskDefinition.split(":")[0],
+        this.config.meshName,
+        this.config.region,
+        this.config.awsAccountID
+      );
+      console.log('updated gateway task definition');
+      console.log('updating ecs gateway service');
+      await ECSService.update(
+        this.config,
+        this.config.originalGatewayECSServiceName,
+        this.gatewayTaskDefinition, 
+        null
+      );
+      console.log('updated ecs gateway service');
+    }
+  },
 
   async deploy(config) {
     let newVersionDeployed = false;
@@ -40,11 +78,14 @@ const Chimera = {
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
       this.config.containerName,
-      this.config.envoyContainerName,
       virtualNodeName,
+      null,
+      this.config.envoyContainerName,
       this.config.originalTaskDefinition,
       taskName,
-      this.config.meshName
+      this.config.meshName,
+      this.config.region,
+      this.config.awsAccountID
     );
     console.log('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
@@ -67,7 +108,7 @@ const Chimera = {
             weight: originalVersionWeight,
           },
           {
-            virtualNode: this.virtualNode.virtualNodeName, 
+            virtualNode: this.virtualNode.virtualNodeName,
             weight: newVersionWeight,
           },
         ];
@@ -102,7 +143,7 @@ const Chimera = {
     console.log(`deleting virtual node ${this.config.originalNodeName}`);
     await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName);
     console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
-    await ECSService.update(this.config, 0, this.config.originalECSServiceName);
+    await ECSService.update(this.config, this.config.originalECSServiceName, null, 0);
     console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
     await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName);
     console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
@@ -123,7 +164,7 @@ const Chimera = {
       }
       if (this.newECSService !== null) {
         console.log(`setting desired count for service ${this.newECSService.serviceName} to 0`);
-        await ECSService.update(this.config, 0, this.newECSService.serviceName);
+        await ECSService.update(this.config, this.newECSService.serviceName, null, 0);
         console.log(`deleting ECS service ${this.newECSService.serviceName}`);
         await ECSService.destroy(this.config, this.newECSService.serviceName);
       }

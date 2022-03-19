@@ -35,13 +35,12 @@ const destroy = async (clusterName, ecsServiceName) => {
   return response;
 };
 
-const update = async (chimeraConfig, desiredCount, ecsServiceName) => {
+const update = async (chimeraConfig, ecsServiceName, taskDefinition, desiredCount) => {
   const client = new ECSClient();
-  const updateServiceCommandInput = {
-    cluster: chimeraConfig.clusterName,
-    desiredCount,
-    service: ecsServiceName,
-  };
+  const updateServiceCommandInput = taskDefinition
+    ? { cluster: chimeraConfig.clusterName, service: ecsServiceName, taskDefinition: `${taskDefinition.family}:${taskDefinition.revision}` }
+    : { cluster: chimeraConfig.clusterName, service: ecsServiceName, desiredCount };
+
   const command = new UpdateServiceCommand(updateServiceCommandInput);
   const response = await client.send(command)
   return response;
