@@ -27,6 +27,7 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
     "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
   };
 
+  // https://docs.aws.amazon.com/app-mesh/latest/userguide/envoy-config.html
   let updatedEnvoyEnvironment;
   if (virtualNodeName) {
     updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
@@ -56,6 +57,137 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(taskDefinition);
 
   const response = await client.send(registerTaskDefinitionCommand);
+  return response.taskDefinition;
+};
+
+const createCW = async (logGroup, region, awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole) => {
+  const client = new ECSClient();
+  let input = {
+    containerDefinitions: [
+      {
+        logConfiguration: {
+          logDriver: "awslogs",
+          options: {
+            "awslogs-group": `${logGroup}`,
+            "awslogs-region": `${region}`,
+            "awslogs-stream-prefix": "cwagent"
+          }
+        },
+        name: "cwagent",
+        image: "public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest",
+        essential: true,
+        environment: [
+          {
+            name: "PROMETHEUS_CONFIG_CONTENT",
+            value: JSON.stringify({
+              "global": {
+                "scrape_interval": "1m",
+                "scrape_timeout": "10s"
+              },
+              "scrape_configs": [
+                {
+                  "job_name": "cwagent-ecs-file-sd-config",
+                  "sample_limit": 10000,
+                  "file_sd_configs": [
+                    {
+                      "files": [
+                        "/tmp/cwagent_ecs_auto_sd.yaml"
+                      ]
+                    }
+                  ],
+                  "metric_relabel_configs": [
+                    {
+                      "source_labels": [
+                        "__name__"
+                      ],
+                      "regex": "^envoy_appmesh_.+$",
+                      "action": "keep"
+                    }
+                  ]
+                }
+              ]
+            })
+          },
+          {
+            name: "CW_CONFIG_CONTENT",
+            value: JSON.stringify({
+              "logs": {
+              "force_flush_interval": 5,
+              "metrics_collected": {
+                "prometheus": {
+                  "log_group_name": `${logGroup}`,
+                  "prometheus_config_path": "env:PROMETHEUS_CONFIG_CONTENT",
+                  "ecs_service_discovery": {
+                      "sd_frequency": "1m",
+                      "docker_label": {},
+                      "sd_result_file": "/tmp/cwagent_ecs_auto_sd.yaml"
+                  },
+                  "emf_processor": {
+                      "metric_namespace": `${metricNamespace}`,
+                      "metric_declaration_dedup": true,
+                      "metric_declaration": [
+                        {
+                          "source_labels": [
+                            "container_name"
+                          ],
+                          "label_matcher": "^envoy$",
+                          "dimensions": [
+                            [
+                              "Mesh",
+                              "VirtualNode"
+                            ],
+                            [
+                              "Mesh",
+                              "VirtualNode",
+                              "TargetVirtualNode"
+                            ],
+                            [
+                              "Mesh",
+                              "VirtualNode",
+                              "TargetVirtualNode",
+                              "TargetVirtualService"
+                            ],
+                            [
+                              "Mesh",
+                              "VirtualGateway"
+                            ],
+                            [
+                              "Mesh",
+                              "VirtualGateway",
+                              "TargetVirtualNode"
+                            ],
+                            [
+                              "Mesh",
+                              "VirtualGateway",
+                              "TargetVirtualNode",
+                              "TargetVirtualService"
+                            ]
+                          ],
+                          "metric_selectors": [
+                            "^.+$"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            })
+          }
+        ]
+      }
+    ],
+    cpu: "512",
+    executionRoleArn: `arn:aws:iam::${awsAccountID}:role/${cwExecutionRole.RoleName}`,
+    family: "cwagent",
+    memory: "1024",
+    networkMode: "awsvpc",
+    requiresCompatibilities: [ "FARGATE" ],
+    taskRoleArn: `arn:aws:iam::${awsAccountID}:role/${cwTaskRole.RoleName}`
+  };
+
+  const command = new RegisterTaskDefinitionCommand(input);
+  const response = await client.send(command);
   return response.taskDefinition;
 };
 
@@ -92,6 +224,7 @@ const deregister = async (taskDefinitionName) => {
 };
 
 module.exports = {
+  createCW,
   register,
   describe,
   deregister,

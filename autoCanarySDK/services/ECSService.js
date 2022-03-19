@@ -59,8 +59,34 @@ const create = async (clusterName, originalECSServiceName, newECSServiceName, ta
   return response.service;
 };
 
+const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
+  const client = new ECSClient();
+  const input = {
+    cluster,
+    deploymentConfiguration: {
+      maximumPercent: 200,
+      minimumHealthyPercent: 100
+    },
+    desiredCount: 1,
+    launchType: "FARGATE",
+    networkConfiguration: {
+      awsvpcConfiguration: {
+        assignPublicIp: "DISABLED",
+        securityGroups,
+        subnets
+      }
+    },
+    serviceName: `${cluster}-cw-agent`,
+    taskDefinition: `${cwTaskDef.family}`
+  };
+  const command = new CreateServiceCommand(input);
+  const response = await client.send(command);
+  return response.service;
+};
+
 module.exports = {
   create,
+  createCW,
   update,
   destroy,
   describe,

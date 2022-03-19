@@ -36,14 +36,14 @@ Resources:
                 Resource: '*'
                 Condition:
                   ArnEquals:
-                    ecs:cluster: !GetAtt ECSCluster.Arn
+                    ecs:cluster: arn:aws:ecs:us-east-1:339936612855:cluster/chimera
               - Effect: Allow
                 Action:
                   - ec2:DescribeInstances
                   - ecs:DescribeTaskDefinition
                 Resource: '*'
 
-  CWAgentTaskExecutionIAMRole:
+  CWAgentExecutionIAMRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -88,10 +88,8 @@ Resources:
       NetworkMode: awsvpc
       Cpu: 512
       Memory: 1024
-      TaskRoleArn:
-        Fn::ImportValue: !Sub '${ProjectName}:CWTaskRole'
-      ExecutionRoleArn:
-        Fn::ImportValue: !Sub '${ProjectName}:CWExecutionRole'
+      TaskRoleArn: !Ref CWAgentTaskIAMRole
+      ExecutionRoleArn: !Ref CWAgentExecutionIAMRole
       ContainerDefinitions:
         - Name: cwagent
           Image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
@@ -125,7 +123,7 @@ Resources:
                     "force_flush_interval": 5,
                     "metrics_collected": {
                       "prometheus": {
-                        "log_group_name": "chimera-log-group",
+                        "log_group_name": "${ProjectName}:CWLogGroup",
                         "prometheus_config_path": "env:PROMETHEUS_CONFIG_CONTENT",
                         "ecs_service_discovery": {
                           "sd_frequency": "1m",
@@ -167,6 +165,6 @@ Outputs:
 
   CWExecutionRole:
     Description: cw-agent execution role
-    Value: !Ref CWAgentTaskExecutionIAMRole
+    Value: !Ref CWAgentExecutionIAMRole
     Export:
       Name: !Sub "${ProjectName}:CWExecutionRole"

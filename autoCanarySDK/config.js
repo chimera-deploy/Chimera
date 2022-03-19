@@ -17,6 +17,10 @@ const clientConfiguration = {
   "region": "us-east-1",
   "awsAccountID": "339936612855",
   "originalGatewayECSServiceName": "chimera-gateway-resources-MovieAppGatewayService-vGeA5R1BJXUY",
+  "logGroup": "chimera-log-group",
+  "metricNamespace": "chimera-prometheus-metrics",
+  "cwECSSecurityGroups": ["sg-0e68e4bc62e146bfb"],
+  "cwECSPrimarySubnets": ["subnet-089e14b08ac5c0428", "subnet-0ddb6020c35f084d7"]
 };
 
 module.exports = clientConfiguration;

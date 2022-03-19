@@ -13,6 +13,8 @@ const Chimera = {
   gatewayTaskDefinition: null,
   cwTaskRole: null,
   cwExecutionRole: null,
+  cwTaskDefinition: null,
+  cwECSService: null,
 
   async setup(config) {
     this.config = config;
@@ -80,7 +82,24 @@ const Chimera = {
   },
 
   async createCWAgent() {
-
+    console.log("registering cloudwatch agent task definition");
+    this.cwTaskDefinition = await TaskDefinition.createCW(
+      this.config.logGroup,
+      this.config.region,
+      this.config.awsAccountID,
+      this.config.metricNamespace,
+      this.cwTaskRole,
+      this.cwExecutionRole,
+    );
+    console.log('registered cloudwatch agent task definition');
+    console.log("creating cloudwatch agent ECS service");
+    this.cwECSService = await ECSService.createCW(
+      this.config.clusterName,
+      this.config.cwECSSecurityGroups,
+      this.config.cwECSPrimarySubnets,
+      this.cwTaskDefinition
+    );
+    console.log('created cloudwatch agent ECS service');
   },
 
   async deploy(config) {
