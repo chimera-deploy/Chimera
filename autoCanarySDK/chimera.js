@@ -3,6 +3,7 @@ const VirtualNode = require('./services/VirtualNode');
 const TaskDefinition = require('./services/TaskDefinition');
 const VirtualRoute = require('./services/VirtualRoute');
 const ServiceDiscovery = require('./services/ServiceDiscovery');
+const IAM = require('./services/IAM');
 
 const Chimera = {
   virtualNode: null,
@@ -10,11 +11,15 @@ const Chimera = {
   newECSService: null,
   config: null,
   gatewayTaskDefinition: null,
+  cwTaskRole: null,
+  cwExecutionRole: null,
 
   async setup(config) {
     this.config = config;
     try {
       await this.updateGateway();
+      await this.createCWRoles();
+      await this.createCWAgent();
     } catch (err) {
       console.log('setup failed');
       console.log(err);
@@ -41,11 +46,41 @@ const Chimera = {
       await ECSService.update(
         this.config,
         this.config.originalGatewayECSServiceName,
-        this.gatewayTaskDefinition, 
+        this.gatewayTaskDefinition,
         null
       );
       console.log('updated ecs gateway service');
     }
+  },
+
+  async createCWRoles() {
+    const assumeRolePolicyDocument = JSON.stringify({
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "ecs-tasks.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    });
+    console.log('creating cloudwatch task role');
+    this.cwTaskRole = await IAM.createCWTaskRole(
+      this.config.clusterName,
+      assumeRolePolicyDocument,
+      this.config.region,
+      this.config.awsAccountID
+    );
+    console.log('created cloudwatch task role');
+    console.log('creating cloudwatch execution role');
+    this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument);
+    console.log('created cloudwatch execution role');
+  },
+
+  async createCWAgent() {
+
   },
 
   async deploy(config) {

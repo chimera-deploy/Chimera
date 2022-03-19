@@ -16,7 +16,7 @@ const clientConfiguration = {
   "virtualGatewayName": "gateway",
   "region": "us-east-1",
   "awsAccountID": "339936612855",
-  "originalGatewayECSServiceName": "chimera-gateway-resources-MovieAppGatewayService-vGeA5R1BJXUY", 
+  "originalGatewayECSServiceName": "chimera-gateway-resources-MovieAppGatewayService-vGeA5R1BJXUY",
 };
 
 module.exports = clientConfiguration;
