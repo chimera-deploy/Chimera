@@ -16,6 +16,7 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
       return def.name === appContainerName;
     });
     appContainerDef.image = appImageURL;
+    appContainerDef.logConfiguration.options["awslogs-stream-prefix"] = virtualNodeName;
   }
 
   const envoyContainerDef = taskDefinition.containerDefinitions.find(def => {
@@ -27,11 +28,13 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
     "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
   };
 
+  envoyContainerDef.logConfiguration.options["awslogs-stream-prefix"] = virtualNodeName;
+
   // https://docs.aws.amazon.com/app-mesh/latest/userguide/envoy-config.html
   let updatedEnvoyEnvironment;
   if (virtualNodeName) {
     updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
-      if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" || env.name !== "APPMESH_RESOURCE_ARN") {
+      if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" && env.name !== "APPMESH_RESOURCE_ARN") {
         return env;
       } else {
         return {
