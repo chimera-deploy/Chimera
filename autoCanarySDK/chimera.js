@@ -29,30 +29,28 @@ const Chimera = {
   },
 
   async updateGateway() {
-    if (this.config.originalGatewayTaskDefinition) {
-      console.log("updating gateway task definition");
-      this.gatewayTaskDefinition = await TaskDefinition.register(
-        null,
-        null,
-        null,
-        this.config.virtualGatewayName,
-        this.config.envoyContainerName,
-        this.config.originalGatewayTaskDefinition,
-        this.config.originalGatewayTaskDefinition.split(":")[0],
-        this.config.meshName,
-        this.config.region,
-        this.config.awsAccountID
-      );
-      console.log('updated gateway task definition');
-      console.log('updating ecs gateway service');
-      await ECSService.update(
-        this.config,
-        this.config.originalGatewayECSServiceName,
-        this.gatewayTaskDefinition,
-        null
-      );
-      console.log('updated ecs gateway service');
-    }
+    console.log("updating gateway task definition");
+    this.gatewayTaskDefinition = await TaskDefinition.register(
+      null,
+      null,
+      null,
+      this.config.virtualGatewayName,
+      this.config.envoyContainerName,
+      this.config.originalGatewayTaskDefinition,
+      this.config.originalGatewayTaskDefinition.split(":")[0],
+      this.config.meshName,
+      this.config.region,
+      this.config.awsAccountID
+    );
+    console.log('updated gateway task definition');
+    console.log('updating ecs gateway service');
+    await ECSService.update(
+      this.config,
+      this.config.originalGatewayECSServiceName,
+      this.gatewayTaskDefinition,
+      null
+    );
+    console.log('updated ecs gateway service');
   },
 
   async createCWRoles() {

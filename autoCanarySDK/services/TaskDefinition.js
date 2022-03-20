@@ -28,12 +28,10 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
     "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
   };
 
-  envoyContainerDef.logConfiguration.options["awslogs-stream-prefix"] = virtualNodeName;
+  envoyContainerDef.logConfiguration.options["awslogs-stream-prefix"] = virtualNodeName || virtualGatewayName;
 
-  // https://docs.aws.amazon.com/app-mesh/latest/userguide/envoy-config.html
-  let updatedEnvoyEnvironment;
   if (virtualNodeName) {
-    updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
+    envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
       if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" && env.name !== "APPMESH_RESOURCE_ARN") {
         return env;
       } else {
@@ -44,7 +42,7 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
       }
     });
   } else {
-    updatedEnvoyEnvironment = envoyContainerDef.environment.map(env => {
+    envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
       if (env.name !== "APPMESH_RESOURCE_ARN") {
         return env;
       } else {
@@ -55,7 +53,25 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
       }
     });
   }
-  envoyContainerDef.environment = updatedEnvoyEnvironment;
+
+  envoyContainerDef.environment =
+    envoyContainerDef.environment
+      .some(obj => obj.name === "APPMESH_METRIC_EXTENSION_VERSION")
+        ? envoyContainerDef.environment
+            .map(obj => obj.name === "APPMESH_METRIC_EXTENSION_VERSION"
+              ? {
+                  name: obj.name,
+                  value: "1"
+                }
+              : obj
+            )
+        : [
+          ...envoyContainerDef.environment,
+          {
+            name: "APPMESH_METRIC_EXTENSION_VERSION",
+            value: "1"
+          }
+        ];
 
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(taskDefinition);
 

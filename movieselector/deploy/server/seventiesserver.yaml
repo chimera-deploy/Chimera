@@ -108,8 +108,8 @@ Resources:
           Environment:
             - Name: ENVOY_LOG_LEVEL
               Value: debug
-            - Name: APPMESH_METRIC_EXTENSION_VERSION
-              Value: 1
+            #- Name: APPMESH_METRIC_EXTENSION_VERSION
+            #  Value: 1
             - Name: APPMESH_RESOURCE_ARN
               Value: !Ref SeventiesServerVirtualNode
         - Name: app
