@@ -8,15 +8,11 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, virtualNodeNam
       MetricStat: {
         Metric: {
           Namespace: `${metricNamespace}`,
-          MetricName: "envoy_appmesh_HTTPCode_Target_4XX_Count",
+          MetricName: "envoy_appmesh_HTTPCode_Target_5XX_Count",
           Dimensions: [
             {
               Name: "Mesh",
               Value: "chimera" // hard coded for testing
-            },
-            {
-              Name: "VirtualGateway",
-              Value: "gateway" // hard coded for testing
             },
             {
               Name: "TargetVirtualNode",
@@ -48,7 +44,7 @@ const getHealthCheck = async (failureThresholdTime, metricNamespace, virtualNode
   console.log("response:", response);
   const values = response.MetricDataResults[0].Values;
   console.log("values:", values);
-  if (values.reduce((a, v) => a + v) > 0) { // hard coded for testing
+  if (values.reduce((a, v) => a + v, 0) > 0) { // hard coded for testing
     throw new Error("the canary is not healthy");
   }
 };
