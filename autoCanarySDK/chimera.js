@@ -4,6 +4,7 @@ const TaskDefinition = require('./services/TaskDefinition');
 const VirtualRoute = require('./services/VirtualRoute');
 const ServiceDiscovery = require('./services/ServiceDiscovery');
 const IAM = require('./services/IAM');
+const CloudWatch = require('./services/CloudWatch');
 
 const Chimera = {
   virtualNode: null,
@@ -105,7 +106,7 @@ const Chimera = {
     this.config = config;
     try {
       await this.buildCanary();
-      await this.shiftTraffic(1000 * 60 * 2, 20); // 2min intervals; 20 shiftweight
+      await this.shiftTraffic(1000 * 60 * 3, 20, CloudWatch.getHealthCheck); // 3min intervals; 20 shiftweight
       newVersionDeployed = true;
     } catch (err) {
       console.log('deployment failed');
@@ -168,15 +169,25 @@ const Chimera = {
           clearInterval(intervalID);
         }
         try {
+          console.log('attempting to shift traffic');
           await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
-          console.log('shifted traffic');
         } catch (err) {
+          console.log("failed to shift traffic");
           clearInterval(intervalID);
           reject(new Error('error updating app mesh route', { cause: err }));
+          return
         }
-        if (healthCheck !== undefined) {
-          await healthCheck();
+        console.log("shifted traffic");
+        try {
+          console.log("attempting healthcheck");
+          await healthCheck(routeUpdateInterval, this.config.metricNamespace, `${this.config.serviceName}-${this.config.newVersionNumber}`);
+        } catch (err) {
+          console.log("healthcheck failure");
+          clearInterval(intervalID);
+          reject(err);
+          return
         }
+        console.log("healthcheck pass");
         if (newVersionWeight === 100) {
           resolve();
         }
@@ -218,7 +229,7 @@ const Chimera = {
         console.log(`setting desired count for service ${this.newECSService.serviceName} to 0`);
         await ECSService.update(this.config, this.newECSService.serviceName, null, 0);
         console.log(`deleting ECS service ${this.newECSService.serviceName}`);
-        await ECSService.destroy(this.config, this.newECSService.serviceName);
+        await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;

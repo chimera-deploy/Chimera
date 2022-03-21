@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-app-mesh": "^3.53.0",
+    "@aws-sdk/client-cloudwatch": "^3.54.1",
     "@aws-sdk/client-ecs": "^3.54.0",
     "@aws-sdk/client-iam": "^3.54.1",
     "@aws-sdk/client-servicediscovery": "^3.54.0",
