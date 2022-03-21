@@ -106,7 +106,7 @@ const Chimera = {
     this.config = config;
     try {
       await this.buildCanary();
-      await this.shiftTraffic(1000 * 60 * 2, 20, CloudWatch.getHealthCheck); // 2min intervals; 20 shiftweight
+      await this.shiftTraffic(1000 * 60 * 3, 20, CloudWatch.getHealthCheck); // 3min intervals; 20 shiftweight
       newVersionDeployed = true;
     } catch (err) {
       console.log('deployment failed');

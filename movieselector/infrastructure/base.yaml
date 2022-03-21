@@ -300,6 +300,9 @@ Resources:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Ref ProjectName
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
 
   ###################################################
   # App Mesh

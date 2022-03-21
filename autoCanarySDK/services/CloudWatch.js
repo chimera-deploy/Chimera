@@ -8,20 +8,32 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, virtualNodeNam
       MetricStat: {
         Metric: {
           Namespace: `${metricNamespace}`,
-          MetricName: "envoy_appmesh_HTTPCode_Target_5XX_Count",
+          MetricName: "envoy_http_downstream_rq_xx",
           Dimensions: [
             {
-              Name: "Mesh",
+              Name: "TaskDefinitionFamily",
+              Value: "movieselector" // hard coded for testing
+            },
+            {
+              Name: "envoy_http_conn_manager_prefix",
+              Value: "ingress"
+            },
+            {
+              Name: "envoy_response_code_class",
+              Value: "5"
+            },
+            {
+              Name: "ClusterName",
               Value: "chimera" // hard coded for testing
             },
             {
-              Name: "TargetVirtualNode",
+              Name: "app_mesh_virtual_node",
               Value: `${virtualNodeName}`
             }
           ]
         },
         Period: 60,
-        Stat: "Average"
+        Stat: "Sum"
       },
       ReturnData: true
     }
