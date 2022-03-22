@@ -161,7 +161,7 @@ const Chimera = {
     let p = new Promise(async (resolve, reject) => {
       try {
         console.log('attempting to shift traffic');
-        await this.updateTrafficWeights(10000, shiftWeight, healthCheck, resolve);
+        await this.updateTrafficWeights(routeUpdateInterval, shiftWeight, healthCheck, resolve);
       } catch (err) {
         console.log("failed to shift traffic");
         reject(new Error('error updating app mesh route', { cause: err }));
