@@ -10,6 +10,7 @@ const Chimera = {
   virtualNode: null,
   taskDefinition: null,
   newECSService: null,
+  taskName: null,
   config: null,
   gatewayTaskDefinition: null,
   cwTaskRole: null,
@@ -106,7 +107,7 @@ const Chimera = {
     this.config = config;
     try {
       await this.buildCanary();
-      await this.shiftTraffic(1000 * 60 * 3, 20, CloudWatch.getHealthCheck); // 3min intervals; 20 shiftweight
+      await this.shiftTraffic(1000 * 60 * 2, 25, CloudWatch.getHealthCheck); // 2min intervals; 25 shiftweight
       newVersionDeployed = true;
     } catch (err) {
       console.log('deployment failed');
@@ -125,8 +126,8 @@ const Chimera = {
   async buildCanary() {
     // User will have to provide meshName, serviceName and version
     const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
-    const taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
-    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, taskName);
+    this.taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
+    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName);
     console.log('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
@@ -135,16 +136,16 @@ const Chimera = {
       null,
       this.config.envoyContainerName,
       this.config.originalTaskDefinition,
-      taskName,
+      this.taskName,
       this.config.meshName,
       this.config.region,
       this.config.awsAccountID
     );
     console.log('registered task definition');
-    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, taskName)
+    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName)
     console.log('created ECS service');
     console.log('waiting for cloudmap');
-    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, taskName);
+    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName);
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck) {
@@ -180,7 +181,12 @@ const Chimera = {
         console.log("shifted traffic");
         try {
           console.log("attempting healthcheck");
-          await healthCheck(routeUpdateInterval, this.config.metricNamespace, `${this.config.serviceName}-${this.config.newVersionNumber}`);
+          await healthCheck(
+            routeUpdateInterval,
+            this.config.metricNamespace,
+            this.config.clusterName,
+            this.taskName
+          );
         } catch (err) {
           console.log("healthcheck failure");
           clearInterval(intervalID);

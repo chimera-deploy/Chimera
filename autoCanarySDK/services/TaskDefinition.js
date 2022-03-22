@@ -141,7 +141,8 @@ const createCW = async (logGroup, region, awsAccountID, metricNamespace, cwTaskR
                           "label_matcher": "^envoy$",
                           "dimensions": [["ClusterName", "TaskDefinitionFamily"]],
                           "metric_selectors": [
-                            "^envoy_http_downstream_rq_xx$",
+                            "^envoy_http_downstream_rq_.+$",
+                            "^envoy_http_upstream_rq_.+$"
                             //"^envoy_cluster_upstream_cx_(r|t)x_bytes_total$",
                             //"^envoy_cluster_membership_(healthy|total)$",
                             //"^envoy_server_memory_(allocated|heap_size)$",
@@ -157,9 +158,10 @@ const createCW = async (logGroup, region, awsAccountID, metricNamespace, cwTaskR
                         {
                           "source_labels": ["container_name"],
                           "label_matcher": "^envoy$",
-                          "dimensions": [["ClusterName","TaskDefinitionFamily","appmesh_virtual_node","envoy_http_conn_manager_prefix","envoy_response_code_class"]],
+                          "dimensions": [["ClusterName","TaskDefinitionFamily","envoy_http_conn_manager_prefix","envoy_response_code_class"]],
                           "metric_selectors": [
-                            "^envoy_http_downstream_rq_xx$"
+                            "^envoy_http_downstream_rq_.+$",
+                            "^envoy_http_upstream_rq_.+$"
                           ]
                         }
                       ]
