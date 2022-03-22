@@ -105,7 +105,6 @@ const Chimera = {
       this.config.imageURL,
       this.config.containerName,
       virtualNodeName,
-      null,
       this.config.envoyContainerName,
       this.config.originalTaskDefinition,
       this.taskName,

@@ -6,17 +6,15 @@ const {
   DeregisterTaskDefinitionCommand
 } = require("@aws-sdk/client-ecs");
 
-const register = async (appImageURL, appContainerName, virtualNodeName, virtualGatewayName, envoyContainerName, originalTaskName, taskName, meshName, region, account) => {
+const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account) => {
   const client = new ECSClient();
   const taskDefinition = await describe(originalTaskName);
   taskDefinition.family = taskName;
 
-  if (appImageURL && appContainerName) {
-    const appContainerDef = taskDefinition.containerDefinitions.find(def => {
-      return def.name === appContainerName;
-    });
-    appContainerDef.image = appImageURL;
-  }
+  const appContainerDef = taskDefinition.containerDefinitions.find(def => {
+    return def.name === appContainerName;
+  });
+  appContainerDef.image = appImageURL;
 
   const envoyContainerDef = taskDefinition.containerDefinitions.find(def => {
     return def.name === envoyContainerName;
@@ -27,48 +25,16 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
     "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
   };
 
-  if (virtualNodeName) {
-    envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
-      if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" && env.name !== "APPMESH_RESOURCE_ARN") {
-        return env;
-      } else {
-        return {
-          name: "APPMESH_RESOURCE_ARN",
-          value: `arn:aws:appmesh:${region}:${account}:mesh/${meshName}/virtualNode/${virtualNodeName}`
-        }
+  envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
+    if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" && env.name !== "APPMESH_RESOURCE_ARN") {
+      return env;
+    } else {
+      return {
+        name: "APPMESH_RESOURCE_ARN",
+        value: `arn:aws:appmesh:${region}:${account}:mesh/${meshName}/virtualNode/${virtualNodeName}`
       }
-    });
-  } else {
-    envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
-      if (env.name !== "APPMESH_RESOURCE_ARN") {
-        return env;
-      } else {
-        return {
-          name: "APPMESH_RESOURCE_ARN",
-          value: `arn:aws:appmesh:${region}:${account}:mesh/${meshName}/virtualGateway/${virtualGatewayName}`
-        }
-      }
-    });
-  }
-
-  envoyContainerDef.environment =
-    envoyContainerDef.environment
-      .some(obj => obj.name === "APPMESH_METRIC_EXTENSION_VERSION")
-        ? envoyContainerDef.environment
-            .map(obj => obj.name === "APPMESH_METRIC_EXTENSION_VERSION"
-              ? {
-                  name: obj.name,
-                  value: "1"
-                }
-              : obj
-            )
-        : [
-          ...envoyContainerDef.environment,
-          {
-            name: "APPMESH_METRIC_EXTENSION_VERSION",
-            value: "1"
-          }
-        ];
+    }
+  });
 
   const registerTaskDefinitionCommand = new RegisterTaskDefinitionCommand(taskDefinition);
 
