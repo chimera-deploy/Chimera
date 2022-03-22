@@ -141,7 +141,7 @@ const createCW = async (logGroup, region, awsAccountID, metricNamespace, cwTaskR
                           "label_matcher": "^envoy$",
                           "dimensions": [["ClusterName", "TaskDefinitionFamily"]],
                           "metric_selectors": [
-                            "^envoy_http_downstream_rq_(total|.+)$",
+                            "^envoy_http_downstream_rq_xx$",
                             //"^envoy_cluster_upstream_cx_(r|t)x_bytes_total$",
                             //"^envoy_cluster_membership_(healthy|total)$",
                             //"^envoy_server_memory_(allocated|heap_size)$",
