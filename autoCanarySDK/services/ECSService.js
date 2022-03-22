@@ -35,13 +35,10 @@ const destroy = async (clusterName, ecsServiceName) => {
   return response;
 };
 
-const update = async (chimeraConfig, desiredCount, ecsServiceName) => {
+const update = async (clusterName, ecsServiceName, desiredCount) => {
   const client = new ECSClient();
-  const updateServiceCommandInput = {
-    cluster: chimeraConfig.clusterName,
-    desiredCount,
-    service: ecsServiceName,
-  };
+  const updateServiceCommandInput = { cluster: clusterName, service: ecsServiceName, desiredCount };
+
   const command = new UpdateServiceCommand(updateServiceCommandInput);
   const response = await client.send(command)
   return response;
@@ -60,8 +57,34 @@ const create = async (clusterName, originalECSServiceName, newECSServiceName, ta
   return response.service;
 };
 
+const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
+  const client = new ECSClient();
+  const input = {
+    cluster,
+    deploymentConfiguration: {
+      maximumPercent: 200,
+      minimumHealthyPercent: 100
+    },
+    desiredCount: 1,
+    launchType: "FARGATE",
+    networkConfiguration: {
+      awsvpcConfiguration: {
+        assignPublicIp: "DISABLED",
+        securityGroups,
+        subnets
+      }
+    },
+    serviceName: `${cluster}-cw-agent`,
+    taskDefinition: `${cwTaskDef.family}`
+  };
+  const command = new CreateServiceCommand(input);
+  const response = await client.send(command);
+  return response.service;
+};
+
 module.exports = {
   create,
+  createCW,
   update,
   destroy,
   describe,

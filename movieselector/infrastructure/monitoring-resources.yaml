@@ -5,6 +5,59 @@ Parameters:
 
 Resources:
   ###################################################
+  # IAM Roles
+  ###################################################
+  CWAgentTaskIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Policies:
+        - PolicyName: ECSServiceDiscoveryInlinePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:DescribeTasks
+                  - ecs:ListTasks
+                  - ecs:DescribeContainerInstances
+                  - ecs:DescribeServices
+                  - ecs:ListServices
+                Resource: '*'
+                Condition:
+                  ArnEquals:
+                    ecs:cluster: arn:aws:ecs:us-east-1:339936612855:cluster/chimera
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ecs:DescribeTaskDefinition
+                Resource: '*'
+
+  CWAgentExecutionIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+
+  ###################################################
   # ECS Services & Tasks
   ###################################################
   CWAgentService:
@@ -35,10 +88,8 @@ Resources:
       NetworkMode: awsvpc
       Cpu: 512
       Memory: 1024
-      TaskRoleArn:
-        Fn::ImportValue: !Sub '${ProjectName}:CWTaskRole'
-      ExecutionRoleArn:
-        Fn::ImportValue: !Sub '${ProjectName}:CWExecutionRole'
+      TaskRoleArn: !Ref CWAgentTaskIAMRole
+      ExecutionRoleArn: !Ref CWAgentExecutionIAMRole
       ContainerDefinitions:
         - Name: cwagent
           Image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
@@ -72,7 +123,7 @@ Resources:
                     "force_flush_interval": 5,
                     "metrics_collected": {
                       "prometheus": {
-                        "log_group_name": "chimera-log-group",
+                        "log_group_name": "${ProjectName}:CWLogGroup",
                         "prometheus_config_path": "env:PROMETHEUS_CONFIG_CONTENT",
                         "ecs_service_discovery": {
                           "sd_frequency": "1m",
@@ -104,3 +155,16 @@ Resources:
                     }
                   }
                 }
+
+Outputs:
+  CWTaskRole:
+    Description: cw-agent task iam role
+    Value: !Ref CWAgentTaskIAMRole
+    Export:
+      Name: !Sub "${ProjectName}:CWTaskRole"
+
+  CWExecutionRole:
+    Description: cw-agent execution role
+    Value: !Ref CWAgentExecutionIAMRole
+    Export:
+      Name: !Sub "${ProjectName}:CWExecutionRole"

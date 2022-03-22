@@ -29,6 +29,10 @@ const handler = async (req, res) => {
     return
   }
   console.log(`received ${JSON.stringify(resp.data)} from ${backend}`);
+  if (i % 2 === 0) {
+    res.status(500).json({ error: "nope!" });
+    return
+  }
   res
     .status(200)
     .json({ ...resp.data, version: 3 });

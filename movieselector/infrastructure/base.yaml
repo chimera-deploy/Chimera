@@ -284,56 +284,6 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
 
-  CWAgentTaskIAMRole:
-    Type: AWS::IAM::Role
-    Properties:
-      Path: /
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      Policies:
-        - PolicyName: ECSServiceDiscoveryInlinePolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ecs:DescribeTasks
-                  - ecs:ListTasks
-                  - ecs:DescribeContainerInstances
-                  - ecs:DescribeServices
-                  - ecs:ListServices
-                Resource: '*'
-                Condition:
-                  ArnEquals:
-                    ecs:cluster: !GetAtt ECSCluster.Arn
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeInstances
-                  - ecs:DescribeTaskDefinition
-                Resource: '*'
-
-  CWAgentTaskExecutionIAMRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-
   ##################################################
   # Cloudwatch Resources
   ###################################################
@@ -350,6 +300,9 @@ Resources:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Ref ProjectName
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
 
   ###################################################
   # App Mesh
@@ -405,18 +358,6 @@ Outputs:
     Value: !Ref TaskExecutionIAMRole
     Export:
       Name: !Sub "${ProjectName}:ExecutionRole"
-
-  CWTaskRole:
-    Description: cw-agent task iam role
-    Value: !Ref CWAgentTaskIAMRole
-    Export:
-      Name: !Sub "${ProjectName}:CWTaskRole"
-
-  CWExecutionRole:
-    Description: cw-agent execution role
-    Value: !Ref CWAgentTaskExecutionIAMRole
-    Export:
-      Name: !Sub "${ProjectName}:CWExecutionRole"
 
   CWLogGroup:
     Description: cw log group

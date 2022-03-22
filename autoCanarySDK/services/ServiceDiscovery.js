@@ -15,11 +15,6 @@ const getCloudMapHealth = async (serviceDiscoveryID) => {
   return response.Status;
 };
 
-const currentCloudmapInstanceCount = async (serviceDiscoveryID) => {
-  const health = await getCloudMapHealth(serviceDiscoveryID);
-  return Object.values(health).length;
-};
-
 const allHealthy = (instanceStates, taskIDs) => {
   return taskIDs.length > 0 && taskIDs.every(id => {
     return instanceStates[id] === 'HEALTHY';
@@ -49,6 +44,5 @@ const cloudMapHealthy = async (serviceDiscoveryID, clusterName, taskName) => {
 
 module.exports = {
   getCloudMapHealth,
-  currentCloudmapInstanceCount,
   cloudMapHealthy,
 };
