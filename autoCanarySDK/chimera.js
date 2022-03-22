@@ -21,38 +21,12 @@ const Chimera = {
   async setup(config) {
     this.config = config;
     try {
-      await this.updateGateway();
       await this.createCWRoles();
       await this.createCWAgent();
     } catch (err) {
       console.log('setup failed');
       console.log(err);
     }
-  },
-
-  async updateGateway() {
-    console.log("updating gateway task definition");
-    this.gatewayTaskDefinition = await TaskDefinition.register(
-      null,
-      null,
-      null,
-      this.config.virtualGatewayName,
-      this.config.envoyContainerName,
-      this.config.originalGatewayTaskDefinition,
-      this.config.originalGatewayTaskDefinition.split(":")[0],
-      this.config.meshName,
-      this.config.region,
-      this.config.awsAccountID
-    );
-    console.log('updated gateway task definition');
-    console.log('updating ecs gateway service');
-    await ECSService.update(
-      this.config,
-      this.config.originalGatewayECSServiceName,
-      this.gatewayTaskDefinition,
-      null
-    );
-    console.log('updated ecs gateway service');
   },
 
   async createCWRoles() {
@@ -146,6 +120,7 @@ const Chimera = {
     console.log('created ECS service');
     console.log('waiting for cloudmap');
     await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName);
+    console.log('finished deploying canary');
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck) {
