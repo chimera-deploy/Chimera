@@ -17,42 +17,19 @@ const Chimera = {
   cwExecutionRole: null,
   cwTaskDefinition: null,
   cwECSService: null,
+  newVersionWeight: 0,
+  oldVersionWeight: 100,
+  shiftWeight: 25,
 
   async setup(config) {
     this.config = config;
     try {
-      await this.updateGateway();
       await this.createCWRoles();
       await this.createCWAgent();
     } catch (err) {
       console.log('setup failed');
       console.log(err);
     }
-  },
-
-  async updateGateway() {
-    console.log("updating gateway task definition");
-    this.gatewayTaskDefinition = await TaskDefinition.register(
-      null,
-      null,
-      null,
-      this.config.virtualGatewayName,
-      this.config.envoyContainerName,
-      this.config.originalGatewayTaskDefinition,
-      this.config.originalGatewayTaskDefinition.split(":")[0],
-      this.config.meshName,
-      this.config.region,
-      this.config.awsAccountID
-    );
-    console.log('updated gateway task definition');
-    console.log('updating ecs gateway service');
-    await ECSService.update(
-      this.config,
-      this.config.originalGatewayECSServiceName,
-      this.gatewayTaskDefinition,
-      null
-    );
-    console.log('updated ecs gateway service');
   },
 
   async createCWRoles() {
@@ -148,56 +125,47 @@ const Chimera = {
     await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName);
   },
 
+  async updateTrafficWeights(routeUpdateInterval, shiftWeight, healthCheck, resolve) {
+    this.newVersionWeight = Math.min(100, this.newVersionWeight + shiftWeight);
+    this.oldVersionWeight = Math.max(0, this.oldVersionWeight - shiftWeight);
+    const weightedTargets = [
+      {
+        virtualNode: this.config.originalNodeName,
+        weight: this.originalVersionWeight,
+      },
+      {
+        virtualNode: this.virtualNode.virtualNodeName,
+        weight: this.newVersionWeight,
+      },
+    ];
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
+    await healthCheck(
+      routeUpdateInterval,
+      this.config.metricNamespace,
+      this.config.clusterName,
+      this.taskName
+    );
+    if (this.newVersionWeight >= 100) {
+      resolve();
+    } else {
+      setTimeout(() => this.updateTrafficWeights(
+        routeUpdateInterval,
+        shiftWeight,
+        healthCheck,
+        resolve
+      ), routeUpdateInterval);
+    }
+  },
+
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck) {
-    let p = new Promise((resolve, reject) => {
-      let originalVersionWeight = 100;
-      let newVersionWeight = 0;
-      let intervalID;
-      intervalID = setInterval(async () => {
-        newVersionWeight += shiftWeight;
-        originalVersionWeight -= shiftWeight;
-        const weightedTargets = [
-          {
-            virtualNode: this.config.originalNodeName,
-            weight: originalVersionWeight,
-          },
-          {
-            virtualNode: this.virtualNode.virtualNodeName,
-            weight: newVersionWeight,
-          },
-        ];
-        if (newVersionWeight === 100) {
-          clearInterval(intervalID);
-        }
-        try {
-          console.log('attempting to shift traffic');
-          await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
-        } catch (err) {
-          console.log("failed to shift traffic");
-          clearInterval(intervalID);
-          reject(new Error('error updating app mesh route', { cause: err }));
-          return
-        }
-        console.log("shifted traffic");
-        try {
-          console.log("attempting healthcheck");
-          await healthCheck(
-            routeUpdateInterval,
-            this.config.metricNamespace,
-            this.config.clusterName,
-            this.taskName
-          );
-        } catch (err) {
-          console.log("healthcheck failure");
-          clearInterval(intervalID);
-          reject(err);
-          return
-        }
-        console.log("healthcheck pass");
-        if (newVersionWeight === 100) {
-          resolve();
-        }
-      }, routeUpdateInterval);
+    let p = new Promise(async (resolve, reject) => {
+      try {
+        console.log('attempting to shift traffic');
+        await this.updateTrafficWeights(10000, shiftWeight, healthCheck, resolve);
+      } catch (err) {
+        console.log("failed to shift traffic");
+        reject(new Error('error updating app mesh route', { cause: err }));
+      }
     });
     await p;
   },
