@@ -32,36 +32,6 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
         Stat: "Sum"
       },
       ReturnData: true
-    },
-    {
-      Id: "id2",
-      MetricStat: {
-        Metric: {
-          Namespace: `${metricNamespace}`,
-          MetricName: "envoy_http_downstream_rq_xx",
-          Dimensions: [
-            {
-              Name: "TaskDefinitionFamily",
-              Value: taskName
-            },
-            {
-              Name: "envoy_http_conn_manager_prefix",
-              Value: "ingress"
-            },
-            {
-              Name: "envoy_response_code_class",
-              Value: "2"
-            },
-            {
-              Name: "ClusterName",
-              Value: clusterName
-            }
-          ]
-        },
-        Period: 60,
-        Stat: "Sum"
-      },
-      ReturnData: true
     }
   ];
   const input = {
