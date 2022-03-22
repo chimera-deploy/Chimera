@@ -16,7 +16,6 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
       return def.name === appContainerName;
     });
     appContainerDef.image = appImageURL;
-    appContainerDef.logConfiguration.options["awslogs-stream-prefix"] = virtualNodeName;
   }
 
   const envoyContainerDef = taskDefinition.containerDefinitions.find(def => {
@@ -27,8 +26,6 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
     "ECS_PROMETHEUS_METRICS_PATH": "/stats/prometheus",
     "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
   };
-
-  envoyContainerDef.logConfiguration.options["awslogs-stream-prefix"] = virtualNodeName || virtualGatewayName;
 
   if (virtualNodeName) {
     envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
@@ -79,19 +76,11 @@ const register = async (appImageURL, appContainerName, virtualNodeName, virtualG
   return response.taskDefinition;
 };
 
-const createCW = async (logGroup, region, awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole) => {
+const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole) => {
   const client = new ECSClient();
   let input = {
     containerDefinitions: [
       {
-        logConfiguration: {
-          logDriver: "awslogs",
-          options: {
-            "awslogs-group": `${logGroup}`,
-            "awslogs-region": `${region}`,
-            "awslogs-stream-prefix": "cwagent"
-          }
-        },
         name: "cwagent",
         image: "public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest",
         essential: true,
@@ -125,7 +114,6 @@ const createCW = async (logGroup, region, awsAccountID, metricNamespace, cwTaskR
                 "force_flush_interval": 5,
                 "metrics_collected": {
                   "prometheus": {
-                    "log_group_name": `${logGroup}`,
                     "prometheus_config_path": "env:PROMETHEUS_CONFIG_CONTENT",
                     "ecs_service_discovery": {
                       "sd_frequency": "1m",

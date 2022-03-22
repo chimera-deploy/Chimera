@@ -58,8 +58,6 @@ const Chimera = {
   async createCWAgent() {
     console.log("registering cloudwatch agent task definition");
     this.cwTaskDefinition = await TaskDefinition.createCW(
-      this.config.logGroup,
-      this.config.region,
       this.config.awsAccountID,
       this.config.metricNamespace,
       this.cwTaskRole,
