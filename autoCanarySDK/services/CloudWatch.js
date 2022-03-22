@@ -44,14 +44,14 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
   return await client.send(command);
 };
 
-const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName) => {
+const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, maxFailures) => {
   const millisecondsNow = Date.now();
   const now = new Date(millisecondsNow);
   const start = new Date(millisecondsNow - (failureThresholdTime * 2));
   const response = await getMetricData(start, now, metricNamespace, clusterName, taskName);
   const values = response.MetricDataResults[0].Values;
   console.log("values downstream/ingress 500:", values);
-  if (values.reduce((a, v) => a + v, 0) > 0) { // hard coded for testing
+  if (values.reduce((a, v) => a + v, 0) > maxFailures) { // hard coded for testing
     throw new Error("the canary is not healthy");
   }
 };

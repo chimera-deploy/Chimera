@@ -16,7 +16,10 @@ const clientConfiguration = {
   "awsAccountID": "822180497458",
   "metricNamespace": "chimera-prometheus-metrics-3",
   "cwECSSecurityGroups": ["sg-0ba88d5feee9fedc3"],
-  "cwECSPrimarySubnets": ["subnet-01683c903501dfd39", "subnet-01b67f4aa9f58abbb"]
+  "cwECSPrimarySubnets": ["subnet-01683c903501dfd39", "subnet-01b67f4aa9f58abbb"],
+  "routeUpdateInterval": "2",
+  "shiftWeight": "25",
+  "maxFailures": "0",
 };
 
 module.exports = clientConfiguration;

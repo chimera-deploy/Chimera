@@ -82,7 +82,7 @@ const Chimera = {
     this.config = config;
     try {
       await this.buildCanary();
-      await this.shiftTraffic(1000 * 60 * 2, 25, CloudWatch.getHealthCheck); // 2min intervals; 25 shiftweight
+      await this.shiftTraffic(1000 * 60 * Number(config.routeUpdateInterval), Number(config.shiftWeight), CloudWatch.getHealthCheck);
       newVersionDeployed = true;
     } catch (err) {
       console.log('deployment failed');
@@ -141,7 +141,8 @@ const Chimera = {
       routeUpdateInterval,
       this.config.metricNamespace,
       this.config.clusterName,
-      this.taskName
+      this.taskName,
+      Number(this.config.maxFailures)
     );
     if (this.newVersionWeight >= 100) {
       resolve();
