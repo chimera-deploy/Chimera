@@ -32,36 +32,6 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
         Stat: "Sum"
       },
       ReturnData: true
-    },
-    {
-      Id: "id2",
-      MetricStat: {
-        Metric: {
-          Namespace: `${metricNamespace}`,
-          MetricName: "envoy_http_downstream_rq_xx",
-          Dimensions: [
-            {
-              Name: "TaskDefinitionFamily",
-              Value: taskName
-            },
-            {
-              Name: "envoy_http_conn_manager_prefix",
-              Value: "ingress"
-            },
-            {
-              Name: "envoy_response_code_class",
-              Value: "2"
-            },
-            {
-              Name: "ClusterName",
-              Value: clusterName
-            }
-          ]
-        },
-        Period: 60,
-        Stat: "Sum"
-      },
-      ReturnData: true
     }
   ];
   const input = {
@@ -77,11 +47,8 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
 const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName) => {
   const millisecondsNow = Date.now();
   const now = new Date(millisecondsNow);
-  console.log("now:", now);
   const start = new Date(millisecondsNow - (failureThresholdTime * 2));
-  console.log("start:", start);
   const response = await getMetricData(start, now, metricNamespace, clusterName, taskName);
-  console.log("response:", response);
   const values = response.MetricDataResults[0].Values;
   console.log("values downstream/ingress 500:", values);
   if (values.reduce((a, v) => a + v, 0) > 0) { // hard coded for testing
