@@ -127,29 +127,9 @@ const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRo
                         {
                           "source_labels": ["container_name"],
                           "label_matcher": "^envoy$",
-                          "dimensions": [["ClusterName", "TaskDefinitionFamily"]],
-                          "metric_selectors": [
-                            "^envoy_http_downstream_rq_.+$",
-                            "^envoy_http_upstream_rq_.+$"
-                            //"^envoy_cluster_upstream_cx_(r|t)x_bytes_total$",
-                            //"^envoy_cluster_membership_(healthy|total)$",
-                            //"^envoy_server_memory_(allocated|heap_size)$",
-                            //"^envoy_cluster_upstream_cx_(connect_timeout|destroy_local_with_active_rq)$",
-                            //"^envoy_cluster_upstream_rq_(pending_failure_eject|pending_overflow|timeout|per_try_timeout|rx_reset|maintenance_mode)$",
-                            //"^envoy_http_downstream_cx_destroy_remote_active_rq$",
-                            //"^envoy_cluster_upstream_flow_control_(paused_reading_total|resumed_reading_total|backed_up_total|drained_total)$",
-                            //"^envoy_cluster_upstream_rq_retry$",
-                            //"^envoy_cluster_upstream_rq_retry_(success|overflow)$",
-                            //"^envoy_server_(version|uptime|live)$"
-                          ]
-                        },
-                        {
-                          "source_labels": ["container_name"],
-                          "label_matcher": "^envoy$",
                           "dimensions": [["ClusterName","TaskDefinitionFamily","envoy_http_conn_manager_prefix","envoy_response_code_class"]],
                           "metric_selectors": [
-                            "^envoy_http_downstream_rq_.+$",
-                            "^envoy_http_upstream_rq_.+$"
+                            "^envoy_http_downstream_rq_.+$"
                           ]
                         }
                       ]
