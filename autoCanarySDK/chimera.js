@@ -169,6 +169,7 @@ const Chimera = {
           if (newVersionWeight === 100) {
             clearInterval(intervalID);
             resolve();
+            return
           }
 
           newVersionWeight = Math.min(100, newVersionWeight + shiftWeight);
