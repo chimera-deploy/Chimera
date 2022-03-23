@@ -104,9 +104,8 @@ const Chimera = {
   },
 
   async buildCanary() {
-    // User will have to provide meshName, serviceName and version
-    const virtualNodeName = `${this.config.serviceName}-${this.config.newVersionNumber}`
-    this.taskName = `${this.config.meshName}-${this.config.serviceName}-${this.config.newVersionNumber}`;
+    const virtualNodeName = this.config.newVirtualNodeName;
+    this.taskName = this.config.newTaskDefinitionName;
     this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName);
     console.log('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
