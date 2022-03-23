@@ -69,7 +69,7 @@ const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
     launchType: "FARGATE",
     networkConfiguration: {
       awsvpcConfiguration: {
-        assignPublicIp: "DISABLED",
+        assignPublicIp: "ENABLED",
         securityGroups,
         subnets
       }

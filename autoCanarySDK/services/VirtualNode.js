@@ -5,13 +5,20 @@ const create = async (meshName, virtualNodeName, originalNodeName, taskName) => 
   const originalNode = await describe(meshName, originalNodeName);
   originalNode.virtualNodeName = virtualNodeName;
   if (originalNode.spec.serviceDiscovery.awsCloudMap) {
+    let needToAdd = true;
     const newAttributes = originalNode.spec.serviceDiscovery.awsCloudMap.attributes.map(attr => {
       if (attr.key !== 'ECS_TASK_DEFINITION_FAMILY') {
         return attr;
       } else {
         return { key: 'ECS_TASK_DEFINITION_FAMILY', value: taskName };
+        needToAdd = false
       }
     });
+
+    if (needToAdd) {
+      newAttributes.push({ key: "ECS_TASK_DEFINITION_FAMILY", value: taskName })
+    }
+
     originalNode.spec.serviceDiscovery.awsCloudMap.attributes = newAttributes;
   }
 
@@ -28,7 +35,7 @@ const destroy = async (meshName, virtualNodeName) => {
   };
 
   const command = new DeleteVirtualNodeCommand(input);
-  
+
   const response = await client.send(command);
   return response;
 };
