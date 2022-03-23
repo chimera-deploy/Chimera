@@ -10,8 +10,8 @@ const create = async (meshName, virtualNodeName, originalNodeName, taskName) => 
       if (attr.key !== 'ECS_TASK_DEFINITION_FAMILY') {
         return attr;
       } else {
-        return { key: 'ECS_TASK_DEFINITION_FAMILY', value: taskName };
         needToAdd = false
+        return { key: 'ECS_TASK_DEFINITION_FAMILY', value: taskName };
       }
     });
 
