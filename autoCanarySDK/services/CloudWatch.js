@@ -45,6 +45,7 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
 };
 
 const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, maxFailures) => {
+  console.log(taskName)
   const millisecondsNow = Date.now();
   const now = new Date(millisecondsNow);
   const start = new Date(millisecondsNow - (failureThresholdTime * 2));
