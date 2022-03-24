@@ -22,9 +22,10 @@ app.get('/mesh-details', async (request, response) => {
     const meshName = request.body.meshName;
 
     const nodes = await AppMesh.nodeNames(meshName);
-    const routers = await AppMesh.routersWithRoutes(meshName);
+    const routers = await AppMesh.routerNames(meshName);
+    const routes = await AppMesh.routesByRouter(meshName);
 
-    response.status(200).json({ nodes, routers });
+    response.status(200).json({ nodes, routers, routes });
   } catch (error) {
     console.log("Error getting mesh details", error);
     response.status(500).json({ error });
