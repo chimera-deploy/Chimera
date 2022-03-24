@@ -16,4 +16,11 @@ app.post('/deploy', (request, response) => {
   response.status(200).send();
 });
 
+app.post('/setup', async (request, response) => {
+  // validate request
+  const config = request.body;
+  const result = await Chimera.setup(config);
+  result ? response.status(200).send() : response.status(500).json({error: 'setup failed'});
+});
+
 app.listen(PORT, () => console.log(`Backend listening on port ${PORT}`));
