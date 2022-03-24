@@ -1,31 +1,31 @@
 const clientConfiguration = {
-  "meshName": "MyMesh",
-  "routeName": "randomNumber",
-  "routerName": "randomNumber",
-  "originalNodeName": "randomNumber-2",
-  "originalECSServiceName": "randomNumber-2",
-  "originalTaskDefinition": "MyMesh-randomNumber-2:11",
+  "meshName": "chimera",
+  "routeName": "movieselector-route",
+  "routerName": "movieselector-vr",
 
-  "newNodeName": "",
-  "newECSServiceName": "",
-  "newTaskDefinitionName": "",
+  "originalNodeName": "movieselector-15",
+  "originalECSServiceName": "movieselector-15",
+  "originalTaskDefinition": "chimera-movieselector-15:1",
 
-  "containerName": "randomNumber",
-  "imageURI": '522968852253.dkr.ecr.us-east-2.amazonaws.com/random-number:1',
-  "clusterName": "randomNumber",
-  "serviceDiscoveryID": "srv-pnwwbagytaqial7v",
+  "newNodeName": "movieselector-18",
+  "newECSServiceName": "movieselector-18",
+  "newTaskDefinitionName": "chimera-movieselector-18",
+
+  "clusterName": "chimera",
+  "containerName": "app",
+  "imageURL": '339936612855.dkr.ecr.us-east-1.amazonaws.com/movieselector:1.0',
   "envoyContainerName": "envoy",
+  "serviceDiscoveryID": "srv-og6bcp4odezgw4k3",
 
-  "routeUpdateInterval": "1",
+  "routeUpdateInterval": "2",
   "shiftWeight": "25",
   "maxFailures": "0",
 
-  "region": "us-east-2",
-  "awsAccountID": "522968852253",
-  "metricNamespace": "chimera-prometheus-metrics-3",
-  "cwECSSecurityGroups": ["sg-05acbb0dbc0737d18"],
-  "cwECSPrimarySubnets": ["subnet-0084713a6ca9fff19"],
-
+  "region": "us-east-1",
+  "awsAccountID": "339936612855",
+  "metricNamespace": "chimera-prometheus-metrics-18",
+  "vpcID": "vpc-009982664fe05da7f",
+  "cwECSPrimarySubnets": ["subnet-0b762c591b8eef19e", "subnet-03f885dfbdfacaf31"],
 };
 
 module.exports = clientConfiguration;

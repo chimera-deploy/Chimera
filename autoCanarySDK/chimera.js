@@ -5,6 +5,7 @@ const VirtualRoute = require('./services/VirtualRoute');
 const ServiceDiscovery = require('./services/ServiceDiscovery');
 const IAM = require('./services/IAM');
 const CloudWatch = require('./services/CloudWatch');
+const EC2 = require('./services/EC2');
 
 const Chimera = {
   virtualNode: null,
@@ -17,6 +18,7 @@ const Chimera = {
   cwExecutionRole: null,
   cwTaskDefinition: null,
   cwECSService: null,
+  cwSecurityGroupID: null,
   newVersionWeight: 0,
   oldVersionWeight: 100,
   shiftWeight: 25,
@@ -24,12 +26,19 @@ const Chimera = {
   async setup(config) {
     this.config = config;
     try {
+      await this.createCWSecurityGroup();
       await this.createCWRoles();
       await this.createCWAgent();
     } catch (err) {
       console.log('setup failed');
       console.log(err);
     }
+  },
+
+  async createCWSecurityGroup() {
+    console.log('creating security group for cloudwatch agent');
+    this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID);
+    console.log('created security group for cloudwatch agent');
   },
 
   async createCWRoles() {
@@ -70,7 +79,7 @@ const Chimera = {
     console.log("creating cloudwatch agent ECS service");
     this.cwECSService = await ECSService.createCW(
       this.config.clusterName,
-      this.config.cwECSSecurityGroups,
+      [ this.config.cwSecurityGroupID ],
       this.config.cwECSPrimarySubnets,
       this.cwTaskDefinition
     );
@@ -104,7 +113,7 @@ const Chimera = {
   },
 
   async buildCanary() {
-    const virtualNodeName = this.config.newVirtualNodeName;
+    const virtualNodeName = this.config.newNodeName;
     this.taskName = this.config.newTaskDefinitionName;
     this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName);
     console.log('created virtual node');
