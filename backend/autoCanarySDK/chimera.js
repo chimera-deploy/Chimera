@@ -32,9 +32,8 @@ const Chimera = {
     } catch (err) {
       console.log('setup failed');
       console.log(err);
-      return false
+      throw err
     }
-    return true
   },
 
   async createCWSecurityGroup() {
