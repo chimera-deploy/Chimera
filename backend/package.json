@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.3",
+    "@aws-sdk/client-app-mesh": "^3.53.0",
+    "@aws-sdk/client-cloudwatch": "^3.54.1",
+    "@aws-sdk/client-ec2": "^3.55.0",
+    "@aws-sdk/client-ecs": "^3.54.0",
+    "@aws-sdk/client-iam": "^3.54.1",
+    "@aws-sdk/client-servicediscovery": "^3.54.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
