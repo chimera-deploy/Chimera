@@ -101,4 +101,5 @@ module.exports = {
   update,
   destroy,
   describe,
+  listServices,
 };
