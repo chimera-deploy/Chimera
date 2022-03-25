@@ -16,7 +16,7 @@ app.post('/deploy', (request, response) => {
   console.log(config);
   Chimera.deploy(config);
   response.status(200).send();
-});  
+});
 
 app.post('/setup', async (request, response) => {
   // validate request
@@ -32,11 +32,35 @@ app.post('/setup', async (request, response) => {
 app.post('/mesh-details', async (request, response) => {
   try {
     const meshName = request.body.meshName;
+    let nodes, routers, routes;
 
-    const nodes = await AppMesh.nodeNames(meshName);
-    const routers = await AppMesh.routerNames(meshName);
-    const routes = await AppMesh.routesByRouter(meshName);
+    const nodesPromise = new Promise(async (resolve, reject) => {
+      try {
+        nodes = await AppMesh.nodeNames(meshName);
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    });
+    const routersPromise = new Promise(async (resolve, reject) => {
+      try {
+        routers = await AppMesh.routerNames(meshName);
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    });
+    const routesPromise = new Promise(async (resolve, reject) => {
+      try {
+        routes = await AppMesh.routesByRouter(meshName);
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    });
+    const promises = [nodesPromise, routersPromise, routesPromise];
 
+    await Promise.all(promises);
     response.status(200).json({ nodes, routers, routes });
   } catch (error) {
     console.log("Error getting mesh details", error);
