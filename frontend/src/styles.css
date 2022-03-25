@@ -15,7 +15,30 @@ h1 {
   margin: 10px;
 }
 
+.input-line {
+  border-top: 1px solid #0C0E21;
+  display: block;
+  padding: 10px;
+}
+
 dd, dt {
   display: inline-block;
-  width: 40%;
+  width: 45%;
+}
+
+.subnet-inputs {
+  display: inline-block;
+  width: 45%;
+}
+
+.subnet-inputs > dd {
+  width: 100%;
+}
+
+dd, .subnet-inputs {
+  float: right;
+}
+
+input, select {
+  width: 100%;
 }
