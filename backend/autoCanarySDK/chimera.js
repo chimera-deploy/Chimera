@@ -22,6 +22,18 @@ const Chimera = {
   newVersionWeight: 0,
   oldVersionWeight: 100,
   shiftWeight: 25,
+  client: null,
+  events: [],
+
+  async registerClient(newClient) {
+    this.client = newClient;
+  },
+
+  async writeToClient(message) {
+    console.log(message);
+    this.events.push(message);
+    this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+  },
 
   async setup(config) {
     this.config = config;
@@ -30,16 +42,17 @@ const Chimera = {
       await this.createCWRoles();
       await this.createCWAgent();
     } catch (err) {
-      console.log('setup failed');
+      this.writeToClient('setup failed');
       console.log(err);
       throw err
     }
   },
 
   async createCWSecurityGroup() {
-    console.log('creating security group for cloudwatch agent');
+    this.writeToClient('creating security group for cloudwatch agent');
+    this.writeToClient()
     this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID);
-    console.log('created security group for cloudwatch agent');
+    this.writeToClient('created security group for cloudwatch agent');
   },
 
   async createCWRoles() {
@@ -55,36 +68,36 @@ const Chimera = {
         }
       ]
     });
-    console.log('creating cloudwatch task role');
+    this.writeToClient('creating cloudwatch task role');
     this.cwTaskRole = await IAM.createCWTaskRole(
       this.config.clusterName,
       assumeRolePolicyDocument,
       this.config.region,
       this.config.awsAccountID
     );
-    console.log('created cloudwatch task role');
-    console.log('creating cloudwatch execution role');
+    this.writeToClient('created cloudwatch task role');
+    this.writeToClient('creating cloudwatch execution role');
     this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument);
-    console.log('created cloudwatch execution role');
+    this.writeToClient('created cloudwatch execution role');
   },
 
   async createCWAgent() {
-    console.log("registering cloudwatch agent task definition");
+    this.writeToClient("registering cloudwatch agent task definition");
     this.cwTaskDefinition = await TaskDefinition.createCW(
       this.config.awsAccountID,
       this.config.metricNamespace,
       this.cwTaskRole,
       this.cwExecutionRole,
     );
-    console.log('registered cloudwatch agent task definition');
-    console.log("creating cloudwatch agent ECS service");
+    this.writeToClient('registered cloudwatch agent task definition');
+    this.writeToClient("creating cloudwatch agent ECS service");
     this.cwECSService = await ECSService.createCW(
       this.config.clusterName,
       [ this.config.cwSecurityGroupID ],
       this.config.cwECSPrimarySubnets,
       this.cwTaskDefinition
     );
-    console.log('created cloudwatch agent ECS service');
+    this.writeToClient('created cloudwatch agent ECS service');
   },
 
   async deploy(config) {
@@ -100,7 +113,7 @@ const Chimera = {
       );
       newVersionDeployed = true;
     } catch (err) {
-      console.log('deployment failed');
+      this.writeToClient('deployment failed');
       console.log(err);
       await this.rollbackToOldVersion();
     }
@@ -117,7 +130,7 @@ const Chimera = {
     const virtualNodeName = this.config.newNodeName;
     this.taskName = this.config.newTaskDefinitionName;
     this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName);
-    console.log('created virtual node');
+    this.writeToClient('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
       this.config.containerName,
@@ -129,12 +142,12 @@ const Chimera = {
       this.config.region,
       this.config.awsAccountID
     );
-    console.log('registered task definition');
+    this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName)
-    console.log('created ECS service');
-    console.log('waiting for cloudmap');
+    this.writeToClient('created ECS service');
+    this.writeToClient('waiting for cloudmap');
     await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName);
-    console.log('finished deploying canary');
+    this.writeToClient('finished deploying canary');
   },
 
   async updateRoute(newVersionWeight, originalVersionWeight) {
@@ -149,7 +162,7 @@ const Chimera = {
       },
     ];
     await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
-    console.log(`shifted traffic: Stable: ${originalVersionWeight} || Canary: ${newVersionWeight}`);
+    this.writeToClient(`shifted traffic: Stable: ${originalVersionWeight} || Canary: ${newVersionWeight}`);
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck, maxFailures) {
@@ -201,13 +214,13 @@ const Chimera = {
         weight: 100,
       },
     ]);
-    console.log(`deleting virtual node ${this.config.originalNodeName}`);
+    this.writeToClient(`deleting virtual node ${this.config.originalNodeName}`);
     await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName);
-    console.log(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
+    this.writeToClient(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
     await ECSService.update(this.config.clusterName, this.config.originalECSServiceName, 0);
-    console.log(`deleting ECS service ${this.config.originalECSServiceName}`);
+    this.writeToClient(`deleting ECS service ${this.config.originalECSServiceName}`);
     await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName);
-    console.log(`deregistering task definition ${this.config.originalTaskDefinition}`);
+    this.writeToClient(`deregistering task definition ${this.config.originalTaskDefinition}`);
     await TaskDefinition.deregister(this.config.originalTaskDefinition);
   },
 
@@ -220,22 +233,22 @@ const Chimera = {
         },
       ]);
       if (this.virtualNode !== null) {
-        console.log(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
+        this.writeToClient(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
         await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName);
       }
       if (this.newECSService !== null) {
-        console.log(`setting desired count for service ${this.newECSService.serviceName} to 0`);
+        this.writeToClient(`setting desired count for service ${this.newECSService.serviceName} to 0`);
         await ECSService.update(this.config.clusterName, this.newECSService.serviceName, 0);
-        console.log(`deleting ECS service ${this.newECSService.serviceName}`);
+        this.writeToClient(`deleting ECS service ${this.newECSService.serviceName}`);
         await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
-        console.log(`deregistering task definition ${taskDefinitionName}`);
+        this.writeToClient(`deregistering task definition ${taskDefinitionName}`);
         await TaskDefinition.deregister(taskDefinitionName);
       }
     } catch (err) {
-      console.log('Failed to rollback to old version');
+      this.writeToClient('Failed to rollback to old version');
       console.log(err);
     }
   },

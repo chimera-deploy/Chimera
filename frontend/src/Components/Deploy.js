@@ -137,10 +137,33 @@ const DeployInfo = ({ ecsServices }) => {
 // it'll send a message to the backend to do its thing and track the progress
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
-  axios.post('http://localhost:5000/deploy', deploy);
+  const [ events, setEvents ] = useState([]);
+  const [ listening, setListening ] = useState(false);
+
+  useEffect(() => {
+    axios.post('http://localhost:5000/deploy', deploy);
+  }, []);
+
+  useEffect(() => {
+    if (!listening) {
+      const eventListener = new EventSource('http://localhost:5000/events');
+      eventListener.onmessage = (event) => {
+        console.log(event);
+
+        const parsedEvent = JSON.parse(event.data);
+        setEvents(parsedEvent);
+      };
+
+      setListening(true);
+    }
+  }, [listening, events]);
+
   return (
     <div>
       <p>Deploying!</p>
+      <ul>
+        {events.map(event => <li key={event}>{event}</li>)}
+      </ul>
     </div>
   );
 };

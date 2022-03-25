@@ -10,6 +10,25 @@ app.use(express.json());
 app.use(cors());
 const PORT = 5000;
 
+app.get('/events', (request, response) => {
+  const headers = {
+    'Content-Type': 'text/event-stream',
+    'Connection': 'keep-alive',
+    'Cache-Control': 'no-cache'
+  };
+  response.writeHead(200, headers);
+  const clientId = Date.now();
+  const newClient = {
+    id: clientId,
+    response,
+  };
+
+  request.on('close', () => {
+    console.log(`${clientId} Connection closed`);
+  });
+  Chimera.registerClient(newClient);
+})
+
 app.post('/deploy', (request, response) => {
   //validate request
   const config = request.body;
