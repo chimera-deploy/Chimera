@@ -65,6 +65,4 @@ const AppMesh = {
   }
 }
 
-AppMesh.routesByRouter("MyMesh").then(r => console.log(r))
-
 module.exports = AppMesh;
