@@ -1,25 +1,24 @@
 const init = {
-  routing: {
-    meshName: "",
-    originalNodeName: "",
-    newNodeName: "",
-    routerName: "",
-    routeName: "",
-    routeUpdateInterval: "",
-    shiftWeight: "",
-    maxFailures: ""
-  },
-  containers: {
-    clusterName: "",
-    serviceDiscoveryID: "",
-    originalECSServiceName: "",
-    originalTaskDefinition: "",
-    newECSServiceName: "",
-    newTaskDefinitionName: "",
-    imageURL: "",
-    containerName: "",
-    envoyContainerName: "",
-  }
+  meshName: "",
+  originalNodeName: "",
+  newNodeName: "",
+  routerName: "",
+  routeName: "",
+  routeUpdateInterval: "",
+  shiftWeight: "",
+  maxFailures: "",
+  clusterName: "",
+  serviceDiscoveryID: "",
+  originalECSServiceName: "",
+  originalTaskDefinition: "",
+  newECSServiceName: "",
+  newTaskDefinitionName: "",
+  imageURL: "",
+  containerName: "",
+  envoyContainerName: "",
+  awsAccountID: "",
+  region: "",
+  metricNamespace: "",
 };
 
 const deploy = (state = init, action) => {
@@ -31,16 +30,10 @@ const deploy = (state = init, action) => {
       const clusterName = action.payload[3].value;
       return {
         ...state,
-        routing: {
-          ...state.routing,
-          meshName,
-        },
-        containers: {
-          ...state.containers,
-          clusterName,
-          awsAccountID,
-          region,
-        }
+        meshName,
+        clusterName,
+        awsAccountID,
+        region,
       };
     }
     case "GENERAL_OPTIONS_SELECTED": {
@@ -48,20 +41,15 @@ const deploy = (state = init, action) => {
       const newECSServiceName = action.payload[1].value;
       return {
         ...state,
-        containers: {
-          ...state.containers,
-          originalECSServiceName,
-          newECSServiceName,
-        }
+        originalECSServiceName,
+        newECSServiceName,
       }
     }
     case "GET_ADDITIONAL_USER_OPTIONS_SUCCESS": {
       return {
         ...state,
-        containers: {
-          ...state.containers,
-          originalTaskDefinition: action.payload.ecsResponse.originalTaskDefinition
-        }
+        originalTaskDefinition: action.payload.ecsResponse.originalTaskDefinition,
+        metricNamespace: action.payload.cwResponse.metricNamespace,
       }
     }
     case "DEPLOY_INFO_SUBMITTED": {
@@ -79,25 +67,26 @@ const deploy = (state = init, action) => {
       const maxFailures = action.payload[11].value;
       return {
         ...state,
-        containers: {
-          ...state.containers,
-          newTaskDefinitionName,
-          serviceDiscoveryID,
-          envoyContainerName,
-          containerName,
-          imageURL,
-        },
-        routing: {
-          ...state.routing,
-          originalNodeName,
-          newNodeName,
-          routerName,
-          routeName,
-          routeUpdateInterval,
-          shiftWeight,
-          maxFailures,
-        }
+        newTaskDefinitionName,
+        serviceDiscoveryID,
+        envoyContainerName,
+        containerName,
+        imageURL,
+        originalNodeName,
+        newNodeName,
+        routerName,
+        routeName,
+        routeUpdateInterval,
+        shiftWeight,
+        maxFailures,
       }
+    }
+    case "SETUP_INFO_SUBMITTED": {
+      const metricNamespace = action.payload[0].value;
+      return {
+        ...state,
+        metricNamespace,
+      };
     }
     default: {
       return state;

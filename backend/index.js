@@ -89,6 +89,27 @@ app.post('/ecs-details', async (request, response) => {
   }
 });
 
+app.post('/cw-metric-namespace', async (request, response) => {
+  try {
+    const { clusterName } = request.body;
+    const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`);
+    const taskDefinitionWithRevision = service.taskDefinition;
+    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision);
+    const env = taskDefinition.containerDefinitions[0].environment.find(env => {
+      return env.name === 'CW_CONFIG_CONTENT';
+    });
+    const parsedEnv = JSON.parse(env.value);
+    response.status(200).json({
+      metricNamespace: parsedEnv.logs.metrics_collected.prometheus.emf_processor.metric_namespace,
+    });
+  } catch (err) {
+    console.log(err);
+    response.status(404).json(
+      { error: `unable to fetch metric namespace for cw agent on cluster ${request.body.clusterName}`}
+    );
+  }
+});
+
 app.post('/ecs-services', async (request, response) => {
   const clusterName = request.body.clusterName;
   try {

@@ -1,10 +1,12 @@
 import ecs from "../services/ecs";
 import mesh from "../services/mesh";
+import cloudwatch from "../services/cloudwatch";
 
 const init = {
   ecsServices: null,
   ecsDetails: null,
   meshDetails: null,
+  cwDetails: null,
   page: "welcome",
   baseInfoEntered: false,
   setupInfoEntered: false,
@@ -69,6 +71,7 @@ const logic = (state = init, action) => {
         ...state,
         ecsDetails: action.payload.ecsResponse,
         meshDetails: action.payload.meshResponse,
+        cwDetails: action.payload.cwResponse,
       }
     }
     default: {
@@ -88,7 +91,8 @@ export const readSpecificOptions = (clusterName, originalECSServiceName, meshNam
   return async dispatch => {
     const ecsResponse = await ecs.getECSDetails(clusterName, originalECSServiceName);
     const meshResponse = await mesh.getMeshDetails(meshName);
-    dispatch({ type: "GET_ADDITIONAL_USER_OPTIONS_SUCCESS", payload: { ecsResponse, meshResponse } });
+    const cwResponse = await cloudwatch.getCWMetricNamespace(clusterName);
+    dispatch({ type: "GET_ADDITIONAL_USER_OPTIONS_SUCCESS", payload: { ecsResponse, meshResponse, cwResponse } });
   };
 };
 

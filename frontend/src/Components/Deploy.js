@@ -47,7 +47,13 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
     >
       <dl>
         <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} />
-        <InputLabel message={"Enter the service discovery entry ID the new task should fall under"} />
+        <SelectorLabel
+          message={"Choose the service discovery id the new task should use"}
+          array={ecsDetails.serviceRegistryIds}
+          condition={true}
+          alternative={""}
+          changeHandler={() => undefined}
+        />
         <SelectorLabel
           message={"Pick the name of the envoy container:"}
           array={ecsDetails.containerNames}
@@ -102,9 +108,9 @@ const DeployInfo = ({ ecsServices }) => {
   } = useSelector(state => state.logic);
   const {
     clusterName,
-    originalECSServiceName
-  } = useSelector(state => state.deploy.containers);
-  const { meshName } = useSelector(state => state.deploy.routing);
+    originalECSServiceName,
+    meshName,
+  } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -130,9 +136,8 @@ const DeployInfo = ({ ecsServices }) => {
 // S'pose we'll dispatch a thunky action creator in this function
 // it'll send a message to the backend to do its thing and track the progress
 const DeployDispatchAndTrackProgress = () => {
-  const state = useSelector(state => state);
-  console.log(state);
-  axios.post('http://localhost:5000/deploy', {...state.deploy.containers, ...state.deploy.routing });
+  const { deploy } = useSelector(state => state);
+  axios.post('http://localhost:5000/deploy', deploy);
   return (
     <div>
       <p>Deploying!</p>
@@ -142,8 +147,7 @@ const DeployDispatchAndTrackProgress = () => {
 
 const Deploy = () => {
   const { deployInfoEntered, ecsServices } = useSelector(state => state.logic);
-  const { clusterName } = useSelector(state => state.deploy.containers);
-  console.log(clusterName);
+  const { clusterName } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
   useEffect(() => dispatch(readGeneralOptions(clusterName)), [dispatch, clusterName]);
 
