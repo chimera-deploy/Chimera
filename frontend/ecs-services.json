@@ -1,0 +1,10 @@
+{
+  "ecs-services": {
+    "ECSServiceNames": [
+      "movieselector-1",
+      "movieui-1",
+      "chimera-cw",
+      "movieapp-gateway"
+    ]
+  }
+}
