@@ -89,7 +89,7 @@ app.post('/ecs-details', async (request, response) => {
   }
 });
 
-app.post('/cwMetricNamespace', async (request, response) => {
+app.post('/cw-metric-namespace', async (request, response) => {
   try {
     const { clusterName } = request.body;
     const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`);
