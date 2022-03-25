@@ -48,7 +48,8 @@ const deploy = (state = init, action) => {
     case "GET_ADDITIONAL_USER_OPTIONS_SUCCESS": {
       return {
         ...state,
-        originalTaskDefinition: action.payload.ecsResponse.originalTaskDefinition
+        originalTaskDefinition: action.payload.ecsResponse.originalTaskDefinition,
+        metricNamespace: action.payload.cwResponse.metricNamespace,
       }
     }
     case "DEPLOY_INFO_SUBMITTED": {
