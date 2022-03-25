@@ -46,7 +46,7 @@ const Welcome = () => {
 
   return (
     <div>
-      <h2>Welcome to Chimera!</h2>
+      <h1>Welcome to Chimera!</h1>
       {
         !baseInfoEntered
           ? <BaseInfoForm />

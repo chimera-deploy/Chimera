@@ -1,9 +1,11 @@
 const InputLabel = ({ message }) => {
   return (
-    <label>
-      {message}
-      <input type="text" />
-    </label>
+    <>
+      <dt>{message}</dt>
+      <dd>
+        <input type="text" />
+      </dd>
+    </>
   )
 };
 

@@ -45,48 +45,50 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
         }
       }
     >
-      <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} />
-      <InputLabel message={"Enter the service discovery entry ID the new task should fall under"} />
-      <SelectorLabel
-        message={"Pick the name of the envoy container:"}
-        array={ecsDetails.containerNames}
-        condition={true}
-        alternative={""}
-        changeHandler={() => undefined}
-      />
-      <SelectorLabel
-        message={"Pick the name of the app container:"}
-        array={ecsDetails.containerNames}
-        condition={true}
-        alternative={""}
-        changeHandler={() => undefined}
-      />
-      <InputLabel message={"Enter the URL of the new image for the app container"} />
-      <SelectorLabel
-        message={"Pick the corresponding virtual node to replace:"}
-        array={meshDetails.nodes}
-        condition={true}
-        alternative={""}
-        changeHandler={() => undefined}
-      />
-      <InputLabel message={"Enter a name for your new virtual node"} />
-      <SelectorLabel
-        message={"Pick a virtual router:"}
-        array={meshDetails.routers}
-        condition={true}
-        alternative={""}
-        changeHandler={e => setRouter(e.target.value)}
-      />
-      <SelectorLabel
-        message={"Pick a virtual route:"}
-        array={meshDetails.routes[router]}
-        condition={router}
-        alternative={"Select a router first"}
-        changeHandler={() => undefined}
-      />
-      <InputLabel message={"Enter the minutes of each canary interval"} />
-      <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} />
-      <InputLabel message={"How many 500 responses from the canary is tolerable?"} />
+      <dl>
+        <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} />
+        <InputLabel message={"Enter the service discovery entry ID the new task should fall under"} />
+        <SelectorLabel
+          message={"Pick the name of the envoy container:"}
+          array={ecsDetails.containerNames}
+          condition={true}
+          alternative={""}
+          changeHandler={() => undefined}
+        />
+        <SelectorLabel
+          message={"Pick the name of the app container:"}
+          array={ecsDetails.containerNames}
+          condition={true}
+          alternative={""}
+          changeHandler={() => undefined}
+        />
+        <InputLabel message={"Enter the URL of the new image for the app container"} />
+        <SelectorLabel
+          message={"Pick the corresponding virtual node to replace:"}
+          array={meshDetails.nodes}
+          condition={true}
+          alternative={""}
+          changeHandler={() => undefined}
+        />
+        <InputLabel message={"Enter a name for your new virtual node"} />
+        <SelectorLabel
+          message={"Pick a virtual router:"}
+          array={meshDetails.routers}
+          condition={true}
+          alternative={""}
+          changeHandler={e => setRouter(e.target.value)}
+        />
+        <SelectorLabel
+          message={"Pick a virtual route:"}
+          array={meshDetails.routes[router]}
+          condition={router}
+          alternative={"Select a router first"}
+          changeHandler={() => undefined}
+        />
+        <InputLabel message={"Enter the minutes of each canary interval"} />
+        <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} />
+        <InputLabel message={"How many 500 responses from the canary is tolerable?"} />
+      </dl>
       <input type="submit" value="Submit" />
     </form>
   );

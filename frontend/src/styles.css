@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Koulen&display=swap');
+
+html {
+  background-color: #66ac9a;
+  color: #0C0E21;
+  font: 18px "Value Sans Pro", sans-serif;
+}
+
+body {
+  margin: 5%;
+}
+
+h1 {
+  font: 2.5rem "Koulen", sans-serif;
+  margin: 10px;
+}
+
+dd, dt {
+  display: inline-block;
+  width: 40%;
+}
