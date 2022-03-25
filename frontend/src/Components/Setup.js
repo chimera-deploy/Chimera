@@ -36,7 +36,9 @@ const SetupInfoForm = () => {
   );
 };
 
-const SetupStatus = () => {
+// S'pose we'll dispatch a thunky action creator in this function
+// it'll send a message to the backend to do its thing and track the progress
+const SetupDispatchAndTrackProgress = () => {
   return (
     <div>
       <p>Sorry, cloudwatch is out to lunch!</p>
@@ -57,7 +59,7 @@ const Setup = () => {
       {
         !setupInfoEntered
           ? <SetupInfoForm />
-          : <SetupStatus />
+          : <SetupDispatchAndTrackProgress />
       }
     </div>
   );
