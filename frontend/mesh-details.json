@@ -1,0 +1,20 @@
+{
+  "mesh-details": {
+    "nodes": [
+      "movieselector-1",
+      "movieui-1"
+    ],
+    "routers": [
+      "movieselector-vr",
+      "movieui-vr"
+    ],
+    "routes": {
+      "movieselector-vr": [
+        "movieselector-route"
+      ],
+      "movieui-vr": [
+        "movieui-route"
+      ]
+    }
+  }
+}

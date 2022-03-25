@@ -1,0 +1,9 @@
+{
+  "ecs-details": {
+    "originalTaskDefinition": "chimera-movieselector-1",
+    "containerNames": [
+      "app",
+      "envoy"
+    ]
+  }
+}
