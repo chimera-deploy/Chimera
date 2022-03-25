@@ -13,11 +13,11 @@ const init = {
     clusterName: "",
     serviceDiscoveryID: "",
     originalECSServiceName: "",
-    originalTaskDefinitionFamilyWithRevision: "",
+    originalTaskDefinition: "",
     newECSServiceName: "",
-    newTaskDefinitionFamily: "",
-    newAppImageURL: "",
-    appContainerName: "",
+    newTaskDefinitionName: "",
+    imageURL: "",
+    containerName: "",
     envoyContainerName: "",
   }
 };
@@ -56,16 +56,16 @@ const deploy = (state = init, action) => {
         ...state,
         containers: {
           ...state.containers,
-          originalTaskDefinitionFamilyWithRevision: action.payload.ecsResponse.originalTaskDefinition
+          originalTaskDefinition: action.payload.ecsResponse.originalTaskDefinition
         }
       }
     }
     case "DEPLOY_INFO_SUBMITTED": {
-      const newTaskDefinitionFamily = action.payload[0].value;
+      const newTaskDefinitionName = action.payload[0].value;
       const serviceDiscoveryID = action.payload[1].value;
       const envoyContainerName = action.payload[2].value;
-      const appContainerName = action.payload[3].value;
-      const newAppImageURL = action.payload[4].value;
+      const containerName = action.payload[3].value;
+      const imageURL = action.payload[4].value;
       const originalNodeName = action.payload[5].value;
       const newNodeName = action.payload[6].value;
       const routerName = action.payload[7].value;
@@ -77,11 +77,11 @@ const deploy = (state = init, action) => {
         ...state,
         containers: {
           ...state.containers,
-          newTaskDefinitionFamily,
+          newTaskDefinitionName,
           serviceDiscoveryID,
           envoyContainerName,
-          appContainerName,
-          newAppImageURL,
+          containerName,
+          imageURL,
         },
         routing: {
           ...state.routing,

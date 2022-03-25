@@ -4,13 +4,11 @@ const ECSService = require("./autoCanarySDK/services/ECSService");
 const TaskDefinition = require("./autoCanarySDK/services/TaskDefinition");
 const { getIDFromArn } = require("./utils");
 const express = require("express");
+const cors = require("cors");
 const app = express();
 app.use(express.json());
+app.use(cors());
 const PORT = 5000;
-
-app.get('/', (request, response) => {
-  response.json({hello: "world"});
-});
 
 app.post('/deploy', (request, response) => {
   //validate request
@@ -31,7 +29,7 @@ app.post('/setup', async (request, response) => {
   }
 });
 
-app.get('/mesh-details', async (request, response) => {
+app.post('/mesh-details', async (request, response) => {
   try {
     const meshName = request.body.meshName;
     let nodes, routers, routes;
@@ -69,8 +67,8 @@ app.get('/mesh-details', async (request, response) => {
     response.status(500).json({ error });
   }
 });
-
-app.get('/ecs-details', async (request, response) => {
+        
+app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
   try {
     const service = await ECSService.describe(clusterName, originalECSServiceName);
@@ -91,7 +89,7 @@ app.get('/ecs-details', async (request, response) => {
   }
 });
 
-app.get('/ecs-services', async (request, response) => {
+app.post('/ecs-services', async (request, response) => {
   const clusterName = request.body.clusterName;
   try {
     const services = await ECSService.listServices(clusterName);
