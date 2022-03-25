@@ -93,8 +93,6 @@ const listServices = async (clusterName) => {
   return response.serviceArns.map(getIDFromArn);
 };
 
-listServices('chimera');
-
 module.exports = {
   create,
   createCW,
