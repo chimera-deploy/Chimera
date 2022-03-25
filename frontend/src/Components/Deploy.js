@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
@@ -129,9 +130,10 @@ const DeployInfo = ({ ecsServices }) => {
 const DeployDispatchAndTrackProgress = () => {
   const state = useSelector(state => state);
   console.log(state);
+  axios.post('http://localhost:5000/deploy', {...state.deploy.containers, ...state.deploy.routing });
   return (
     <div>
-      <p>Sorry, chimere is out to lunch!</p>
+      <p>Deploying!</p>
     </div>
   );
 };
@@ -139,6 +141,7 @@ const DeployDispatchAndTrackProgress = () => {
 const Deploy = () => {
   const { deployInfoEntered, ecsServices } = useSelector(state => state.logic);
   const { clusterName } = useSelector(state => state.deploy.containers);
+  console.log(clusterName);
   const dispatch = useDispatch();
   useEffect(() => dispatch(readGeneralOptions(clusterName)), [dispatch, clusterName]);
 
