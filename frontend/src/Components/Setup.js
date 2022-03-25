@@ -1,4 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
+import InputLabel from "./InputLabel";
 
 const SetupInfoForm = () => {
   const dispatch = useDispatch();
@@ -15,16 +16,10 @@ const SetupInfoForm = () => {
           }
         }
       >
+        <InputLabel message={"Enter some text for the metric namespace associated with the CloudWatch agent"} />
+        <InputLabel message={"Enter the ID of VPC"} />
         <label>
-          What would you like the metric namespace associated with the CloudWatch agent to be?:
-          <input type="text" name="metricNamespace" />
-        </label>
-        <label>
-          What is the ID of your system's VPC?:
-          <input type="text" name="vpcID" />
-        </label>
-        <label>
-          Please enter at least one subnet within which the CloudWatch agent may be deployed:
+          Enter at least one subnet within which the CloudWatch agent may be deployed:
           <input type="text" name="subnet1" />
           <input type="text" name="subnet2" />
           <input type="text" name="subnet3" />

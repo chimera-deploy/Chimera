@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
+import InputLabel from "./InputLabel";
+import SelectorLabel from "./SelectorLabel";
 
 const SelectGeneralOptions = ({ ecsServices }) => {
   const dispatch = useDispatch();
@@ -15,21 +17,14 @@ const SelectGeneralOptions = ({ ecsServices }) => {
         }
       }
     >
-      <label>
-        Pick the ECS Service you would like to update:
-        <select>
-          {
-            ecsServices.ECSServiceNames
-              .map(ecsService =>
-                <option key={ecsService} value={ecsService}>{ecsService}</option>
-              )
-          }
-        </select>
-      </label>
-      <label>
-        Enter a new name for the updated ECS Service:
-        <input type="text" name="newECSServiceName" />
-      </label>
+      <SelectorLabel
+        message={"Pick the ECS Service to update:"}
+        array={ecsServices.ECSServiceNames}
+        condition={true}
+        alternative={""}
+        changeHandler={() => undefined}
+      />
+      <InputLabel message={"Enter a new name for the updated ECS Service"} />
       <input type="submit" value="Submit" />
     </form>
   );
@@ -49,91 +44,48 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
         }
       }
     >
-      <label>
-        Enter a new task definition family name (the current one is {ecsDetails.originalTaskDefinition}):
-        <input type="text" name="newTaskDefinitionFamily" />
-      </label>
-      <label>
-        Enter the service discovery entry ID your new task should fall under:
-        <input type="text" name="serviceDiscoveryID" />
-      </label>
-      <label>
-        Pick the name of the envoy container:
-        <select>
-          {
-            ecsDetails.containerNames
-              .map(containerName =>
-                <option key={containerName} value={containerName}>{containerName}</option>
-              )
-          }
-        </select>
-      </label>
-      <label>
-        Pick the name of the app container:
-        <select>
-          {
-            ecsDetails.containerNames
-              .map(containerName =>
-                <option key={containerName} value={containerName}>{containerName}</option>
-              )
-          }
-        </select>
-      </label>
-      <label>
-        Enter the URL of the new image for the app container:
-        <input type="text" name="newAppImageURL" />
-      </label>
-      <label>
-        Pick the corresponding virtual node to replace:
-        <select>
-          {
-            meshDetails.nodes
-              .map(node =>
-                <option key={node} value={node}>{node}</option>
-              )
-          }
-        </select>
-      </label>
-      <label>
-        Enter a new name for your new virtual node:
-        <input type="text" name="newNodeName" />
-      </label>
-      <label>
-        Pick a virtual router:
-        <select onChange={e => setRouter(e.target.value)}>
-          {
-            meshDetails.routers
-              .map(router =>
-                <option key={router} value={router}>{router}</option>
-              )
-          }
-        </select>
-      </label>
-      <label>
-        Pick a virtual route:
-        <select>
-          {
-            router
-              ? meshDetails.routes[router]
-                .map(route =>
-                  <option key={route} value={route}>{route}</option>
-                )
-              : <option>Select a router first</option>
-          }
-        </select>
-      </label>
-      <label>
-        Enter the number of minutes for each canary interval
-        <input type="text" />
-      </label>
-      <label>
-        Enter the percentage of traffic to shift toward the canary for each interval
-        <input type="text" />
-      </label>
-      <label>
-        How many 500 responses from the canary is tolerable?
-        <input type="text" />
-      </label>
+      <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} />
+      <InputLabel message={"Enter the service discovery entry ID the new task should fall under"} />
+      <SelectorLabel
+        message={"Pick the name of the envoy container:"}
+        array={ecsDetails.containerNames}
+        condition={true}
+        alternative={""}
+        changeHandler={() => undefined}
+      />
+      <SelectorLabel
+        message={"Pick the name of the app container:"}
+        array={ecsDetails.containerNames}
+        condition={true}
+        alternative={""}
+        changeHandler={() => undefined}
+      />
+      <InputLabel message={"Enter the URL of the new image for the app container"} />
+      <SelectorLabel
+        message={"Pick the corresponding virtual node to replace:"}
+        array={meshDetails.nodes}
+        condition={true}
+        alternative={""}
+        changeHandler={() => undefined}
+      />
+      <InputLabel message={"Enter a name for your new virtual node"} />
+      <SelectorLabel
+        message={"Pick a virtual router:"}
+        array={meshDetails.routers}
+        condition={true}
+        alternative={""}
+        changeHandler={e => setRouter(e.target.value)}
+      />
+      <SelectorLabel
+        message={"Pick a virtual route:"}
+        array={meshDetails.routes[router]}
+        condition={router}
+        alternative={"Select a router first"}
+        changeHandler={() => undefined}
+      />
+      <InputLabel message={"Enter the minutes of each canary interval"} />
+      <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} />
+      <InputLabel message={"How many 500 responses from the canary is tolerable?"} />
       <input type="submit" value="Submit" />
     </form>
   );
@@ -193,6 +145,9 @@ const Deploy = () => {
   return (
     <div>
       <h2>Here you will deploy a canary! Good luck little guy!</h2>
+      <button onClick={() => dispatch({ type: "TO_WELCOME" })}>
+        Take me back!
+      </button>
       {
         !deployInfoEntered
           ? ecsServices

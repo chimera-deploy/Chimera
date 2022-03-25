@@ -1,4 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
+import InputLabel from "./InputLabel";
 
 const BaseInfoForm = () => {
   const dispatch = useDispatch();
@@ -15,22 +16,10 @@ const BaseInfoForm = () => {
           }
         }
       >
-        <label>
-          AWS Account ID:
-          <input type="text" name="awsAccountID" />
-        </label>
-        <label>
-          AWS Region:
-          <input type="text" name="region" />
-        </label>
-        <label>
-          App Mesh Name:
-          <input type="text" name="meshName" />
-        </label>
-        <label>
-          ECS Cluster Name:
-          <input type="text" name="clusterName" />
-        </label>
+        <InputLabel message={"AWS Account ID:"} />
+        <InputLabel message={"AWS Region:"} />
+        <InputLabel message={"App Mesh Name:"} />
+        <InputLabel message={"ECS Cluster Name:"} />
         <input type="submit" value="Submit" />
       </form>
     </>
