@@ -1,4 +1,5 @@
-const { ECSClient, DeleteServiceCommand, CreateServiceCommand, UpdateServiceCommand, DescribeServicesCommand } = require("@aws-sdk/client-ecs")
+const { ECSClient, DeleteServiceCommand, CreateServiceCommand, UpdateServiceCommand, DescribeServicesCommand, ListServicesCommand } = require("@aws-sdk/client-ecs");
+const { getIDFromArn } = require("../../utils");
 
 const describe = async (clusterName, originalECSServiceName) => {
   const client = new ECSClient();
@@ -82,10 +83,23 @@ const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
   return response.service;
 };
 
+const listServices = async (clusterName) => {
+  const client = new ECSClient();
+  const input = {
+    cluster: clusterName,
+  };
+  const command = new ListServicesCommand(input);
+  const response = await client.send(command);
+  return response.serviceArns.map(getIDFromArn);
+};
+
+listServices('chimera');
+
 module.exports = {
   create,
   createCW,
   update,
   destroy,
   describe,
+  listServices,
 };
