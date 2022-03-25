@@ -16,15 +16,15 @@ const AppMesh = {
   },
 
   async routesByRouter(meshName) {
-    const routers = await this.routerNames(meshName);
+    const routerNames = await this.routerNames(meshName);
     let promises = [];
     let routes = {};
 
-    for (let i = 0; i < routers.length; i++) {
+    for (let i = 0; i < routerNames.length; i++) {
       const p = new Promise(async (resolve, reject) => {
         try {
-          const routeNames = await this.routeNames(meshName, routers[i]);
-          routes[routers[i]] = routeNames;
+          const routeNames = await this.routeNames(meshName, routerNames[i]);
+          routes[routerNames[i]] = routeNames;
           resolve();
         } catch (e) {
           reject(e);
@@ -64,5 +64,7 @@ const AppMesh = {
     return routers.map(router => router.virtualRouterName)
   }
 }
+
+AppMesh.routesByRouter("MyMesh").then(r => console.log(r))
 
 module.exports = AppMesh;
