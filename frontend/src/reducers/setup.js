@@ -21,6 +21,22 @@ const setup = (state = init, action) => {
         clusterName
       };
     }
+    case "SETUP_INFO_SUBMITTED": {
+      const metricNamespace = action.payload[0].value;
+      const vpcID = action.payload[1].value;
+      return {
+        ...state,
+        metricNamespace,
+        vpcID,
+        cwECSPrimarySubnets: [
+          ...Array
+            .from(action.payload)
+            .slice(2)
+            .filter(input => input.value.includes("subnet"))
+            .map(input => input.value)
+        ]
+      }
+    }
     default: {
       return state;
     }

@@ -12,7 +12,9 @@ const init = {
     containerNames: []
   },
   page: "welcome",
-  baseInfoEntered: false
+  baseInfoEntered: false,
+  setupInfoEntered: false,
+  deployInfoEntered: false,
 };
 
 const logic = (state = init, action) => {
@@ -21,6 +23,12 @@ const logic = (state = init, action) => {
       return {
         ...state,
         baseInfoEntered: true
+      }
+    }
+    case "SETUP_INFO_SUBMITTED": {
+      return {
+        ...state,
+        setupInfoEntered: true
       }
     }
     case "TO_SETUP": {
@@ -33,6 +41,12 @@ const logic = (state = init, action) => {
       return {
         ...state,
         page: "deploy"
+      }
+    }
+    case "TO_WELCOME": {
+      return {
+        ...state,
+        page: "welcome"
       }
     }
     default: {
