@@ -18,6 +18,17 @@ app.post('/deploy', (request, response) => {
   console.log(config);
   Chimera.deploy(config);
   response.status(200).send();
+});  
+
+app.post('/setup', async (request, response) => {
+  // validate request
+  const config = request.body;
+  try {
+    const result = await Chimera.setup(config);
+    response.status(200).send();
+  } catch(err) {
+    response.status(500).json({error: 'setup failed'});
+  }
 });
 
 app.get('/mesh-details', async (request, response) => {

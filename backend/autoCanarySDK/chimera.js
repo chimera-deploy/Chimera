@@ -32,6 +32,7 @@ const Chimera = {
     } catch (err) {
       console.log('setup failed');
       console.log(err);
+      throw err
     }
   },
 
