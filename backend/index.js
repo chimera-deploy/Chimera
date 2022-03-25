@@ -1,4 +1,5 @@
 const Chimera = require("./autoCanarySDK/chimera");
+const AppMesh = require("./autoCanarySDK/services/AppMesh");
 const ECSService = require("./autoCanarySDK/services/ECSService");
 const TaskDefinition = require("./autoCanarySDK/services/TaskDefinition");
 const { getIDFromArn } = require("./utils");
@@ -19,6 +20,21 @@ app.post('/deploy', (request, response) => {
   response.status(200).send();
 });
 
+app.get('/mesh-details', async (request, response) => {
+  try {
+    const meshName = request.body.meshName;
+
+    const nodes = await AppMesh.nodeNames(meshName);
+    const routers = await AppMesh.routerNames(meshName);
+    const routes = await AppMesh.routesByRouter(meshName);
+
+    response.status(200).json({ nodes, routers, routes });
+  } catch (error) {
+    console.log("Error getting mesh details", error);
+    response.status(500).json({ error });
+  }
+});
+        
 app.get('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
   try {
