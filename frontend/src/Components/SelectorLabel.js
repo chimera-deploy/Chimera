@@ -1,6 +1,6 @@
 const SelectorLabel = ({ message, array, condition, alternative, changeHandler }) => {
   return (
-    <>
+    <div className="input-line">
       <dt>{message}</dt>
       <dd>
         <select onChange={changeHandler}>
@@ -11,7 +11,7 @@ const SelectorLabel = ({ message, array, condition, alternative, changeHandler }
           }
         </select>
       </dd>
-    </>
+    </div>
   );
 };
 
