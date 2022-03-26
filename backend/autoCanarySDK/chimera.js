@@ -32,7 +32,9 @@ const Chimera = {
   async writeToClient(message) {
     console.log(message);
     this.events.push(message);
-    this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+    if (this.client) {
+      this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+    }
   },
 
   async setup(config) {
