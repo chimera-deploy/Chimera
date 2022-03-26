@@ -3,7 +3,8 @@ const SelectorLabel = ({ message, array, condition, alternative, changeHandler }
     <div className="input-line">
       <dt>{message}</dt>
       <dd>
-        <select onChange={changeHandler}>
+        <select required="true" onChange={changeHandler}>
+          <option value="" disabled selected>Select one</option>
           {
             condition
               ? array.map(ele => <option key={ele} value={ele}>{ele}</option>)

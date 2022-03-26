@@ -3,7 +3,7 @@ const InputLabel = ({ message }) => {
     <div className="input-line">
       <dt>{message}</dt>
       <dd>
-        <input type="text" />
+        <input required="true" type="text" />
       </dd>
     </div>
   )
