@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import InputLabel from "./InputLabel";
+import SubmitButton from "./SubmitButton";
 
 const BaseInfoForm = () => {
   const dispatch = useDispatch();
@@ -11,16 +12,19 @@ const BaseInfoForm = () => {
 
   return (
     <>
-      <p>Please enter some information about your current AWS infrastructure.</p>
-      <form onSubmit={handleSubmit} >
-        <dl>
-          <InputLabel message={"AWS Account ID:"} name={"awsAccountID"} />
-          <InputLabel message={"AWS Region:"} name={"region"} />
-          <InputLabel message={"App Mesh Name:"} name={"meshName"} />
-          <InputLabel message={"ECS Cluster Name:"} name={"clusterName"} />
-        </dl>
-        <input type="submit" value="Submit" />
-      </form>
+      <h1>AWS Base Infrastructure Information</h1>
+      <div className="form-box">
+        <p>Please enter some information about your current AWS infrastructure.</p>
+        <form onSubmit={handleSubmit} >
+          <dl>
+            <InputLabel message={"AWS Account ID:"} name={"awsAccountID"} />
+            <InputLabel message={"AWS Region:"} name={"region"} />
+            <InputLabel message={"App Mesh Name:"} name={"meshName"} />
+            <InputLabel message={"ECS Cluster Name:"} name={"clusterName"} />
+            <SubmitButton value={"Submit"} />
+          </dl>
+        </form>
+      </div>
     </>
   );
 };
