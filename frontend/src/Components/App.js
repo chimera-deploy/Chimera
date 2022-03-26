@@ -9,15 +9,19 @@ const App = () => {
   const { page } = useSelector(state => state.logic);
 
   return (
-    <div className="body">
+    <div>
       <Header />
-      {
-        page === "welcome"
-          ? <Welcome />
-          : page === "setup"
-            ? <Setup />
-            : <Deploy />
-      }
+      <div className="main">
+        <div className="forms">
+          {
+            page === "welcome"
+              ? <Welcome />
+              : page === "setup"
+                ? <Setup />
+                : <Deploy />
+          }
+        </div>
+      </div>
       <Footer />
     </div>
   );

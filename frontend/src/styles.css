@@ -21,11 +21,31 @@ h1 {
 .header {
   background-color: white;
   padding: 0 5%;
+  display: flex;
+  justify-content: center;
+}
+
+.header-container {
+  max-width: 1000px;
+  width: 100%;
 }
 
 .header img {
   display: inline-block;
   height: 100px;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+}
+
+.forms {
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  width: 100%;
 }
 
 .input-line {
