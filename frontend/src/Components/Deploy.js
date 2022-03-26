@@ -142,7 +142,7 @@ const DeployDispatchAndTrackProgress = () => {
 
   useEffect(() => {
     axios.post('http://localhost:5000/deploy', deploy);
-  }, []);
+  }, [deploy]);
 
   useEffect(() => {
     if (!listening) {

@@ -111,6 +111,7 @@ const Chimera = {
         CloudWatch.getHealthCheck,
         Number(config.maxFailures)
       );
+      this.writeToClient('canary successfully deployed and stable')
       newVersionDeployed = true;
     } catch (err) {
       this.writeToClient('deployment failed');
@@ -120,6 +121,8 @@ const Chimera = {
     if (newVersionDeployed) {
       try {
         await this.removeOldVersion();
+        this.writeToClient('old version succesfully removed')
+        this.writeToClient('closing connection')
       } catch (err) {
         throw new Error('Failed to remove original version of service', { cause: err });
       }
@@ -147,7 +150,7 @@ const Chimera = {
     this.writeToClient('created ECS service');
     this.writeToClient('waiting for cloudmap');
     await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName);
-    this.writeToClient('finished deploying canary');
+    this.writeToClient('canary running on ECS');
   },
 
   async updateRoute(newVersionWeight, originalVersionWeight) {
@@ -246,6 +249,7 @@ const Chimera = {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
         this.writeToClient(`deregistering task definition ${taskDefinitionName}`);
         await TaskDefinition.deregister(taskDefinitionName);
+        this.writeToClient(`rollback to ${this.config.originalNodeName} complete`)
       }
     } catch (err) {
       this.writeToClient('Failed to rollback to old version');
