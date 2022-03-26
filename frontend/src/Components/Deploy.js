@@ -142,7 +142,7 @@ const DeployDispatchAndTrackProgress = () => {
 
   useEffect(() => {
     axios.post('http://localhost:5000/deploy', deploy);
-  }, []);
+  }, [deploy]);
 
   useEffect(() => {
     if (!listening) {
@@ -152,6 +152,9 @@ const DeployDispatchAndTrackProgress = () => {
 
         const parsedEvent = JSON.parse(event.data);
         setEvents(parsedEvent);
+        if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
+          eventListener.close();
+        }
       };
 
       setListening(true);
