@@ -1,37 +1,39 @@
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import InputLabel from "./InputLabel";
+import SubmitButton from "./SubmitButton";
 
 const SetupInfoForm = () => {
   const dispatch = useDispatch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "SETUP_INFO_SUBMITTED", payload: e.target })
+    e.target.reset();
+  }
 
   return (
     <>
-      <p>Please enter some additional information.</p>
-      <form
-        onSubmit={
-          e => {
-            e.preventDefault();
-            dispatch({ type: "SETUP_INFO_SUBMITTED", payload: e.target })
-            e.target.reset();
-          }
-        }
-      >
-        <dl>
-          <InputLabel message={"Enter some text for the metric namespace associated with the CloudWatch agent"} name={"metricNamespace"} />
-          <InputLabel message={"Enter the ID of VPC"} name={"vpcID"} />
-          <div className="input-line">
-            <dt>Enter at least one subnet within which the CloudWatch agent may be deployed:</dt>
-            <div className="subnet-inputs">
-              <dd><input type="text" name="subnet1" /></dd>
-              <dd><input type="text" name="subnet2" /></dd>
-              <dd><input type="text" name="subnet3" /></dd>
-              <dd><input type="text" name="subnet4" /></dd>
+      <h1>Setup Prometheus-configured CloudWatch Agent</h1>
+      <div className="form-box">
+        <p>Please enter some additional information.</p>
+        <form onSubmit={handleSubmit} >
+          <dl>
+            <InputLabel message={"Enter some text for the metric namespace associated with the CloudWatch agent"} name={"metricNamespace"} />
+            <InputLabel message={"Enter the ID of VPC"} name={"vpcID"} />
+            <div className="input-line">
+              <dt>Enter at least one subnet within which the CloudWatch agent may be deployed:</dt>
+              <div className="subnet-inputs">
+                <dd><input type="text" name="subnet1" /></dd>
+                <dd><input type="text" name="subnet2" /></dd>
+                <dd><input type="text" name="subnet3" /></dd>
+                <dd><input type="text" name="subnet4" /></dd>
+              </div>
             </div>
-          </div>
-        </dl>
-        <input type="submit" value="Submit" />
-      </form>
+            <SubmitButton value={"Submit"} />
+          </dl>
+
+        </form>
+      </div>
     </>
   );
 };
