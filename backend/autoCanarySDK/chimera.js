@@ -117,6 +117,8 @@ const Chimera = {
       this.writeToClient('deployment failed');
       console.log(err);
       await this.rollbackToOldVersion();
+      this.writeToClient('rollback succesfull')
+      this.writeToClient('closing connection')
     }
     if (newVersionDeployed) {
       try {
@@ -124,6 +126,7 @@ const Chimera = {
         this.writeToClient('old version succesfully removed')
         this.writeToClient('closing connection')
       } catch (err) {
+        this.writeToClient('closing connection');
         throw new Error('Failed to remove original version of service', { cause: err });
       }
     }
