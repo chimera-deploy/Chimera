@@ -1,8 +1,9 @@
 const { ECSClient, DeleteServiceCommand, CreateServiceCommand, UpdateServiceCommand, DescribeServicesCommand, ListServicesCommand } = require("@aws-sdk/client-ecs");
 const { getIDFromArn } = require("../../utils");
+const region = { region: 'us-west-2' }
 
 const describe = async (clusterName, originalECSServiceName) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
 
   const describeServicesInput = {
     cluster: clusterName,
@@ -25,7 +26,7 @@ const describe = async (clusterName, originalECSServiceName) => {
 };
 
 const destroy = async (clusterName, ecsServiceName) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const input = {
     cluster: clusterName,
     service: ecsServiceName,
@@ -37,7 +38,7 @@ const destroy = async (clusterName, ecsServiceName) => {
 };
 
 const update = async (clusterName, ecsServiceName, desiredCount) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const updateServiceCommandInput = { cluster: clusterName, service: ecsServiceName, desiredCount };
 
   const command = new UpdateServiceCommand(updateServiceCommandInput);
@@ -46,7 +47,7 @@ const update = async (clusterName, ecsServiceName, desiredCount) => {
 };
 
 const create = async (clusterName, originalECSServiceName, newECSServiceName, taskName) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const serviceInfo = await describe(clusterName, originalECSServiceName);
 
   serviceInfo.cluster = clusterName;
@@ -59,7 +60,7 @@ const create = async (clusterName, originalECSServiceName, newECSServiceName, ta
 };
 
 const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const input = {
     cluster,
     deploymentConfiguration: {
@@ -84,7 +85,7 @@ const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
 };
 
 const listServices = async (clusterName) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const input = {
     cluster: clusterName,
   };

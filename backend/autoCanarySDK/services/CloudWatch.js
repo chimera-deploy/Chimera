@@ -1,7 +1,8 @@
 const { CloudWatchClient, GetMetricDataCommand } = require("@aws-sdk/client-cloudwatch"); // CommonJS import
+const region = {region: 'us-west-2'}
 
 const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName) => {
-  const client = new CloudWatchClient();
+  const client = new CloudWatchClient(region);
   const MetricDataQueries = [
     {
       Id: "id1",

@@ -1,4 +1,5 @@
 const { AppMeshClient, UpdateRouteCommand, DescribeRouteCommand } = require("@aws-sdk/client-app-mesh");
+const region = {region: 'us-west-2'}
 
 const describe = async (meshName, virtualRouterName, routeName) => {
   const input = {
@@ -7,14 +8,14 @@ const describe = async (meshName, virtualRouterName, routeName) => {
     routeName,
   };
 
-  const client = new AppMeshClient();
+  const client = new AppMeshClient(region);
   const command = new DescribeRouteCommand(input);
   response = await client.send(command);
   return response.route;
 };
 
 const update = async (meshName, routeName, routerName, weightedTargets) => {
-  const client = new AppMeshClient();
+  const client = new AppMeshClient(region);
 
   const route = await describe(meshName, routerName, routeName);
   route.spec.httpRoute.action.weightedTargets = weightedTargets;

@@ -6,8 +6,10 @@ const {
   DeregisterTaskDefinitionCommand
 } = require("@aws-sdk/client-ecs");
 
+const region = {region: 'us-west-2'}
+
 const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const taskDefinition = await describe(originalTaskName);
   taskDefinition.family = taskName;
 
@@ -43,7 +45,7 @@ const register = async (appImageURL, appContainerName, virtualNodeName, envoyCon
 };
 
 const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   let input = {
     containerDefinitions: [
       {
@@ -126,7 +128,7 @@ const describe = async (taskDefinition) => {
   const input = {
     taskDefinition,
   };
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const command = new DescribeTaskDefinitionCommand(input);
   const response = await client.send(command);
   return response.taskDefinition;
@@ -137,14 +139,14 @@ const listTasks = async (clusterName, taskFamily) => {
     cluster: clusterName,
     family: taskFamily,
   };
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const command = new ListTasksCommand(input);
   const response = await client.send(command);
   return response.taskArns;
 };
 
 const deregister = async (taskDefinitionName) => {
-  const client = new ECSClient();
+  const client = new ECSClient(region);
   const deregisterTaskDefinitionCommandInput = {
     taskDefinition: taskDefinitionName,
   };

@@ -1,7 +1,8 @@
 const { IAMClient, AttachRolePolicyCommand, CreateRoleCommand, GetRoleCommand, PutRolePolicyCommand } = require("@aws-sdk/client-iam"); // CommonJS import
+const region = {region: 'us-west-2'}
 
 const createRole = async (AssumeRolePolicyDocument, RoleName) => {
-  const client = new IAMClient();
+  const client = new IAMClient(region);
   const input = {
     AssumeRolePolicyDocument,
     RoleName,
@@ -12,7 +13,7 @@ const createRole = async (AssumeRolePolicyDocument, RoleName) => {
 };
 
 const attachRolePolicy = async (managedPolicyArns, RoleName) => {
-  const client = new IAMClient();
+  const client = new IAMClient(region);
   managedPolicyArns.forEach(async arn => {
     const input = {
       PolicyArn: arn,
@@ -24,7 +25,7 @@ const attachRolePolicy = async (managedPolicyArns, RoleName) => {
 };
 
 const putRolePolicy = async (policies, RoleName) => {
-  const client = new IAMClient();
+  const client = new IAMClient(region);
   policies.forEach(async ({ PolicyName, PolicyDocument }) => {
     const input = {
       PolicyName,
@@ -37,7 +38,7 @@ const putRolePolicy = async (policies, RoleName) => {
 };
 
 const getRole = async (RoleName) => {
-  const client = new IAMClient();
+  const client = new IAMClient(region);
   const input = { RoleName };
   const command = new GetRoleCommand(input);
   return await client.send(command);

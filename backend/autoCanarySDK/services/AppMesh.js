@@ -1,5 +1,6 @@
 const { AppMeshClient, ListVirtualNodesCommand, ListVirtualRoutersCommand, ListRoutesCommand } = require("@aws-sdk/client-app-mesh");
 const { builtinModules } = require("module");
+const region = {region: 'us-west-2'}
 
 const AppMesh = {
   async nodeNames(meshName) {
@@ -8,7 +9,7 @@ const AppMesh = {
     };
 
     const command = new ListVirtualNodesCommand(input);
-    const client = new AppMeshClient();
+    const client = new AppMeshClient(region);
 
     const response = await client.send(command);
     const nodes = response.virtualNodes;
@@ -44,7 +45,7 @@ const AppMesh = {
     };
 
     const command = new ListRoutesCommand(input);
-    const client = new AppMeshClient();
+    const client = new AppMeshClient(region);
 
     const response = await client.send(command);
     const routes = response.routes
@@ -57,7 +58,7 @@ const AppMesh = {
     }
 
     const command = new ListVirtualRoutersCommand(input);
-    const client = new AppMeshClient();
+    const client = new AppMeshClient(region);
 
     const response = await client.send(command);
     const routers =  response.virtualRouters;

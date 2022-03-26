@@ -1,10 +1,11 @@
 const { ServiceDiscoveryClient, GetInstancesHealthStatusCommand } = require("@aws-sdk/client-servicediscovery");
 const TaskDefinition = require('./TaskDefinition');
+const region = {region: 'us-west-2'}
 
 const cloudMapCheckInterval = 5 * 1000;
 
 const getCloudMapHealth = async (serviceDiscoveryID) => {
-  const client = new ServiceDiscoveryClient();
+  const client = new ServiceDiscoveryClient(region);
 
   const healthStatusInput = {
     ServiceId: serviceDiscoveryID,
