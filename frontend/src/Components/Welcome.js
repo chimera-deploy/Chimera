@@ -3,19 +3,16 @@ import InputLabel from "./InputLabel";
 
 const BaseInfoForm = () => {
   const dispatch = useDispatch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "BASE_INFO_SUBMITTED", payload: e.target })
+    e.target.reset();
+  }
 
   return (
     <>
       <p>Please enter some information about your current AWS infrastructure.</p>
-      <form
-        onSubmit={
-          e => {
-            e.preventDefault();
-            dispatch({ type: "BASE_INFO_SUBMITTED", payload: e.target })
-            e.target.reset();
-          }
-        }
-      >
+      <form onSubmit={handleSubmit} >
         <dl>
           <InputLabel message={"AWS Account ID:"} name={"awsAccountID"} />
           <InputLabel message={"AWS Region:"} name={"region"} />
