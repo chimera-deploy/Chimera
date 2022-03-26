@@ -5,10 +5,12 @@ const TaskDefinition = require("./autoCanarySDK/services/TaskDefinition");
 const { getIDFromArn } = require("./utils");
 const express = require("express");
 const cors = require("cors");
+require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 const PORT = 5000;
+
 
 app.get('/events', (request, response) => {
   const headers = {
@@ -86,9 +88,22 @@ app.post('/mesh-details', async (request, response) => {
     response.status(500).json({ error });
   }
 });
+
+app.get('/test', async (request, response) => {
+
+  console.log('Access Key ID:', process.env.AWS_ACCESS_KEY_ID)
+  console.log('Secret Access Key:', process.env.AWS_SECRET_ACCESS_KEY)
+  console.log('Region:', process.env.REGION)
+  response.status(200).send()
+})
         
 app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
+
+  console.log('Access Key ID:', process.env.AWS_ACCESS_KEY_ID)
+  console.log('Secret Access Key:', process.env.AWS_SECRET_ACCESS_KEY)
+  console.log('Region:', process.env.REGION)
+
   try {
     const service = await ECSService.describe(clusterName, originalECSServiceName);
     const serviceRegistryIds = service.serviceRegistries.map(registry => getIDFromArn(registry.registryArn));
