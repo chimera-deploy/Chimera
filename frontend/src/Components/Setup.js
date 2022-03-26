@@ -18,8 +18,8 @@ const SetupInfoForm = () => {
         }
       >
         <dl>
-          <InputLabel message={"Enter some text for the metric namespace associated with the CloudWatch agent"} />
-          <InputLabel message={"Enter the ID of VPC"} />
+          <InputLabel message={"Enter some text for the metric namespace associated with the CloudWatch agent"} name={"metricNamespace"} />
+          <InputLabel message={"Enter the ID of VPC"} name={"vpcID"} />
           <div className="input-line">
             <dt>Enter at least one subnet within which the CloudWatch agent may be deployed:</dt>
             <div className="subnet-inputs">
