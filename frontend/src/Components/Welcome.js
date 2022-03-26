@@ -17,10 +17,26 @@ const BaseInfoForm = () => {
         }
       >
         <dl>
-          <InputLabel message={"AWS Account ID:"} name={"awsAccountID"} />
-          <InputLabel message={"AWS Region:"} name={"region"} />
-          <InputLabel message={"App Mesh Name:"} name={"meshName"} />
-          <InputLabel message={"ECS Cluster Name:"} name={"clusterName"} />
+          <InputLabel
+            message={"AWS Account ID:"}
+            name={"awsAccountID"}
+            required={true}
+          />
+          <InputLabel
+            message={"AWS Region:"}
+            name={"region"}
+            required={true}
+          />
+          <InputLabel
+            message={"App Mesh Name:"}
+            name={"meshName"}
+            required={true}
+          />
+          <InputLabel
+            message={"ECS Cluster Name:"}
+            name={"clusterName"}
+            required={true}
+          />
         </dl>
         <input type="submit" value="Submit" />
       </form>
