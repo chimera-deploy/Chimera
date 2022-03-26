@@ -146,7 +146,8 @@ const Chimera = {
       this.taskName,
       this.config.meshName,
       this.config.region,
-      this.config.awsAccountID
+      this.config.awsAccountID,
+      this.config.awslogsStreamPrefix
     );
     this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName)
