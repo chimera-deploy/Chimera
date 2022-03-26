@@ -4,99 +4,106 @@ import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
 import InputLabel from "./InputLabel";
 import SelectorLabel from "./SelectorLabel";
+import SubmitButton from "./SubmitButton";
 
 const SelectGeneralOptions = ({ ecsServices }) => {
   const dispatch = useDispatch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "GENERAL_OPTIONS_SELECTED", payload: e.target })
+    e.target.reset();
+  }
 
   return (
-    <form
-      onSubmit={
-        e => {
-          e.preventDefault();
-          dispatch({ type: "GENERAL_OPTIONS_SELECTED", payload: e.target })
-          e.target.reset();
-        }
-      }
-    >
-      <SelectorLabel
-        message={"Pick the ECS Service to update:"}
-        array={ecsServices.ECSServiceNames}
-        condition={true}
-        alternative={""}
-        changeHandler={() => undefined}
-      />
-      <InputLabel message={"Enter a new name for the updated ECS Service"} name={"newECSServiceName"}/>
-      <input type="submit" value="Submit" />
-    </form>
+    <>
+      <h1>Basic ECS Information</h1>
+      <div className="form-box">
+        <form onSubmit={handleSubmit}>
+          <dl>
+            <SelectorLabel
+              message={"Pick the ECS Service to update:"}
+              array={ecsServices.ECSServiceNames}
+              condition={true}
+              alternative={""}
+              changeHandler={() => undefined}
+            />
+            <InputLabel message={"Enter a new name for the updated ECS Service"} name={"newECSServiceName"}/>
+            <SubmitButton value={"Submit"} />
+          </dl>
+        </form>
+      </div>
+    </>
   );
 };
 
 const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
   let [ router, setRouter ] = useState("");
   const dispatch = useDispatch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "DEPLOY_INFO_SUBMITTED", payload: e.target })
+    e.target.reset();
+  }
 
   return (
-    <form
-      onSubmit={
-        e => {
-          e.preventDefault();
-          dispatch({ type: "DEPLOY_INFO_SUBMITTED", payload: e.target })
-          e.target.reset();
-        }
-      }
-    >
-      <dl>
-        <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} name={"newTaskDefinitionName"} />
-        <SelectorLabel
-          message={"Choose the service discovery id the new task should use"}
-          array={ecsDetails.serviceRegistryIds}
-          condition={true}
-          alternative={""}
-          changeHandler={() => undefined}
-        />
-        <SelectorLabel
-          message={"Pick the name of the envoy container:"}
-          array={ecsDetails.containerNames}
-          condition={true}
-          alternative={""}
-          changeHandler={() => undefined}
-        />
-        <SelectorLabel
-          message={"Pick the name of the app container:"}
-          array={ecsDetails.containerNames}
-          condition={true}
-          alternative={""}
-          changeHandler={() => undefined}
-        />
-        <InputLabel message={"Enter the URL of the new image for the app container"} name={"imageURL"} />
-        <SelectorLabel
-          message={"Pick the corresponding virtual node to replace:"}
-          array={meshDetails.nodes}
-          condition={true}
-          alternative={""}
-          changeHandler={() => undefined}
-        />
-        <InputLabel message={"Enter a name for your new virtual node"} name={"newNodeName"} />
-        <SelectorLabel
-          message={"Pick a virtual router:"}
-          array={meshDetails.routers}
-          condition={true}
-          alternative={""}
-          changeHandler={e => setRouter(e.target.value)}
-        />
-        <SelectorLabel
-          message={"Pick a virtual route:"}
-          array={meshDetails.routes[router]}
-          condition={router}
-          alternative={"Select a router first"}
-          changeHandler={() => undefined}
-        />
-        <InputLabel message={"Enter the minutes of each canary interval"} name={"routeUpdateInterval"} />
-        <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} name={"shiftWeight"} />
-        <InputLabel message={"How many 500 responses from the canary is tolerable?"} name={"maxFailures"} />
-      </dl>
-      <input type="submit" value="Submit" />
-    </form>
+    <>
+      <h1>Detailed ECS and App Mesh Information</h1>
+      <div className="form-box">
+        <form onSubmit={handleSubmit}>
+          <dl>
+            <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} name={"newTaskDefinitionName"} />
+            <SelectorLabel
+              message={"Choose the service discovery id the new task should use"}
+              array={ecsDetails.serviceRegistryIds}
+              condition={true}
+              alternative={""}
+              changeHandler={() => undefined}
+            />
+            <SelectorLabel
+              message={"Pick the name of the envoy container:"}
+              array={ecsDetails.containerNames}
+              condition={true}
+              alternative={""}
+              changeHandler={() => undefined}
+            />
+            <SelectorLabel
+              message={"Pick the name of the app container:"}
+              array={ecsDetails.containerNames}
+              condition={true}
+              alternative={""}
+              changeHandler={() => undefined}
+            />
+            <InputLabel message={"Enter the URL of the new image for the app container"} name={"imageURL"} />
+            <SelectorLabel
+              message={"Pick the corresponding virtual node to replace:"}
+              array={meshDetails.nodes}
+              condition={true}
+              alternative={""}
+              changeHandler={() => undefined}
+            />
+            <InputLabel message={"Enter a name for your new virtual node"} name={"newNodeName"} />
+            <SelectorLabel
+              message={"Pick a virtual router:"}
+              array={meshDetails.routers}
+              condition={true}
+              alternative={""}
+              changeHandler={e => setRouter(e.target.value)}
+            />
+            <SelectorLabel
+              message={"Pick a virtual route:"}
+              array={meshDetails.routes[router]}
+              condition={router}
+              alternative={"Select a router first"}
+              changeHandler={() => undefined}
+            />
+            <InputLabel message={"Enter the minutes of each canary interval"} name={"routeUpdateInterval"} />
+            <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} name={"shiftWeight"} />
+            <InputLabel message={"How many 500 responses from the canary is tolerable?"} name={"maxFailures"} />
+            <SubmitButton value={"Submit"} />
+          </dl>
+        </form>
+      </div>
+    </>
   );
 };
 
@@ -121,7 +128,6 @@ const DeployInfo = ({ ecsServices }) => {
 
   return (
     <>
-      <p>Please input some additional information.</p>
       {
         !ecsServiceSelected
           ? <SelectGeneralOptions ecsServices={ecsServices} />
