@@ -35,6 +35,7 @@ const SetupInfoForm = () => {
                 <dd><input type="text" name="subnet2" required={false} /></dd>
                 <dd><input type="text" name="subnet3" required={false} /></dd>
                 <dd><input type="text" name="subnet4" required={false} /></dd>
+              </div>
             </div>
             <SubmitButton value={"Submit"} />
           </dl>

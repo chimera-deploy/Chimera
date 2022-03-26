@@ -19,20 +19,22 @@ const SelectGeneralOptions = ({ ecsServices }) => {
       <h1>Basic ECS Information</h1>
       <div className="form-box">
         <form onSubmit={handleSubmit}>
-          <SelectorLabel
-            message={"Pick the ECS Service to update:"}
-            array={ecsServices.ECSServiceNames}
-            condition={true}
-            alternative={""}
-            changeHandler={() => undefined}
-          />
-          <InputLabel
-            message={"Enter a new name for the updated ECS Service"}
-            name={"newECSServiceName"}
-            required={true}
-          />
-          <SubmitButton value={"Submit"} />
-        </dl>
+          <dl>
+            <SelectorLabel
+              message={"Pick the ECS Service to update:"}
+              array={ecsServices.ECSServiceNames}
+              condition={true}
+              alternative={""}
+              changeHandler={() => undefined}
+            />
+            <InputLabel
+              message={"Enter a new name for the updated ECS Service"}
+              name={"newECSServiceName"}
+              required={true}
+            />
+            <SubmitButton value={"Submit"} />
+          </dl>
+        </form>
       </div>
     </>
   );
