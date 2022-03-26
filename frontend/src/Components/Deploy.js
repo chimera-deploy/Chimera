@@ -25,7 +25,7 @@ const SelectGeneralOptions = ({ ecsServices }) => {
         alternative={""}
         changeHandler={() => undefined}
       />
-      <InputLabel message={"Enter a new name for the updated ECS Service"} />
+      <InputLabel message={"Enter a new name for the updated ECS Service"} name={"newECSServiceName"}/>
       <input type="submit" value="Submit" />
     </form>
   );
@@ -46,7 +46,7 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
       }
     >
       <dl>
-        <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} />
+        <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} name={"newTaskDefinitionName"} />
         <SelectorLabel
           message={"Choose the service discovery id the new task should use"}
           array={ecsDetails.serviceRegistryIds}
@@ -68,7 +68,7 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
           alternative={""}
           changeHandler={() => undefined}
         />
-        <InputLabel message={"Enter the URL of the new image for the app container"} />
+        <InputLabel message={"Enter the URL of the new image for the app container"} name={"imageURL"} />
         <SelectorLabel
           message={"Pick the corresponding virtual node to replace:"}
           array={meshDetails.nodes}
@@ -76,7 +76,7 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
           alternative={""}
           changeHandler={() => undefined}
         />
-        <InputLabel message={"Enter a name for your new virtual node"} />
+        <InputLabel message={"Enter a name for your new virtual node"} name={"newNodeName"} />
         <SelectorLabel
           message={"Pick a virtual router:"}
           array={meshDetails.routers}
@@ -91,9 +91,9 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
           alternative={"Select a router first"}
           changeHandler={() => undefined}
         />
-        <InputLabel message={"Enter the minutes of each canary interval"} />
-        <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} />
-        <InputLabel message={"How many 500 responses from the canary is tolerable?"} />
+        <InputLabel message={"Enter the minutes of each canary interval"} name={"routeUpdateInterval"} />
+        <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} name={"shiftWeight"} />
+        <InputLabel message={"How many 500 responses from the canary is tolerable?"} name={"maxFailures"} />
       </dl>
       <input type="submit" value="Submit" />
     </form>

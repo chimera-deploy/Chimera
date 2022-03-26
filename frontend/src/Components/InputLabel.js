@@ -1,9 +1,11 @@
-const InputLabel = ({ message }) => {
+const InputLabel = ({ message, name }) => {
   return (
     <div className="input-line">
-      <dt>{message}</dt>
+      <dt>
+        <label for={name}>{message}</label>
+      </dt>
       <dd>
-        <input required="true" type="text" />
+        <input required="true" type="text" name={name} id={name}/>
       </dd>
     </div>
   )
