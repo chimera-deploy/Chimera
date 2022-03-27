@@ -3,8 +3,8 @@ import axios from "axios";
 const BASEURL = "http://localhost";
 const PORT3 = "5000";
 
-const getMeshDetails = async meshName => {
-  const response = await axios.post(`${BASEURL}:${PORT3}/mesh-details`, { meshName });
+const getMeshDetails = async (meshName, region) => {
+  const response = await axios.post(`${BASEURL}:${PORT3}/mesh-details`, { meshName, region });
   return response.data;
 };
 
