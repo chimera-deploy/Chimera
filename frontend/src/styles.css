@@ -82,10 +82,10 @@ dd, dt {
 }
 
 input {
-  background-color: #4E9180;
+  background-color: #85bdae;
   border: none;
   border-radius: 5px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 2px 4px;
   padding: 5px;
 }
 
@@ -95,8 +95,8 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active,
 input:-internal-autofill-selected,
 input:-internal-autofill-previewed {
-    background-color: #4E9180 !important;
-    -webkit-box-shadow: 0 0 0 30px #4E9180 inset !important;
+    background-color: #85bdae !important;
+    -webkit-box-shadow: 0 0 0 30px #85bdae inset, rgba(0, 0, 0, 0.3) 0 2px 4px !important;
 }
 
 .button {
