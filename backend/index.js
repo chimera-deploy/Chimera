@@ -53,9 +53,7 @@ app.post('/setup', async (request, response) => {
 app.post('/mesh-details', async (request, response) => {
   try {
     const meshName = request.body.meshName;
-
-    // need to update frontend to include region in body
-    const clientRegion =  { region: request.body.region }// { region: 'us-west-2' };
+    const clientRegion =  { region: request.body.region };
     let nodes, routers, routes;
 
     const nodesPromise = new Promise(async (resolve, reject) => {
@@ -94,9 +92,7 @@ app.post('/mesh-details', async (request, response) => {
         
 app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
-
-  // need to add region to body in the frontend
-  const clientRegion = { region: request.body.region } // { region: 'us-west-2' }
+  const clientRegion = { region: request.body.region };
 
   try {
     const service = await ECSService.describe(clusterName, originalECSServiceName, clientRegion);
@@ -120,9 +116,7 @@ app.post('/ecs-details', async (request, response) => {
 app.post('/cw-metric-namespace', async (request, response) => {
   try {
     const { clusterName } = request.body;
-
-    // will need to update frontend to includ region in body
-    const clientRegion = { region: request.body.region } // { region: 'us-west-2' };
+    const clientRegion = { region: request.body.region };
 
     const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`, clientRegion);
     const taskDefinitionWithRevision = service.taskDefinition;
@@ -144,9 +138,7 @@ app.post('/cw-metric-namespace', async (request, response) => {
 
 app.post('/ecs-services', async (request, response) => {
   const clusterName = request.body.clusterName;
-
-  // need to update frontend to include region in the body of the request
-  const clientRegion = { region: request.body.region } //  { region: 'us-west-2' }
+  const clientRegion = { region: request.body.region };
 
   try {
     const services = await ECSService.listServices(clusterName, clientRegion);

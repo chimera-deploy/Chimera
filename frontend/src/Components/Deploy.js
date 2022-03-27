@@ -174,8 +174,7 @@ const DeployDispatchAndTrackProgress = () => {
 
 const Deploy = () => {
   const { deployInfoEntered, ecsServices } = useSelector(state => state.logic);
-  const { clusterName } = useSelector(state => state.deploy);
-  const { region } = useSelector(state => state);
+  const { clusterName, region } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
   useEffect(() => dispatch(readGeneralOptions(clusterName, region)), [dispatch, clusterName]);
 
