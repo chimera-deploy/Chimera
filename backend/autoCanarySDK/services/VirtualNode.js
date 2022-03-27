@@ -28,7 +28,7 @@ const create = async (meshName, virtualNodeName, originalNodeName, taskName, reg
   return response.virtualNode;
 };
 
-const destroy = async (meshName, virtualNodeName) => {
+const destroy = async (meshName, virtualNodeName, region) => {
   const client = new AppMeshClient(region);
   const input = {
     meshName: meshName,

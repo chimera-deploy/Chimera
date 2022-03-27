@@ -235,26 +235,29 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, [
-        {
-          virtualNode: this.config.originalNodeName,
-          weight: 100,
-        },
-      ]);
+      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+        [
+          {
+            virtualNode: this.config.originalNodeName,
+            weight: 100,
+          },
+        ],
+        this.config.region
+      );
       if (this.virtualNode !== null) {
         this.writeToClient(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
-        await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName);
+        await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName, this.config.region);
       }
       if (this.newECSService !== null) {
         this.writeToClient(`setting desired count for service ${this.newECSService.serviceName} to 0`);
-        await ECSService.update(this.config.clusterName, this.newECSService.serviceName, 0);
+        await ECSService.update(this.config.clusterName, this.newECSService.serviceName, 0, this.config.region);
         this.writeToClient(`deleting ECS service ${this.newECSService.serviceName}`);
-        await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName);
+        await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName, this.config.region);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
         this.writeToClient(`deregistering task definition ${taskDefinitionName}`);
-        await TaskDefinition.deregister(taskDefinitionName);
+        await TaskDefinition.deregister(taskDefinitionName, this.config.region);
         this.writeToClient(`rollback to ${this.config.originalNodeName} complete`)
       }
     } catch (err) {

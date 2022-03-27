@@ -25,7 +25,7 @@ const describe = async (clusterName, originalECSServiceName, region) => {
   return response.services[0];
 };
 
-const destroy = async (clusterName, ecsServiceName) => {
+const destroy = async (clusterName, ecsServiceName, region) => {
   const client = new ECSClient(region);
   const input = {
     cluster: clusterName,
@@ -37,7 +37,7 @@ const destroy = async (clusterName, ecsServiceName) => {
   return response;
 };
 
-const update = async (clusterName, ecsServiceName, desiredCount) => {
+const update = async (clusterName, ecsServiceName, desiredCount, region) => {
   const client = new ECSClient(region);
   const updateServiceCommandInput = { cluster: clusterName, service: ecsServiceName, desiredCount };
 

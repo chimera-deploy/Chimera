@@ -145,8 +145,8 @@ const listTasks = async (clusterName, taskFamily, region) => {
   return response.taskArns;
 };
 
-const deregister = async (taskDefinitionName) => {
-  const client = new ECSClient(clientRegion);
+const deregister = async (taskDefinitionName, region) => {
+  const client = new ECSClient(region);
   const deregisterTaskDefinitionCommandInput = {
     taskDefinition: taskDefinitionName,
   };
