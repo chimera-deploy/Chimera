@@ -7,7 +7,7 @@ const describe = async (meshName, virtualRouterName, routeName, clientRegion) =>
     routeName,
   };
 
-  const client = new AppMeshClient(region);
+  const client = new AppMeshClient(clientRegion);
   const command = new DescribeRouteCommand(input);
   response = await client.send(command);
   return response.route;
