@@ -147,10 +147,8 @@ app.post('/ecs-services', async (request, response) => {
 
   // need to update frontend to include region in the body of the request
   const clientRegion = { region: 'us-west-2' }
-  console.log('/ecs-services request received')
 
   try {
-    console.log('attempting to list services')
     const services = await ECSService.listServices(clusterName, clientRegion);
     response.status(200).json({
       ECSServiceNames: services,
