@@ -3,7 +3,7 @@ const { builtinModules } = require("module");
 const region = {region: 'us-west-2'}
 
 const AppMesh = {
-  async nodeNames(meshName) {
+  async nodeNames(meshName, region) {
     const input = {
       meshName,
     };
@@ -16,8 +16,8 @@ const AppMesh = {
     return nodes.map(node => node.virtualNodeName);
   },
 
-  async routesByRouter(meshName) {
-    const routerNames = await this.routerNames(meshName);
+  async routesByRouter(meshName, region) {
+    const routerNames = await this.routerNames(meshName, region);
     let promises = [];
     let routes = {};
 
@@ -38,7 +38,7 @@ const AppMesh = {
     return routes;
   },
 
-  async routeNames(meshName, virtualRouterName) {
+  async routeNames(meshName, virtualRouterName, region) {
     const input = {
       meshName,
       virtualRouterName,
@@ -52,7 +52,7 @@ const AppMesh = {
     return routes.map(route => route.routeName);
   },
 
-  async routerNames(meshName) {
+  async routerNames(meshName, region) {
     const input = {
       meshName,
     }

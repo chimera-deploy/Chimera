@@ -124,11 +124,11 @@ const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRo
   return response.taskDefinition;
 };
 
-const describe = async (taskDefinition) => {
+const describe = async (taskDefinition, region) => {
   const input = {
     taskDefinition,
   };
-  const client = new ECSClient(clientRegion);
+  const client = new ECSClient(region);
   const command = new DescribeTaskDefinitionCommand(input);
   const response = await client.send(command);
   return response.taskDefinition;

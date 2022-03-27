@@ -53,11 +53,12 @@ app.post('/setup', async (request, response) => {
 app.post('/mesh-details', async (request, response) => {
   try {
     const meshName = request.body.meshName;
+    const region = request.body.region;
     let nodes, routers, routes;
 
     const nodesPromise = new Promise(async (resolve, reject) => {
       try {
-        nodes = await AppMesh.nodeNames(meshName);
+        nodes = await AppMesh.nodeNames(meshName, region);
         resolve()
       } catch (e) {
         reject(e)
@@ -65,7 +66,7 @@ app.post('/mesh-details', async (request, response) => {
     });
     const routersPromise = new Promise(async (resolve, reject) => {
       try {
-        routers = await AppMesh.routerNames(meshName);
+        routers = await AppMesh.routerNames(meshName, region);
         resolve()
       } catch (e) {
         reject(e)
@@ -73,7 +74,7 @@ app.post('/mesh-details', async (request, response) => {
     });
     const routesPromise = new Promise(async (resolve, reject) => {
       try {
-        routes = await AppMesh.routesByRouter(meshName);
+        routes = await AppMesh.routesByRouter(meshName, region);
         resolve()
       } catch (e) {
         reject(e)
@@ -88,27 +89,18 @@ app.post('/mesh-details', async (request, response) => {
     response.status(500).json({ error });
   }
 });
-
-app.get('/test', async (request, response) => {
-
-  console.log('Access Key ID:', process.env.AWS_ACCESS_KEY_ID)
-  console.log('Secret Access Key:', process.env.AWS_SECRET_ACCESS_KEY)
-  console.log('Region:', process.env.REGION)
-  response.status(200).send()
-})
         
 app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
 
-  console.log('Access Key ID:', process.env.AWS_ACCESS_KEY_ID)
-  console.log('Secret Access Key:', process.env.AWS_SECRET_ACCESS_KEY)
-  console.log('Region:', process.env.REGION)
+  // need to add region to body in the frontend
+  const region = 'us-west-2'
 
   try {
-    const service = await ECSService.describe(clusterName, originalECSServiceName);
+    const service = await ECSService.describe(clusterName, originalECSServiceName, region);
     const serviceRegistryIds = service.serviceRegistries.map(registry => getIDFromArn(registry.registryArn));
     const taskDefinitionWithRevision = getIDFromArn(service.taskDefinition);
-    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision);
+    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision, region);
     const containerNames = taskDefinition.containerDefinitions.map(def => def.name);
     response.status(200).json({
       serviceRegistryIds,
