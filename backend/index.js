@@ -118,9 +118,13 @@ app.post('/ecs-details', async (request, response) => {
 app.post('/cw-metric-namespace', async (request, response) => {
   try {
     const { clusterName } = request.body;
-    const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`);
+
+    // will need to update frontend to includ region in body
+    const region = 'us-west-2';
+
+    const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`, region);
     const taskDefinitionWithRevision = service.taskDefinition;
-    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision);
+    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision, region);
     const env = taskDefinition.containerDefinitions[0].environment.find(env => {
       return env.name === 'CW_CONFIG_CONTENT';
     });
