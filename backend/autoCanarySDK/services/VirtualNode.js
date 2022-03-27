@@ -1,8 +1,8 @@
 const { AppMeshClient, CreateVirtualNodeCommand, DeleteVirtualNodeCommand, DescribeVirtualNodeCommand } = require("@aws-sdk/client-app-mesh")
 
-const create = async (meshName, virtualNodeName, originalNodeName, taskName, region) => {
-  const appMeshClient = new AppMeshClient(region);
-  const originalNode = await describe(meshName, originalNodeName, region);
+const create = async (meshName, virtualNodeName, originalNodeName, taskName, clientRegion) => {
+  const appMeshClient = new AppMeshClient(clientRegion);
+  const originalNode = await describe(meshName, originalNodeName, clientRegion);
   originalNode.virtualNodeName = virtualNodeName;
   if (originalNode.spec.serviceDiscovery.awsCloudMap) {
     let needToAdd = true;
@@ -27,8 +27,8 @@ const create = async (meshName, virtualNodeName, originalNodeName, taskName, reg
   return response.virtualNode;
 };
 
-const destroy = async (meshName, virtualNodeName, region) => {
-  const client = new AppMeshClient(region);
+const destroy = async (meshName, virtualNodeName, clientRegion) => {
+  const client = new AppMeshClient(clientRegion);
   const input = {
     meshName: meshName,
     virtualNodeName: virtualNodeName,
@@ -40,8 +40,8 @@ const destroy = async (meshName, virtualNodeName, region) => {
   return response;
 };
 
-const describe = async (meshName, virtualNodeName, region) => {
-  const client = new AppMeshClient(region);
+const describe = async (meshName, virtualNodeName, clientRegion) => {
+  const client = new AppMeshClient(clientRegion);
 
   const describeNodeInput = {
     meshName,

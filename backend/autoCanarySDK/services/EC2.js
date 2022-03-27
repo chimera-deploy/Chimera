@@ -1,7 +1,7 @@
 const { EC2Client, AuthorizeSecurityGroupIngressCommand, CreateSecurityGroupCommand } = require("@aws-sdk/client-ec2"); // CommonJS import
 
-const createSG = async (Description, GroupName, VpcId, region) => {
-  const client = new EC2Client(region);
+const createSG = async (Description, GroupName, VpcId, clientRegion) => {
+  const client = new EC2Client(clientRegion);
   const input = {
     Description,
     GroupName,

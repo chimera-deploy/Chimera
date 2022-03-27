@@ -37,6 +37,7 @@ const Chimera = {
 
   async setup(config) {
     this.config = config;
+    this.config.clientRegion = {region: config.region };
     try {
       await this.createCWSecurityGroup();
       await this.createCWRoles();
@@ -51,7 +52,7 @@ const Chimera = {
   async createCWSecurityGroup() {
     this.writeToClient('creating security group for cloudwatch agent');
     this.writeToClient()
-    this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID, this.config.region);
+    this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID, this.config.clientRegion);
     this.writeToClient('created security group for cloudwatch agent');
   },
 
@@ -73,11 +74,12 @@ const Chimera = {
       this.config.clusterName,
       assumeRolePolicyDocument,
       this.config.region,
-      this.config.awsAccountID
+      this.config.awsAccountID,
+      this.config.clientRegion
     );
     this.writeToClient('created cloudwatch task role');
     this.writeToClient('creating cloudwatch execution role');
-    this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument, this.config.region);
+    this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument, this.config.clientRegion);
     this.writeToClient('created cloudwatch execution role');
   },
 
@@ -88,7 +90,7 @@ const Chimera = {
       this.config.metricNamespace,
       this.cwTaskRole,
       this.cwExecutionRole,
-      this.config.region
+      this.config.clientRegion
     );
     this.writeToClient('registered cloudwatch agent task definition');
     this.writeToClient("creating cloudwatch agent ECS service");
@@ -97,7 +99,7 @@ const Chimera = {
       [ this.config.cwSecurityGroupID ],
       this.config.cwECSPrimarySubnets,
       this.cwTaskDefinition,
-      this.config.region
+      this.config.clientRegion
     );
     this.writeToClient('created cloudwatch agent ECS service');
   },
@@ -105,6 +107,7 @@ const Chimera = {
   async deploy(config) {
     let newVersionDeployed = false;
     this.config = config;
+    this.config.clientRegion = { region: this.config.region }
     try {
       await this.buildCanary();
       await this.shiftTraffic(
@@ -137,7 +140,7 @@ const Chimera = {
   async buildCanary() {
     const virtualNodeName = this.config.newNodeName;
     this.taskName = this.config.newTaskDefinitionName;
-    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName, this.config.region);
+    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName, this.config.clientRegion);
     this.writeToClient('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
@@ -148,13 +151,14 @@ const Chimera = {
       this.taskName,
       this.config.meshName,
       this.config.region,
-      this.config.awsAccountID
+      this.config.awsAccountID,
+      this.config.clientRegion
     );
     this.writeToClient('registered task definition');
-    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.region)
+    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
     this.writeToClient('created ECS service');
     this.writeToClient('waiting for cloudmap');
-    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName, this.config.region);
+    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName, this.config.clientRegion);
     this.writeToClient('canary running on ECS');
   },
 
@@ -169,7 +173,7 @@ const Chimera = {
         weight: newVersionWeight,
       },
     ];
-    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets, this.config.region);
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets, this.config.clientRegion);
     this.writeToClient(`shifted traffic: Stable: ${originalVersionWeight} || Canary: ${newVersionWeight}`);
   },
 
@@ -194,7 +198,7 @@ const Chimera = {
               this.config.clusterName,
               this.taskName,
               maxFailures,
-              this.config.region
+              this.config.clientRegion
             );
           }
           if (newVersionWeight === 100) {
@@ -224,16 +228,16 @@ const Chimera = {
           weight: 100,
         },
       ],
-      this.config.region
+      this.config.clientRegion
     );
     this.writeToClient(`deleting virtual node ${this.config.originalNodeName}`);
-    await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName, this.config.region);
+    await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName, this.config.clientRegion);
     this.writeToClient(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
-    await ECSService.update(this.config.clusterName, this.config.originalECSServiceName, 0, this.config.region);
+    await ECSService.update(this.config.clusterName, this.config.originalECSServiceName, 0, this.config.clientRegion);
     this.writeToClient(`deleting ECS service ${this.config.originalECSServiceName}`);
-    await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName, this.config.region);
+    await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName, this.config.clientRegion);
     this.writeToClient(`deregistering task definition ${this.config.originalTaskDefinition}`);
-    await TaskDefinition.deregister(this.config.originalTaskDefinition, this.config.region);
+    await TaskDefinition.deregister(this.config.originalTaskDefinition, this.config.clientRegion);
   },
 
   async rollbackToOldVersion() {
@@ -245,22 +249,22 @@ const Chimera = {
             weight: 100,
           },
         ],
-        this.config.region
+        this.config.clientRegion
       );
       if (this.virtualNode !== null) {
         this.writeToClient(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
-        await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName, this.config.region);
+        await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName, this.config.clientRegion);
       }
       if (this.newECSService !== null) {
         this.writeToClient(`setting desired count for service ${this.newECSService.serviceName} to 0`);
-        await ECSService.update(this.config.clusterName, this.newECSService.serviceName, 0, this.config.region);
+        await ECSService.update(this.config.clusterName, this.newECSService.serviceName, 0, this.config.clientRegion);
         this.writeToClient(`deleting ECS service ${this.newECSService.serviceName}`);
-        await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName, this.config.region);
+        await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName, this.config.clientRegion);
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
         this.writeToClient(`deregistering task definition ${taskDefinitionName}`);
-        await TaskDefinition.deregister(taskDefinitionName, this.config.region);
+        await TaskDefinition.deregister(taskDefinitionName, this.config.clientRegion);
         this.writeToClient(`rollback to ${this.config.originalNodeName} complete`)
       }
     } catch (err) {

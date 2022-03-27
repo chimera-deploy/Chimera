@@ -1,7 +1,7 @@
 const { IAMClient, AttachRolePolicyCommand, CreateRoleCommand, GetRoleCommand, PutRolePolicyCommand } = require("@aws-sdk/client-iam"); // CommonJS import
 
-const createRole = async (AssumeRolePolicyDocument, RoleName, region) => {
-  const client = new IAMClient(region);
+const createRole = async (AssumeRolePolicyDocument, RoleName, clientRegion) => {
+  const client = new IAMClient(clientRegion);
   const input = {
     AssumeRolePolicyDocument,
     RoleName,
@@ -11,8 +11,8 @@ const createRole = async (AssumeRolePolicyDocument, RoleName, region) => {
   return response.Role;
 };
 
-const attachRolePolicy = async (managedPolicyArns, RoleName, region) => {
-  const client = new IAMClient(region);
+const attachRolePolicy = async (managedPolicyArns, RoleName, clientRegion) => {
+  const client = new IAMClient(clientRegion);
   managedPolicyArns.forEach(async arn => {
     const input = {
       PolicyArn: arn,
@@ -23,8 +23,8 @@ const attachRolePolicy = async (managedPolicyArns, RoleName, region) => {
   });
 };
 
-const putRolePolicy = async (policies, RoleName, region) => {
-  const client = new IAMClient(region);
+const putRolePolicy = async (policies, RoleName, clientRegion) => {
+  const client = new IAMClient(clientRegion);
   policies.forEach(async ({ PolicyName, PolicyDocument }) => {
     const input = {
       PolicyName,
@@ -36,20 +36,20 @@ const putRolePolicy = async (policies, RoleName, region) => {
   });
 };
 
-const getRole = async (RoleName, region) => {
-  const client = new IAMClient(region);
+const getRole = async (RoleName, clientRegion) => {
+  const client = new IAMClient(clientRegion);
   const input = { RoleName };
   const command = new GetRoleCommand(input);
   return await client.send(command);
 };
 
-const createCWTaskRole = async (clusterName, assumeRolePolicyDocument, region, awsAccountID) => {
+const createCWTaskRole = async (clusterName, assumeRolePolicyDocument, region, awsAccountID, clientRegion) => {
   const roleName = `${clusterName}-prometheus-cw-task-role`;
-  const cwTaskRole = await createRole(assumeRolePolicyDocument, roleName, region);
+  const cwTaskRole = await createRole(assumeRolePolicyDocument, roleName, clientRegion);
   const managedPolicyArns = [
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ];
-  await attachRolePolicy(managedPolicyArns, roleName, region);
+  await attachRolePolicy(managedPolicyArns, roleName, clientRegion);
   const inLinePolicies = [
     {
       "PolicyName": "ECSServiceDiscoveryInlinePolicy",
@@ -84,20 +84,20 @@ const createCWTaskRole = async (clusterName, assumeRolePolicyDocument, region, a
       }
     }
   ];
-  await putRolePolicy(inLinePolicies, roleName, region);
-  const response = await getRole(roleName, region);
+  await putRolePolicy(inLinePolicies, roleName, clientRegion);
+  const response = await getRole(roleName, clientRegion);
   return response.Role;
 };
 
-const createCWExecutionRole = async (clusterName, assumeRolePolicyDocument, region) => {
+const createCWExecutionRole = async (clusterName, assumeRolePolicyDocument, clientRegion) => {
   const roleName = `${clusterName}-prometheus-cw-execution-role`;
-  const cwExecutionRole = await createRole(assumeRolePolicyDocument, roleName, region);
+  const cwExecutionRole = await createRole(assumeRolePolicyDocument, roleName, clientRegion);
   const managedPolicyArns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ];
-  await attachRolePolicy(managedPolicyArns, roleName, region);
-  const response = await getRole(roleName, region);
+  await attachRolePolicy(managedPolicyArns, roleName, clientRegion);
+  const response = await getRole(roleName, clientRegion);
   return response.Role;
 };
 

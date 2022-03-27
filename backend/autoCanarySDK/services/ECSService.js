@@ -1,9 +1,8 @@
 const { ECSClient, DeleteServiceCommand, CreateServiceCommand, UpdateServiceCommand, DescribeServicesCommand, ListServicesCommand } = require("@aws-sdk/client-ecs");
 const { getIDFromArn } = require("../../utils");
-const region = { region: 'us-west-2' }
 
-const describe = async (clusterName, originalECSServiceName, region) => {
-  const client = new ECSClient(region);
+const describe = async (clusterName, originalECSServiceName, clientRegion) => {
+  const client = new ECSClient(clientRegion);
 
   const describeServicesInput = {
     cluster: clusterName,
@@ -25,8 +24,8 @@ const describe = async (clusterName, originalECSServiceName, region) => {
   return response.services[0];
 };
 
-const destroy = async (clusterName, ecsServiceName, region) => {
-  const client = new ECSClient(region);
+const destroy = async (clusterName, ecsServiceName, clientRegion) => {
+  const client = new ECSClient(clientRegion);
   const input = {
     cluster: clusterName,
     service: ecsServiceName,
@@ -37,8 +36,8 @@ const destroy = async (clusterName, ecsServiceName, region) => {
   return response;
 };
 
-const update = async (clusterName, ecsServiceName, desiredCount, region) => {
-  const client = new ECSClient(region);
+const update = async (clusterName, ecsServiceName, desiredCount, clientRegion) => {
+  const client = new ECSClient(clientRegion);
   const updateServiceCommandInput = { cluster: clusterName, service: ecsServiceName, desiredCount };
 
   const command = new UpdateServiceCommand(updateServiceCommandInput);
@@ -46,9 +45,9 @@ const update = async (clusterName, ecsServiceName, desiredCount, region) => {
   return response;
 };
 
-const create = async (clusterName, originalECSServiceName, newECSServiceName, taskName, region) => {
-  const client = new ECSClient(region);
-  const serviceInfo = await describe(clusterName, originalECSServiceName, region);
+const create = async (clusterName, originalECSServiceName, newECSServiceName, taskName, clientRegion) => {
+  const client = new ECSClient(clientRegion);
+  const serviceInfo = await describe(clusterName, originalECSServiceName, clientRegion);
 
   serviceInfo.cluster = clusterName;
   serviceInfo.serviceName = newECSServiceName;
@@ -59,8 +58,8 @@ const create = async (clusterName, originalECSServiceName, newECSServiceName, ta
   return response.service;
 };
 
-const createCW = async (cluster, securityGroups, subnets, cwTaskDef, region) => {
-  const client = new ECSClient(region);
+const createCW = async (cluster, securityGroups, subnets, cwTaskDef, clientRegion) => {
+  const client = new ECSClient(clientRegion);
   const input = {
     cluster,
     deploymentConfiguration: {
