@@ -1,6 +1,5 @@
 const { AppMeshClient, ListVirtualNodesCommand, ListVirtualRoutersCommand, ListRoutesCommand } = require("@aws-sdk/client-app-mesh");
 const { builtinModules } = require("module");
-const region = {region: 'us-west-2'}
 
 const AppMesh = {
   async nodeNames(meshName, region) {

@@ -1,5 +1,4 @@
 const { AppMeshClient, UpdateRouteCommand, DescribeRouteCommand } = require("@aws-sdk/client-app-mesh");
-const region = {region: 'us-west-2'}
 
 const describe = async (meshName, virtualRouterName, routeName, region) => {
   const input = {

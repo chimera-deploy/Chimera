@@ -6,11 +6,9 @@ const {
   DeregisterTaskDefinitionCommand
 } = require("@aws-sdk/client-ecs");
 
-const clientRegion = {region: 'us-west-2'}
-
 const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account) => {
   const client = new ECSClient(region);
-  const taskDefinition = await describe(originalTaskName);
+  const taskDefinition = await describe(originalTaskName, region);
   taskDefinition.family = taskName;
 
   const appContainerDef = taskDefinition.containerDefinitions.find(def => {

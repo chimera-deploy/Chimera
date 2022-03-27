@@ -1,5 +1,4 @@
 const { IAMClient, AttachRolePolicyCommand, CreateRoleCommand, GetRoleCommand, PutRolePolicyCommand } = require("@aws-sdk/client-iam"); // CommonJS import
-//const region = {region: 'us-west-2'}
 
 const createRole = async (AssumeRolePolicyDocument, RoleName, region) => {
   const client = new IAMClient(region);

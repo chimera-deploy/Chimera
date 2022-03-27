@@ -1,5 +1,4 @@
 const { AppMeshClient, CreateVirtualNodeCommand, DeleteVirtualNodeCommand, DescribeVirtualNodeCommand } = require("@aws-sdk/client-app-mesh")
-const region = {region: 'us-west-2'}
 
 const create = async (meshName, virtualNodeName, originalNodeName, taskName, region) => {
   const appMeshClient = new AppMeshClient(region);
