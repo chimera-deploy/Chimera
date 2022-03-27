@@ -4,7 +4,7 @@ const region = {region: 'us-west-2'}
 
 const cloudMapCheckInterval = 5 * 1000;
 
-const getCloudMapHealth = async (serviceDiscoveryID) => {
+const getCloudMapHealth = async (serviceDiscoveryID, region) => {
   const client = new ServiceDiscoveryClient(region);
 
   const healthStatusInput = {
@@ -22,14 +22,14 @@ const allHealthy = (instanceStates, taskIDs) => {
   });
 };
 
-const cloudMapHealthy = async (serviceDiscoveryID, clusterName, taskName) => {
+const cloudMapHealthy = async (serviceDiscoveryID, clusterName, taskName, region) => {
   const p = new Promise((resolve, reject) => {
     let intervalId;
     let taskIDs = [];
     intervalId = setInterval(async () => {
-      const instanceStates = await getCloudMapHealth(serviceDiscoveryID);
+      const instanceStates = await getCloudMapHealth(serviceDiscoveryID, region);
       if (taskIDs.length === 0) {
-        const taskArns = await TaskDefinition.listTasks(clusterName, taskName);
+        const taskArns = await TaskDefinition.listTasks(clusterName, taskName, region);
         taskIDs = taskArns.map(taskArn => {
           const parts = taskArn.split('/');
           return parts[parts.length - 1];

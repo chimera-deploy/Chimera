@@ -137,7 +137,7 @@ const Chimera = {
   async buildCanary() {
     const virtualNodeName = this.config.newNodeName;
     this.taskName = this.config.newTaskDefinitionName;
-    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName);
+    this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName, this.config.region);
     this.writeToClient('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
@@ -151,10 +151,10 @@ const Chimera = {
       this.config.awsAccountID
     );
     this.writeToClient('registered task definition');
-    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName)
+    this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.region)
     this.writeToClient('created ECS service');
     this.writeToClient('waiting for cloudmap');
-    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName);
+    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName, this.config.region);
     this.writeToClient('canary running on ECS');
   },
 

@@ -2,7 +2,7 @@ const { ECSClient, DeleteServiceCommand, CreateServiceCommand, UpdateServiceComm
 const { getIDFromArn } = require("../../utils");
 const region = { region: 'us-west-2' }
 
-const describe = async (clusterName, originalECSServiceName) => {
+const describe = async (clusterName, originalECSServiceName, region) => {
   const client = new ECSClient(region);
 
   const describeServicesInput = {
@@ -46,9 +46,9 @@ const update = async (clusterName, ecsServiceName, desiredCount) => {
   return response;
 };
 
-const create = async (clusterName, originalECSServiceName, newECSServiceName, taskName) => {
+const create = async (clusterName, originalECSServiceName, newECSServiceName, taskName, region) => {
   const client = new ECSClient(region);
-  const serviceInfo = await describe(clusterName, originalECSServiceName);
+  const serviceInfo = await describe(clusterName, originalECSServiceName, region);
 
   serviceInfo.cluster = clusterName;
   serviceInfo.serviceName = newECSServiceName;

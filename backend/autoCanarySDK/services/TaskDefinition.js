@@ -9,7 +9,7 @@ const {
 const clientRegion = {region: 'us-west-2'}
 
 const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account) => {
-  const client = new ECSClient(clientRegion);
+  const client = new ECSClient(region);
   const taskDefinition = await describe(originalTaskName);
   taskDefinition.family = taskName;
 
@@ -44,8 +44,8 @@ const register = async (appImageURL, appContainerName, virtualNodeName, envoyCon
   return response.taskDefinition;
 };
 
-const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole) => {
-  const client = new ECSClient(clientRegion);
+const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole, region) => {
+  const client = new ECSClient(region);
   let input = {
     containerDefinitions: [
       {
@@ -134,12 +134,12 @@ const describe = async (taskDefinition) => {
   return response.taskDefinition;
 };
 
-const listTasks = async (clusterName, taskFamily) => {
+const listTasks = async (clusterName, taskFamily, region) => {
   const input = {
     cluster: clusterName,
     family: taskFamily,
   };
-  const client = new ECSClient(clientRegion);
+  const client = new ECSClient(region);
   const command = new ListTasksCommand(input);
   const response = await client.send(command);
   return response.taskArns;
