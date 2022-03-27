@@ -169,7 +169,7 @@ const Chimera = {
         weight: newVersionWeight,
       },
     ];
-    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets);
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets, this.config.region);
     this.writeToClient(`shifted traffic: Stable: ${originalVersionWeight} || Canary: ${newVersionWeight}`);
   },
 
@@ -193,7 +193,8 @@ const Chimera = {
               this.config.metricNamespace,
               this.config.clusterName,
               this.taskName,
-              maxFailures
+              maxFailures,
+              this.config.region
             );
           }
           if (newVersionWeight === 100) {

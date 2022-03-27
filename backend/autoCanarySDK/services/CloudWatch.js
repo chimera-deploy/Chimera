@@ -1,7 +1,7 @@
 const { CloudWatchClient, GetMetricDataCommand } = require("@aws-sdk/client-cloudwatch"); // CommonJS import
 const region = {region: 'us-west-2'}
 
-const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName) => {
+const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, region) => {
   const client = new CloudWatchClient(region);
   const MetricDataQueries = [
     {
@@ -45,11 +45,11 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
   return await client.send(command);
 };
 
-const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, maxFailures) => {
+const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, maxFailures, region) => {
   const millisecondsNow = Date.now();
   const now = new Date(millisecondsNow);
   const start = new Date(millisecondsNow - (failureThresholdTime * 2));
-  const response = await getMetricData(start, now, metricNamespace, clusterName, taskName);
+  const response = await getMetricData(start, now, metricNamespace, clusterName, taskName, region);
   const values = response.MetricDataResults[0].Values;
   console.log("values downstream/ingress 500:", values);
   if (values.reduce((a, v) => a + v, 0) > maxFailures) { // hard coded for testing
