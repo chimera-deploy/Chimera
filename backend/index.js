@@ -55,7 +55,7 @@ app.post('/mesh-details', async (request, response) => {
     const meshName = request.body.meshName;
 
     // need to update frontend to include region in body
-    const clientRegion = { region: 'us-west-2' };
+    const clientRegion =  { region: request.body.region }// { region: 'us-west-2' };
     let nodes, routers, routes;
 
     const nodesPromise = new Promise(async (resolve, reject) => {
@@ -96,7 +96,7 @@ app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
 
   // need to add region to body in the frontend
-  const clientRegion = { region: 'us-west-2' }
+  const clientRegion = { region: request.body.region } // { region: 'us-west-2' }
 
   try {
     const service = await ECSService.describe(clusterName, originalECSServiceName, clientRegion);
@@ -122,7 +122,7 @@ app.post('/cw-metric-namespace', async (request, response) => {
     const { clusterName } = request.body;
 
     // will need to update frontend to includ region in body
-    const clientRegion = { region: 'us-west-2' };
+    const clientRegion = { region: request.body.region } // { region: 'us-west-2' };
 
     const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`, clientRegion);
     const taskDefinitionWithRevision = service.taskDefinition;
@@ -146,7 +146,7 @@ app.post('/ecs-services', async (request, response) => {
   const clusterName = request.body.clusterName;
 
   // need to update frontend to include region in the body of the request
-  const clientRegion = { region: 'us-west-2' }
+  const clientRegion = { region: request.body.region } //  { region: 'us-west-2' }
 
   try {
     const services = await ECSService.listServices(clusterName, clientRegion);
