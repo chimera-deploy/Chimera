@@ -59,7 +59,7 @@ const create = async (clusterName, originalECSServiceName, newECSServiceName, ta
   return response.service;
 };
 
-const createCW = async (cluster, securityGroups, subnets, cwTaskDef) => {
+const createCW = async (cluster, securityGroups, subnets, cwTaskDef, region) => {
   const client = new ECSClient(region);
   const input = {
     cluster,

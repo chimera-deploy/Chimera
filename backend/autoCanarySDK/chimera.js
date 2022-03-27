@@ -51,7 +51,7 @@ const Chimera = {
   async createCWSecurityGroup() {
     this.writeToClient('creating security group for cloudwatch agent');
     this.writeToClient()
-    this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID);
+    this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID, this.config.region);
     this.writeToClient('created security group for cloudwatch agent');
   },
 
@@ -77,7 +77,7 @@ const Chimera = {
     );
     this.writeToClient('created cloudwatch task role');
     this.writeToClient('creating cloudwatch execution role');
-    this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument);
+    this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument, this.config.region);
     this.writeToClient('created cloudwatch execution role');
   },
 
@@ -88,6 +88,7 @@ const Chimera = {
       this.config.metricNamespace,
       this.cwTaskRole,
       this.cwExecutionRole,
+      this.config.region
     );
     this.writeToClient('registered cloudwatch agent task definition');
     this.writeToClient("creating cloudwatch agent ECS service");
@@ -95,7 +96,8 @@ const Chimera = {
       this.config.clusterName,
       [ this.config.cwSecurityGroupID ],
       this.config.cwECSPrimarySubnets,
-      this.cwTaskDefinition
+      this.cwTaskDefinition,
+      this.config.region
     );
     this.writeToClient('created cloudwatch agent ECS service');
   },

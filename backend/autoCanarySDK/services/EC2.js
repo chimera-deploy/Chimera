@@ -1,7 +1,7 @@
 const { EC2Client, AuthorizeSecurityGroupIngressCommand, CreateSecurityGroupCommand } = require("@aws-sdk/client-ec2"); // CommonJS import
-const region = {region: 'us-west-2'}
+//const region = {region: 'us-west-2'}
 
-const createSG = async (Description, GroupName, VpcId) => {
+const createSG = async (Description, GroupName, VpcId, region) => {
   const client = new EC2Client(region);
   const input = {
     Description,
@@ -25,8 +25,8 @@ const authorizeSGIngress = async (CidrIp, FromPort, ToPort, GroupId, IpProtocol)
   await client.send(command);
 };
 
-const createCWSecurityGroup = async (vpcID) => {
-  const response = await createSG("cloud watch agent sg for chimera", "chimera-cw-sg", vpcID);
+const createCWSecurityGroup = async (vpcID, region) => {
+  const response = await createSG("cloud watch agent sg for chimera", "chimera-cw-sg", vpcID, region);
   const sgID = response.GroupId;
   await authorizeSGIngress("0.0.0.0/0", 9901, 9901, sgID, "tcp");
   return sgID;
