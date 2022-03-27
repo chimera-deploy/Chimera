@@ -38,6 +38,8 @@ const Chimera = {
   async setup(config) {
     this.config = config;
     this.config.clientRegion = {region: config.region };
+    console.log('ClientRegion', this.config.clientRegion);
+
     try {
       await this.createCWSecurityGroup();
       await this.createCWRoles();
@@ -108,6 +110,8 @@ const Chimera = {
     let newVersionDeployed = false;
     this.config = config;
     this.config.clientRegion = { region: this.config.region }
+    console.log('ClientRegion', this.config.clientRegion);
+
     try {
       await this.buildCanary();
       await this.shiftTraffic(
