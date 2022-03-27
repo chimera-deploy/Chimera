@@ -81,12 +81,12 @@ dd, dt {
   width: 50%;
 }
 
-input {
+input, select {
   background-color: #85bdae;
   border: none;
   border-radius: 5px;
   box-shadow: rgba(0, 0, 0, 0.3) 0 2px 4px;
-  padding: 5px;
+  padding: 7px;
 }
 
 input:-webkit-autofill,
@@ -134,6 +134,29 @@ input:-internal-autofill-previewed {
 
 input, select {
   width: 100%;
+}
+
+.deployment-event-list {
+  border: 5px solid #69163e;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  width: 100%;
+}
+
+.deployment-event-list :nth-last-child(2) {
+  font-weight: bold;
+}
+
+.deployment-event {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.loading-gif {
+  max-height: 250px;
+
 }
 
 .footer {

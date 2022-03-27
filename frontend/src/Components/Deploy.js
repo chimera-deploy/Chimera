@@ -203,8 +203,9 @@ const DeployDispatchAndTrackProgress = () => {
   return (
     <div>
       <p>Deploying!</p>
-      <ul>
-        {events.map(event => <li key={event}>{event}</li>)}
+      <ul className="deployment-event-list">
+        {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
+        <li><img className="loading-gif" src="../../loading.gif" /></li>
       </ul>
     </div>
   );
