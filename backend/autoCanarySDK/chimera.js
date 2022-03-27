@@ -217,20 +217,23 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, [
-      {
-        virtualNode: this.virtualNode.virtualNodeName,
-        weight: 100,
-      },
-    ]);
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+      [
+        {
+          virtualNode: this.virtualNode.virtualNodeName,
+          weight: 100,
+        },
+      ],
+      this.config.region
+    );
     this.writeToClient(`deleting virtual node ${this.config.originalNodeName}`);
-    await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName);
+    await VirtualNode.destroy(this.config.meshName, this.config.originalNodeName, this.config.region);
     this.writeToClient(`setting desired count for service ${this.config.originalECSServiceName} to 0`);
-    await ECSService.update(this.config.clusterName, this.config.originalECSServiceName, 0);
+    await ECSService.update(this.config.clusterName, this.config.originalECSServiceName, 0, this.config.region);
     this.writeToClient(`deleting ECS service ${this.config.originalECSServiceName}`);
-    await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName);
+    await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName, this.config.region);
     this.writeToClient(`deregistering task definition ${this.config.originalTaskDefinition}`);
-    await TaskDefinition.deregister(this.config.originalTaskDefinition);
+    await TaskDefinition.deregister(this.config.originalTaskDefinition, this.config.region);
   },
 
   async rollbackToOldVersion() {
