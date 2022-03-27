@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
+import { readMetricWidget } from "../reducers/image";
 import InputLabel from "./InputLabel";
 import SelectorLabel from "./SelectorLabel";
 import SubmitButton from "./SubmitButton";
@@ -172,12 +173,68 @@ const DeployInfo = ({ ecsServices }) => {
   );
 };
 
-// S'pose we'll dispatch a thunky action creator in this function
-// it'll send a message to the backend to do its thing and track the progress
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
+  const { metricGraph } = useSelector(state => state.image);
+  const {
+    metricNamespace,
+    newTaskDefinitionName,
+    clusterName,
+    shiftWeight,
+    routeUpdateInterval,
+    region
+  } = useSelector(state => state.deploy);
+  const metricInput = {
+    MetricWidget: JSON.stringify({
+      width: 1200,
+      height: 600,
+      title: "canary health",
+      start: `-PT${(100/Number(shiftWeight)) * Number(routeUpdateInterval)}M`,
+      metrics: [
+        [
+          metricNamespace,
+          "envoy_http_downstream_rq_xx",
+          "TaskDefinitionFamily",
+          newTaskDefinitionName,
+          "envoy_http_conn_manager_prefix",
+          "ingress",
+          "envoy_response_code_class",
+          "5",
+          "ClusterName",
+          clusterName,
+          {
+            id: "m1",
+            stat: "Sum",
+            label: `500 responses from ${newTaskDefinitionName}`,
+            period: 60
+          }
+        ],
+        [
+          metricNamespace,
+          "envoy_http_downstream_rq_xx",
+          "TaskDefinitionFamily",
+          newTaskDefinitionName,
+          "envoy_http_conn_manager_prefix",
+          "ingress",
+          "envoy_response_code_class",
+          "2",
+          "ClusterName",
+          clusterName,
+          {
+            id: "m2",
+            stat: "Sum",
+            label: `200 responses from ${newTaskDefinitionName}`,
+            period: 60
+          }
+        ]
+      ]
+    })
+  };
+  const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
   const [ listening, setListening ] = useState(false);
+
+  console.log("metricInput:", metricInput);
 
   useEffect(() => {
     axios.post('http://localhost:5000/deploy', deploy);
@@ -193,12 +250,13 @@ const DeployDispatchAndTrackProgress = () => {
         setEvents(parsedEvent);
         if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
           eventListener.close();
+          dispatch(readMetricWidget(metricInput, { region }));
         }
       };
 
       setListening(true);
     }
-  }, [listening, events]);
+  }, [listening, events, dispatch, metricInput]);
 
   return (
     <div>
@@ -207,6 +265,11 @@ const DeployDispatchAndTrackProgress = () => {
         {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
         <li><img className="loading-gif" src="../../loading.gif" /></li>
       </ul>
+      {
+        metricGraph
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricGraph}`}/>
+          : ""
+      }
     </div>
   );
 };
