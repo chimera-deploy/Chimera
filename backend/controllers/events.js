@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 const eventsRouter = (chimera) => {
   const router = require('express').Router();
 

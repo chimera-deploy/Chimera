@@ -32,9 +32,10 @@ const Chimera = {
   },
 
   async writeToClient(message) {
-    logger.info(message);
+    console.log(message);
     this.events.push(message);
     this.clientList.forEach(client => {
+      console.log(`sending event to client ${client.id}`)
       client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
     });
   },

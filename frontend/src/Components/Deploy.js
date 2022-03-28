@@ -188,7 +188,7 @@ const DeployDispatchAndTrackProgress = () => {
     if (!listening) {
       const eventListener = new EventSource('http://localhost:5000/events');
       eventListener.onmessage = (event) => {
-        logger.error(event);
+        console.log(event);
 
         const parsedEvent = JSON.parse(event.data);
         setEvents(parsedEvent);
