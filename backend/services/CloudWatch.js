@@ -50,7 +50,7 @@ const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName
   const start = new Date(millisecondsNow - (failureThresholdTime * 2));
   const response = await getMetricData(start, now, metricNamespace, clusterName, taskName, clientRegion);
   const values = response.MetricDataResults[0].Values;
-  console.log("values downstream/ingress 500:", values);
+  logger.info("values downstream/ingress 500:", values);
   if (values.reduce((a, v) => a + v, 0) > maxFailures) { // hard coded for testing
     throw new Error("the canary is not healthy");
   }

@@ -2,6 +2,7 @@ const AppMesh = require("../services/AppMesh");
 const ECSService = require("../services/ECSService");
 const TaskDefinition = require("../services/TaskDefinition");
 const { getIDFromArn } = require("../utils/utils");
+const logger = require('../utils/logger');
 
 const awsInfoRouter = require('express').Router();
 
@@ -40,7 +41,7 @@ awsInfoRouter.post('/mesh-details', async (request, response) => {
     await Promise.all(promises);
     response.status(200).json({ nodes, routers, routes });
   } catch (error) {
-    console.log("Error getting mesh details", error);
+    logger.error("Error getting mesh details", error);
     response.status(500).json({ error });
   }
 });
@@ -61,7 +62,7 @@ awsInfoRouter.post('/ecs-details', async (request, response) => {
       containerNames
     });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     response.status(404).json(
       { error: `unable to find service with name ${originalECSServiceName} on cluster ${clusterName}`}
     );
@@ -84,7 +85,7 @@ awsInfoRouter.post('/cw-metric-namespace', async (request, response) => {
       metricNamespace: parsedEnv.logs.metrics_collected.prometheus.emf_processor.metric_namespace,
     });
   } catch (err) {
-    console.log(err);
+    logger.errorr(err);
     response.status(404).json(
       { error: `unable to fetch metric namespace for cw agent on cluster ${request.body.clusterName}`}
     );

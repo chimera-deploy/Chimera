@@ -16,7 +16,7 @@ const eventsRouter = (chimera) => {
     };
 
     request.on('close', () => {
-      console.log(`${clientId} Connection closed`);
+      logger.info(`${clientId} Connection closed`);
       chimera.clientList = chimera.clientList.filter(client => {
         return client.id !== clientId;
       });
