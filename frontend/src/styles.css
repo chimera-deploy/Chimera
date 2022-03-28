@@ -13,6 +13,7 @@ html {
 }
 
 .header {
+  box-shadow: #0C0E21 0 0 20px -10px;
   background-color: white;
   padding: 0 5%;
   display: flex;
@@ -35,7 +36,7 @@ html {
 }
 
 .forms {
-  box-shadow: #69163e 0 0 10px 1px;
+  box-shadow: #0C0E21 0 0 10px 0px;
   max-width: 1000px;
   display: flex;
   flex-direction: column;
@@ -44,10 +45,12 @@ html {
 }
 
 h1 {
+  color:#69163e;
   border-bottom: 5px solid #69163e;
   font: 1.5rem "Koulen", sans-serif;
   letter-spacing: 0.1rem;
-  padding: 0 10px;
+  line-height: 1;
+  padding: 15px 0 0 15px;
 }
 
 .form-box {
@@ -159,6 +162,7 @@ input, select {
 }
 
 .footer {
+  box-shadow: #0C0E21 0 0 20px -10px;
   position: fixed;
   left:0;
   bottom:0;
