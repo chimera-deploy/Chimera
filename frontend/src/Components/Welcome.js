@@ -1,27 +1,46 @@
 import { useSelector, useDispatch } from "react-redux";
 import InputLabel from "./InputLabel";
+import SubmitButton from "./SubmitButton";
 
 const BaseInfoForm = () => {
   const dispatch = useDispatch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "BASE_INFO_SUBMITTED", payload: e.target })
+    e.target.reset();
+  }
 
   return (
     <>
-      <p>Please enter some information about your current AWS infrastructure.</p>
-      <form
-        onSubmit={
-          e => {
-            e.preventDefault();
-            dispatch({ type: "BASE_INFO_SUBMITTED", payload: e.target })
-            e.target.reset();
-          }
-        }
-      >
-        <InputLabel message={"AWS Account ID:"} />
-        <InputLabel message={"AWS Region:"} />
-        <InputLabel message={"App Mesh Name:"} />
-        <InputLabel message={"ECS Cluster Name:"} />
-        <input type="submit" value="Submit" />
-      </form>
+      <h1>AWS Base Infrastructure Information</h1>
+      <div className="form-box">
+        <p>Please enter some information about your current AWS infrastructure.</p>
+        <form onSubmit={handleSubmit}>
+          <dl>
+            <InputLabel
+              message={"AWS Account ID:"}
+              name={"awsAccountID"}
+              required={true}
+            />
+            <InputLabel
+              message={"AWS Region:"}
+              name={"region"}
+              required={true}
+            />
+            <InputLabel
+              message={"App Mesh Name:"}
+              name={"meshName"}
+              required={true}
+            />
+            <InputLabel
+              message={"ECS Cluster Name:"}
+              name={"clusterName"}
+              required={true}
+            />
+          </dl>
+          <SubmitButton value={"Submit"} />
+        </form>
+      </div>
     </>
   );
 };
@@ -46,7 +65,6 @@ const Welcome = () => {
 
   return (
     <div>
-      <h1>Welcome to Chimera!</h1>
       {
         !baseInfoEntered
           ? <BaseInfoForm />

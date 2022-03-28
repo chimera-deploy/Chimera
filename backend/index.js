@@ -5,10 +5,31 @@ const TaskDefinition = require("./autoCanarySDK/services/TaskDefinition");
 const { getIDFromArn } = require("./utils");
 const express = require("express");
 const cors = require("cors");
+require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 const PORT = 5000;
+
+
+app.get('/events', (request, response) => {
+  const headers = {
+    'Content-Type': 'text/event-stream',
+    'Connection': 'keep-alive',
+    'Cache-Control': 'no-cache'
+  };
+  response.writeHead(200, headers);
+  const clientId = Date.now();
+  const newClient = {
+    id: clientId,
+    response,
+  };
+
+  request.on('close', () => {
+    console.log(`${clientId} Connection closed`);
+  });
+  Chimera.registerClient(newClient);
+})
 
 app.post('/deploy', (request, response) => {
   //validate request
@@ -32,11 +53,12 @@ app.post('/setup', async (request, response) => {
 app.post('/mesh-details', async (request, response) => {
   try {
     const meshName = request.body.meshName;
+    const clientRegion =  { region: request.body.region };
     let nodes, routers, routes;
 
     const nodesPromise = new Promise(async (resolve, reject) => {
       try {
-        nodes = await AppMesh.nodeNames(meshName);
+        nodes = await AppMesh.nodeNames(meshName, clientRegion);
         resolve()
       } catch (e) {
         reject(e)
@@ -44,7 +66,7 @@ app.post('/mesh-details', async (request, response) => {
     });
     const routersPromise = new Promise(async (resolve, reject) => {
       try {
-        routers = await AppMesh.routerNames(meshName);
+        routers = await AppMesh.routerNames(meshName, clientRegion);
         resolve()
       } catch (e) {
         reject(e)
@@ -52,7 +74,7 @@ app.post('/mesh-details', async (request, response) => {
     });
     const routesPromise = new Promise(async (resolve, reject) => {
       try {
-        routes = await AppMesh.routesByRouter(meshName);
+        routes = await AppMesh.routesByRouter(meshName, clientRegion);
         resolve()
       } catch (e) {
         reject(e)
@@ -67,14 +89,16 @@ app.post('/mesh-details', async (request, response) => {
     response.status(500).json({ error });
   }
 });
-        
+
 app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
+  const clientRegion = { region: request.body.region };
+
   try {
-    const service = await ECSService.describe(clusterName, originalECSServiceName);
+    const service = await ECSService.describe(clusterName, originalECSServiceName, clientRegion);
     const serviceRegistryIds = service.serviceRegistries.map(registry => getIDFromArn(registry.registryArn));
     const taskDefinitionWithRevision = getIDFromArn(service.taskDefinition);
-    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision);
+    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision, clientRegion);
     const containerNames = taskDefinition.containerDefinitions.map(def => def.name);
     response.status(200).json({
       serviceRegistryIds,
@@ -92,9 +116,11 @@ app.post('/ecs-details', async (request, response) => {
 app.post('/cw-metric-namespace', async (request, response) => {
   try {
     const { clusterName } = request.body;
-    const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`);
+    const clientRegion = { region: request.body.region };
+
+    const service = await ECSService.describe(clusterName, `${clusterName}-cw-agent`, clientRegion);
     const taskDefinitionWithRevision = service.taskDefinition;
-    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision);
+    const taskDefinition = await TaskDefinition.describe(taskDefinitionWithRevision, clientRegion);
     const env = taskDefinition.containerDefinitions[0].environment.find(env => {
       return env.name === 'CW_CONFIG_CONTENT';
     });
@@ -112,8 +138,10 @@ app.post('/cw-metric-namespace', async (request, response) => {
 
 app.post('/ecs-services', async (request, response) => {
   const clusterName = request.body.clusterName;
+  const clientRegion = { region: request.body.region };
+
   try {
-    const services = await ECSService.listServices(clusterName);
+    const services = await ECSService.listServices(clusterName, clientRegion);
     response.status(200).json({
       ECSServiceNames: services,
     });
