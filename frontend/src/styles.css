@@ -35,23 +35,22 @@ html {
 }
 
 .forms {
+  box-shadow: #69163e 0 0 10px 1px;
   max-width: 1000px;
   display: flex;
   flex-direction: column;
-  padding: 25px;
+  margin: 25px;
   width: 100%;
 }
 
 h1 {
-  border: 5px solid #69163e;
+  border-bottom: 5px solid #69163e;
   font: 1.5rem "Koulen", sans-serif;
   letter-spacing: 0.1rem;
   padding: 0 10px;
 }
 
 .form-box {
-  border-left: 5px solid #69163e;
-  border-right: 5px solid #69163e;
   padding: 10px;
 }
 
