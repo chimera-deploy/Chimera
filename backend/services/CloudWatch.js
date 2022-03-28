@@ -1,4 +1,4 @@
-const { CloudWatchClient, GetMetricDataCommand } = require("@aws-sdk/client-cloudwatch"); // CommonJS import
+const { CloudWatchClient, GetMetricDataCommand } = require("@aws-sdk/client-cloudwatch");
 
 const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, clientRegion) => {
   const client = new CloudWatchClient(clientRegion);

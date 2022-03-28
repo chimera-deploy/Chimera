@@ -3,6 +3,8 @@ const VirtualNode = require('./services/VirtualNode');
 const TaskDefinition = require('./services/TaskDefinition');
 const VirtualRoute = require('./services/VirtualRoute');
 const ServiceDiscovery = require('./services/ServiceDiscovery');
+const logger = require('./utils/logger');
+
 const IAM = require('./services/IAM');
 const CloudWatch = require('./services/CloudWatch');
 const EC2 = require('./services/EC2');
@@ -22,19 +24,20 @@ const Chimera = {
   newVersionWeight: 0,
   oldVersionWeight: 100,
   shiftWeight: 25,
-  client: null,
+  clientList: [],
   events: [],
 
-  async registerClient(newClient) {
-    this.client = newClient;
+  async registerClient(client) {
+    this.clientList.push(client);
   },
 
   async writeToClient(message) {
     console.log(message);
     this.events.push(message);
-    if (this.client) {
-      this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
-    }
+    this.clientList.forEach(client => {
+      console.log(`sending event to client ${client.id}`)
+      client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+    });
   },
 
   async setup(config) {
@@ -47,7 +50,7 @@ const Chimera = {
       await this.createCWAgent();
     } catch (err) {
       this.writeToClient('setup failed');
-      console.log(err);
+      logger.error(err);
       throw err
     }
   },
@@ -124,7 +127,7 @@ const Chimera = {
       newVersionDeployed = true;
     } catch (err) {
       this.writeToClient('deployment failed');
-      console.log(err);
+      logger.error(err);
       await this.rollbackToOldVersion();
       this.writeToClient('rollback succesfull')
       this.writeToClient('closing connection')
@@ -275,7 +278,7 @@ const Chimera = {
       }
     } catch (err) {
       this.writeToClient('Failed to rollback to old version');
-      console.log(err);
+      logger.error(err);
     }
   },
 };
