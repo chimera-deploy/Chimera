@@ -143,12 +143,13 @@ const DeployInfo = ({ ecsServices }) => {
     clusterName,
     originalECSServiceName,
     meshName,
+    region
   } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (ecsServiceSelected) {
-      dispatch(readSpecificOptions(clusterName, originalECSServiceName, meshName));
+      dispatch(readSpecificOptions(clusterName, originalECSServiceName, meshName, region));
     }
   }, [dispatch, ecsServiceSelected, clusterName, originalECSServiceName, meshName]);
 
@@ -206,9 +207,9 @@ const DeployDispatchAndTrackProgress = () => {
 
 const Deploy = () => {
   const { deployInfoEntered, ecsServices } = useSelector(state => state.logic);
-  const { clusterName } = useSelector(state => state.deploy);
+  const { clusterName, region } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
-  useEffect(() => dispatch(readGeneralOptions(clusterName)), [dispatch, clusterName]);
+  useEffect(() => dispatch(readGeneralOptions(clusterName, region)), [dispatch, clusterName]);
 
   return (
     <div>

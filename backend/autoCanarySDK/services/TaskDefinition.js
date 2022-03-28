@@ -6,9 +6,9 @@ const {
   DeregisterTaskDefinitionCommand
 } = require("@aws-sdk/client-ecs");
 
-const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account, awslogsStreamPrefix) => {
-  const client = new ECSClient();
-  const taskDefinition = await describe(originalTaskName);
+const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account, clientRegion, awslogsStreamPrefix) => {
+  const client = new ECSClient(clientRegion);
+  const taskDefinition = await describe(originalTaskName, clientRegion);
   taskDefinition.family = taskName;
 
   const appContainerDef = taskDefinition.containerDefinitions.find(def => {
@@ -50,8 +50,8 @@ const register = async (appImageURL, appContainerName, virtualNodeName, envoyCon
   return response.taskDefinition;
 };
 
-const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole) => {
-  const client = new ECSClient();
+const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRole, clientRegion) => {
+  const client = new ECSClient(clientRegion);
   let input = {
     containerDefinitions: [
       {
@@ -130,29 +130,29 @@ const createCW = async (awsAccountID, metricNamespace, cwTaskRole, cwExecutionRo
   return response.taskDefinition;
 };
 
-const describe = async (taskDefinition) => {
+const describe = async (taskDefinition, clientRegion) => {
   const input = {
     taskDefinition,
   };
-  const client = new ECSClient();
+  const client = new ECSClient(clientRegion);
   const command = new DescribeTaskDefinitionCommand(input);
   const response = await client.send(command);
   return response.taskDefinition;
 };
 
-const listTasks = async (clusterName, taskFamily) => {
+const listTasks = async (clusterName, taskFamily, clientRegion) => {
   const input = {
     cluster: clusterName,
     family: taskFamily,
   };
-  const client = new ECSClient();
+  const client = new ECSClient(clientRegion);
   const command = new ListTasksCommand(input);
   const response = await client.send(command);
   return response.taskArns;
 };
 
-const deregister = async (taskDefinitionName) => {
-  const client = new ECSClient();
+const deregister = async (taskDefinitionName, clientRegion) => {
+  const client = new ECSClient(clientRegion);
   const deregisterTaskDefinitionCommandInput = {
     taskDefinition: taskDefinitionName,
   };

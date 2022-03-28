@@ -80,18 +80,18 @@ const logic = (state = init, action) => {
   };
 };
 
-export const readGeneralOptions = clusterName => {
+export const readGeneralOptions = (clusterName, region) => {
   return async dispatch => {
-    const ecsResponse = await ecs.getECSServices(clusterName);
+    const ecsResponse = await ecs.getECSServices(clusterName, region);
     dispatch({ type: "GET_INITIAL_USER_OPTIONS_SUCCESS", payload: ecsResponse });
   };
 };
 
-export const readSpecificOptions = (clusterName, originalECSServiceName, meshName) => {
+export const readSpecificOptions = (clusterName, originalECSServiceName, meshName, region) => {
   return async dispatch => {
-    const ecsResponse = await ecs.getECSDetails(clusterName, originalECSServiceName);
-    const meshResponse = await mesh.getMeshDetails(meshName);
-    const cwResponse = await cloudwatch.getCWMetricNamespace(clusterName);
+    const ecsResponse = await ecs.getECSDetails(clusterName, originalECSServiceName, region);
+    const meshResponse = await mesh.getMeshDetails(meshName, region);
+    const cwResponse = await cloudwatch.getCWMetricNamespace(clusterName, region);
     dispatch({ type: "GET_ADDITIONAL_USER_OPTIONS_SUCCESS", payload: { ecsResponse, meshResponse, cwResponse } });
   };
 };
