@@ -1,32 +1,30 @@
-const eventsRouter = require('express').Router();
+const eventsRouter = (chimera) => {
+  const router = require('express').Router();
 
-const clientList = [];
+  router.get('/', (request, response) => {
+    const headers = {
+      'Content-Type': 'text/event-stream',
+      'Connection': 'keep-alive',
+      'Cache-Control': 'no-cache',
+    };
 
-const registerClient = (client) => {
-  clientList.push(client);
-};
+    response.writeHead(200, headers);
+    const clientId = Date.now();
+    const newClient = {
+      id: clientId,
+      response,
+    };
 
-eventsRouter.get('/', (request, response) => {
-  const headers = {
-    'Content-Type': 'text/event-stream',
-    'Connection': 'keep-alive',
-    'Cache-Control': 'no-cache',
-  };
-  response.writeHead(200, headers);
-  const clientId = Date.now();
-  const newClient = {
-    id: clientId,
-    response,
-  };
-
-  request.on('close', () => {
-    console.log(`${clientId} Connection closed`);
+    request.on('close', () => {
+      console.log(`${clientId} Connection closed`);
+      chimera.clientList = chimera.clientList.filter(client => {
+        return client.id !== clientId;
+      });
+    });
+    
+    chimera.registerClient(newClient);
   });
-  
-  registerClient(newClient);
-});
-
-module.exports = {
-  eventsRouter,
-  clientList,
+  return router;
 };
+
+module.exports = eventsRouter;

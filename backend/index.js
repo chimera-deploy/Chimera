@@ -4,10 +4,8 @@ const ECSService = require("./services/ECSService");
 const TaskDefinition = require("./services/TaskDefinition");
 const { getIDFromArn } = require("./utils/utils");
 
-const { eventsRouter, clientList } = require('./controllers/events');
+const eventsRouter = require('./controllers/events')
 const deployRouter = require('./controllers/deploy');
-
-Chimera.registerClientList(clientList);
 
 const express = require("express");
 const cors = require("cors");
@@ -17,8 +15,8 @@ app.use(express.json());
 app.use(cors());
 const PORT = 5000;
 
-app.use('/events', eventsRouter);
-app.use('/deploy', deployRouter);
+app.use('/events', eventsRouter(Chimera));
+app.use('/deploy', deployRouter(Chimera));
 
 app.post('/setup', async (request, response) => {
   // validate request

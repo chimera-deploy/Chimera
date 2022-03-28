@@ -25,8 +25,8 @@ const Chimera = {
   clientList: [],
   events: [],
 
-  async registerClientList(clientList) {
-    this.clientList = clientList;
+  async registerClient(client) {
+    this.clientList.push(client);
   },
 
   async writeToClient(message) {
