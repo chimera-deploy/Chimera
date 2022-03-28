@@ -25,7 +25,11 @@ const SelectGeneralOptions = ({ ecsServices }) => {
         alternative={""}
         changeHandler={() => undefined}
       />
-      <InputLabel message={"Enter a new name for the updated ECS Service"} name={"newECSServiceName"}/>
+      <InputLabel
+        message={"Enter a new name for the updated ECS Service"}
+        name={"newECSServiceName"}
+        required={true}
+      />
       <input type="submit" value="Submit" />
     </form>
   );
@@ -46,7 +50,16 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
       }
     >
       <dl>
-        <InputLabel message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition})`} name={"newTaskDefinitionName"} />
+        <InputLabel
+          message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition.split(":")[0]})`}
+          name={"newTaskDefinitionName"}
+          required={true}
+        />
+        <InputLabel
+          message={`If a container definition on ${ecsDetails.originalTaskDefinition.split(":")[0]} is currently configured with an awslogs driver, enter an awslogs-stream-prefix for your new task definition; otherwise, leave this blank`}
+          name={"awslogsStreamPrefix"}
+          required={false}
+        />
         <SelectorLabel
           message={"Choose the service discovery id the new task should use"}
           array={ecsDetails.serviceRegistryIds}
@@ -68,7 +81,11 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
           alternative={""}
           changeHandler={() => undefined}
         />
-        <InputLabel message={"Enter the URL of the new image for the app container"} name={"imageURL"} />
+        <InputLabel
+          message={"Enter the URL of the new image for the app container"}
+          name={"imageURL"}
+          required={true}
+        />
         <SelectorLabel
           message={"Pick the corresponding virtual node to replace:"}
           array={meshDetails.nodes}
@@ -76,7 +93,11 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
           alternative={""}
           changeHandler={() => undefined}
         />
-        <InputLabel message={"Enter a name for your new virtual node"} name={"newNodeName"} />
+        <InputLabel
+          message={"Enter a name for your new virtual node"}
+          name={"newNodeName"}
+          required={true}
+        />
         <SelectorLabel
           message={"Pick a virtual router:"}
           array={meshDetails.routers}
@@ -91,9 +112,21 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
           alternative={"Select a router first"}
           changeHandler={() => undefined}
         />
-        <InputLabel message={"Enter the minutes of each canary interval"} name={"routeUpdateInterval"} />
-        <InputLabel message={"Enter the percentage of traffic to shift toward the canary for each interval"} name={"shiftWeight"} />
-        <InputLabel message={"How many 500 responses from the canary is tolerable?"} name={"maxFailures"} />
+        <InputLabel
+          message={"Enter the minutes of each canary interval"}
+          name={"routeUpdateInterval"}
+          required={true}
+        />
+        <InputLabel
+          message={"Enter the percentage of traffic to shift toward the canary for each interval"}
+          name={"shiftWeight"}
+          required={true}
+        />
+        <InputLabel
+          message={"How many 500 responses from the canary is tolerable?"}
+          name={"maxFailures"}
+          required={true}
+        />
       </dl>
       <input type="submit" value="Submit" />
     </form>

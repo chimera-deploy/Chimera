@@ -19,6 +19,7 @@ const init = {
   awsAccountID: "",
   region: "",
   metricNamespace: "",
+  awslogsStreamPrefix: "",
 };
 
 const deploy = (state = init, action) => {
@@ -54,20 +55,22 @@ const deploy = (state = init, action) => {
     }
     case "DEPLOY_INFO_SUBMITTED": {
       const newTaskDefinitionName = action.payload[0].value;
-      const serviceDiscoveryID = action.payload[1].value;
-      const envoyContainerName = action.payload[2].value;
-      const containerName = action.payload[3].value;
-      const imageURL = action.payload[4].value;
-      const originalNodeName = action.payload[5].value;
-      const newNodeName = action.payload[6].value;
-      const routerName = action.payload[7].value;
-      const routeName = action.payload[8].value;
-      const routeUpdateInterval = action.payload[9].value;
-      const shiftWeight = action.payload[10].value;
-      const maxFailures = action.payload[11].value;
+      const awslogsStreamPrefix = action.payload[1].value;
+      const serviceDiscoveryID = action.payload[2].value;
+      const envoyContainerName = action.payload[3].value;
+      const containerName = action.payload[4].value;
+      const imageURL = action.payload[5].value;
+      const originalNodeName = action.payload[6].value;
+      const newNodeName = action.payload[7].value;
+      const routerName = action.payload[8].value;
+      const routeName = action.payload[9].value;
+      const routeUpdateInterval = action.payload[10].value;
+      const shiftWeight = action.payload[11].value;
+      const maxFailures = action.payload[12].value;
       return {
         ...state,
         newTaskDefinitionName,
+        awslogsStreamPrefix,
         serviceDiscoveryID,
         envoyContainerName,
         containerName,

@@ -32,7 +32,9 @@ const Chimera = {
   async writeToClient(message) {
     console.log(message);
     this.events.push(message);
-    this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+    if (this.client) {
+      this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+    }
   },
 
   async setup(config) {
@@ -154,8 +156,10 @@ const Chimera = {
       this.config.meshName,
       this.config.region,
       this.config.awsAccountID,
-      this.config.clientRegion
+      this.config.clientRegion,
+      this.config.awslogsStreamPrefix
     );
+    
     this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
     this.writeToClient('created ECS service');

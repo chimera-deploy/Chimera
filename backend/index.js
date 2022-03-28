@@ -89,7 +89,7 @@ app.post('/mesh-details', async (request, response) => {
     response.status(500).json({ error });
   }
 });
-        
+
 app.post('/ecs-details', async (request, response) => {
   const { originalECSServiceName, clusterName } = request.body;
   const clientRegion = { region: request.body.region };

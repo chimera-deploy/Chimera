@@ -6,7 +6,7 @@ const {
   DeregisterTaskDefinitionCommand
 } = require("@aws-sdk/client-ecs");
 
-const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account, clientRegion) => {
+const register = async (appImageURL, appContainerName, virtualNodeName, envoyContainerName, originalTaskName, taskName, meshName, region, account, clientRegion, awslogsStreamPrefix) => {
   const client = new ECSClient(clientRegion);
   const taskDefinition = await describe(originalTaskName, clientRegion);
   taskDefinition.family = taskName;
@@ -16,9 +16,17 @@ const register = async (appImageURL, appContainerName, virtualNodeName, envoyCon
   });
   appContainerDef.image = appImageURL;
 
+  if (awslogsStreamPrefix && appContainerDef.logConfiguration && appContainerDef.logConfiguration.logDriver === "awslogs") {
+    appContainerDef.logConfiguration.options["awslogs-stream-prefix"] = awslogsStreamPrefix;
+  }
+
   const envoyContainerDef = taskDefinition.containerDefinitions.find(def => {
     return def.name === envoyContainerName;
   });
+
+  if (awslogsStreamPrefix && envoyContainerDef.logConfiguration && envoyContainerDef.logConfiguration.logDriver === "awslogs") {
+    envoyContainerDef.logConfiguration.options["awslogs-stream-prefix"] = awslogsStreamPrefix;
+  }
 
   envoyContainerDef.dockerLabels = {
     "ECS_PROMETHEUS_METRICS_PATH": "/stats/prometheus",
