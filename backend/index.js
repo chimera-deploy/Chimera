@@ -5,6 +5,8 @@ const TaskDefinition = require("./services/TaskDefinition");
 const { getIDFromArn } = require("./utils/utils");
 
 const { eventsRouter, clientList } = require('./controllers/events');
+const deployRouter = require('./controllers/deploy');
+
 Chimera.registerClientList(clientList);
 
 const express = require("express");
@@ -16,14 +18,7 @@ app.use(cors());
 const PORT = 5000;
 
 app.use('/events', eventsRouter);
-
-app.post('/deploy', (request, response) => {
-  //validate request
-  const config = request.body;
-  console.log(config);
-  Chimera.deploy(config);
-  response.status(200).send();
-});
+app.use('/deploy', deployRouter);
 
 app.post('/setup', async (request, response) => {
   // validate request
