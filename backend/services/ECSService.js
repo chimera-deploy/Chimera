@@ -1,5 +1,5 @@
 const { ECSClient, DeleteServiceCommand, CreateServiceCommand, UpdateServiceCommand, DescribeServicesCommand, ListServicesCommand } = require("@aws-sdk/client-ecs");
-const { getIDFromArn } = require("../../utils");
+const { getIDFromArn } = require("../utils/utils");
 
 const describe = async (clusterName, originalECSServiceName, clientRegion) => {
   const client = new ECSClient(clientRegion);

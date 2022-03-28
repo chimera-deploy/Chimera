@@ -1,8 +1,9 @@
-const Chimera = require("./autoCanarySDK/chimera");
-const AppMesh = require("./autoCanarySDK/services/AppMesh");
-const ECSService = require("./autoCanarySDK/services/ECSService");
-const TaskDefinition = require("./autoCanarySDK/services/TaskDefinition");
-const { getIDFromArn } = require("./utils");
+const Chimera = require("./chimera");
+const AppMesh = require("./services/AppMesh");
+const ECSService = require("./services/ECSService");
+const TaskDefinition = require("./services/TaskDefinition");
+const { getIDFromArn } = require("./utils/utils");
+
 const express = require("express");
 const cors = require("cors");
 require('dotenv').config();

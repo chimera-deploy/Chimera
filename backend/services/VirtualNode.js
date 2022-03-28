@@ -1,4 +1,4 @@
-const { AppMeshClient, CreateVirtualNodeCommand, DeleteVirtualNodeCommand, DescribeVirtualNodeCommand } = require("@aws-sdk/client-app-mesh")
+const { AppMeshClient, CreateVirtualNodeCommand, DeleteVirtualNodeCommand, DescribeVirtualNodeCommand } = require("@aws-sdk/client-app-mesh");
 
 const create = async (meshName, virtualNodeName, originalNodeName, taskName, clientRegion) => {
   const appMeshClient = new AppMeshClient(clientRegion);
@@ -16,7 +16,7 @@ const create = async (meshName, virtualNodeName, originalNodeName, taskName, cli
     });
 
     if (needToAdd) {
-      newAttributes.push({ key: "ECS_TASK_DEFINITION_FAMILY", value: taskName })
+      newAttributes.push({ key: "ECS_TASK_DEFINITION_FAMILY", value: taskName });
     }
 
     originalNode.spec.serviceDiscovery.awsCloudMap.attributes = newAttributes;
