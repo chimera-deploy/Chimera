@@ -96,6 +96,7 @@ input:-webkit-autofill:active,
 input:-internal-autofill-selected,
 input:-internal-autofill-previewed {
     background-color: #85bdae !important;
+    box-shadow: 0 0 0 30px #85bdae inset, rgba(0, 0, 0, 0.3) 0 2px 4px !important;
     -webkit-box-shadow: 0 0 0 30px #85bdae inset, rgba(0, 0, 0, 0.3) 0 2px 4px !important;
 }
 
@@ -156,7 +157,6 @@ input, select {
 
 .loading-gif {
   max-height: 250px;
-
 }
 
 .footer {
@@ -166,23 +166,10 @@ input, select {
   right:0;
   background-color: white;
   padding: 15px 0;
+  text-align: center;
 }
 
-.footer ul {
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-}
-
-.developer {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.developer-image {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+.footer a {
+  color: #cb4a25;
+  text-decoration: none;
 }
