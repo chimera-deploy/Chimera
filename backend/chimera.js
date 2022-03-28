@@ -22,19 +22,19 @@ const Chimera = {
   newVersionWeight: 0,
   oldVersionWeight: 100,
   shiftWeight: 25,
-  client: null,
+  clientList: [],
   events: [],
 
-  async registerClient(newClient) {
-    this.client = newClient;
+  async registerClientList(clientList) {
+    this.clientList = clientList;
   },
 
   async writeToClient(message) {
     console.log(message);
     this.events.push(message);
-    if (this.client) {
-      this.client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
-    }
+    this.clientList.forEach(client => {
+      client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+    });
   },
 
   async setup(config) {

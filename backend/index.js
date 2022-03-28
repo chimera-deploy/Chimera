@@ -4,6 +4,9 @@ const ECSService = require("./services/ECSService");
 const TaskDefinition = require("./services/TaskDefinition");
 const { getIDFromArn } = require("./utils/utils");
 
+const { eventsRouter, clientList } = require('./controllers/events');
+Chimera.registerClientList(clientList);
+
 const express = require("express");
 const cors = require("cors");
 require('dotenv').config();
@@ -12,25 +15,7 @@ app.use(express.json());
 app.use(cors());
 const PORT = 5000;
 
-
-app.get('/events', (request, response) => {
-  const headers = {
-    'Content-Type': 'text/event-stream',
-    'Connection': 'keep-alive',
-    'Cache-Control': 'no-cache'
-  };
-  response.writeHead(200, headers);
-  const clientId = Date.now();
-  const newClient = {
-    id: clientId,
-    response,
-  };
-
-  request.on('close', () => {
-    console.log(`${clientId} Connection closed`);
-  });
-  Chimera.registerClient(newClient);
-})
+app.use('/events', eventsRouter);
 
 app.post('/deploy', (request, response) => {
   //validate request
