@@ -40,7 +40,12 @@ const Chimera = {
     });
   },
 
+  clearEvents() {
+    this.events = [];
+  },
+
   async setup(config) {
+    this.clearEvents();
     this.config = config;
     this.config.clientRegion = {region: config.region };
 
@@ -111,6 +116,7 @@ const Chimera = {
   },
 
   async deploy(config) {
+    this.clearEvents();
     let newVersionDeployed = false;
     this.config = config;
     this.config.clientRegion = { region: this.config.region }
