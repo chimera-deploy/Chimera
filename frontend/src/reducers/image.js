@@ -12,6 +12,12 @@ const image = (state = init, action) => {
         metricWidget: action.payload.metricWidget.b64
       };
     }
+    case "TO_WELCOME": {
+      return {
+        ...state,
+        metricWidget: ""
+      };
+    }
     default: {
       return state;
     }
