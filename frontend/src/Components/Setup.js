@@ -45,8 +45,6 @@ const SetupInfoForm = () => {
   );
 };
 
-// S'pose we'll dispatch a thunky action creator in this function
-// it'll send a message to the backend to do its thing and track the progress
 const SetupDispatchAndTrackProgress = () => {
   const { setup } = useSelector(state => state);
   axios.post('http://localhost:5000/setup', setup)

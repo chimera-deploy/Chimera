@@ -2,7 +2,7 @@ const logger = require('../utils/logger');
 
 const eventsRouter = (chimera) => {
   const router = require('express').Router();
-  router.post('/setup', async (request, response) => {
+  router.post('/', async (request, response) => {
     const config = request.body;
     try {
       const result = await chimera.setup(config);

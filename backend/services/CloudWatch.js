@@ -1,4 +1,11 @@
-const { CloudWatchClient, GetMetricDataCommand } = require("@aws-sdk/client-cloudwatch");
+const { CloudWatchClient, GetMetricDataCommand, GetMetricWidgetImageCommand } = require("@aws-sdk/client-cloudwatch");
+
+const getMetricWidgetImage = async (metricInput, clientRegion) => {
+  const client = new CloudWatchClient(clientRegion);
+  const command = new GetMetricWidgetImageCommand(metricInput);
+  const response = await client.send(command);
+  return response.MetricWidgetImage;
+};
 
 const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, clientRegion) => {
   const client = new CloudWatchClient(clientRegion);
@@ -51,11 +58,12 @@ const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName
   const response = await getMetricData(start, now, metricNamespace, clusterName, taskName, clientRegion);
   const values = response.MetricDataResults[0].Values;
   console.log("values downstream/ingress 500:", values);
-  if (values.reduce((a, v) => a + v, 0) > maxFailures) { // hard coded for testing
+  if (values.reduce((a, v) => a + v, 0) > maxFailures) {
     throw new Error("the canary is not healthy");
   }
 };
 
 module.exports = {
   getHealthCheck,
+  getMetricWidgetImage,
 };
