@@ -129,7 +129,7 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
               required={true}
             />
             <InputLabel
-              message={"How many 5xx responses from the canary are tolerable?"}
+              message={"How many 5xx responses from the canary are tolerable within an interval?"}
               name={"maxFailures"}
               required={true}
             />
