@@ -1,6 +1,7 @@
 const AppMesh = require("../services/AppMesh");
 const ECSService = require("../services/ECSService");
 const TaskDefinition = require("../services/TaskDefinition");
+const CloudWatch = require("../services/CloudWatch");
 const { getIDFromArn } = require("../utils/utils");
 const logger = require('../utils/logger');
 
@@ -85,9 +86,27 @@ awsInfoRouter.post('/cw-metric-namespace', async (request, response) => {
       metricNamespace: parsedEnv.logs.metrics_collected.prometheus.emf_processor.metric_namespace,
     });
   } catch (err) {
-    logger.errorr(err);
+    logger.error(err);
     response.status(404).json(
       { error: `unable to fetch metric namespace for cw agent on cluster ${request.body.clusterName}`}
+    );
+  }
+});
+
+awsInfoRouter.post('/cw-metric-widget', async (request, response) => {
+  const { metricInput } = request.body;
+  const clientRegion = { region: request.body.region };
+  try {
+    const metricWidgetImage = await CloudWatch.getMetricWidgetImage(metricInput, clientRegion);
+    const u8 = new Uint8Array(metricWidgetImage);
+    const b64 = Buffer.from(u8).toString('base64');
+    response.status(200).json({
+      b64
+    });
+  } catch (err) {
+    logger.error(err);
+    response.status(404).json(
+      { error: `unable to fetch metric widget` }
     );
   }
 });

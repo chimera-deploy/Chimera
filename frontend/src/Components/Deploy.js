@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
+import { readMetricWidget } from "../reducers/image";
 import InputLabel from "./InputLabel";
 import SelectorLabel from "./SelectorLabel";
 import SubmitButton from "./SubmitButton";
@@ -128,7 +129,7 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
               required={true}
             />
             <InputLabel
-              message={"How many 500 responses from the canary is tolerable?"}
+              message={"How many 5xx responses from the canary are tolerable within an interval?"}
               name={"maxFailures"}
               required={true}
             />
@@ -158,7 +159,7 @@ const DeployInfo = ({ ecsServices }) => {
     if (ecsServiceSelected) {
       dispatch(readSpecificOptions(clusterName, originalECSServiceName, meshName, region));
     }
-  }, [dispatch, ecsServiceSelected, clusterName, originalECSServiceName, meshName]);
+  }, [dispatch, ecsServiceSelected, clusterName, originalECSServiceName, meshName, region]);
 
   return (
     <>
@@ -173,10 +174,18 @@ const DeployInfo = ({ ecsServices }) => {
   );
 };
 
-// S'pose we'll dispatch a thunky action creator in this function
-// it'll send a message to the backend to do its thing and track the progress
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
+  const { metricWidget } = useSelector(state => state.image);
+  const {
+    region,
+    shiftWeight,
+    routeUpdateInterval,
+    metricNamespace,
+    newTaskDefinitionName,
+    clusterName
+  } = useSelector(state => state.deploy);
+  const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
   const [ listening, setListening ] = useState(false);
 
@@ -194,12 +203,13 @@ const DeployDispatchAndTrackProgress = () => {
         setEvents(parsedEvent);
         if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
           eventListener.close();
+          dispatch(readMetricWidget(shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region));
         }
       };
 
       setListening(true);
     }
-  }, [listening, events]);
+  }, [listening, events, dispatch, shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region]);
 
   return (
     <div>
@@ -208,6 +218,11 @@ const DeployDispatchAndTrackProgress = () => {
         {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
         <li><img className="loading-gif" src="../../loading.gif" /></li>
       </ul>
+      {
+        metricWidget
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricWidget}`} />
+          : ""
+      }
     </div>
   );
 };
@@ -216,7 +231,7 @@ const Deploy = () => {
   const { deployInfoEntered, ecsServices } = useSelector(state => state.logic);
   const { clusterName, region } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
-  useEffect(() => dispatch(readGeneralOptions(clusterName, region)), [dispatch, clusterName]);
+  useEffect(() => dispatch(readGeneralOptions(clusterName, region)), [dispatch, clusterName, region]);
 
   return (
     <div>
