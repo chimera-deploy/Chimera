@@ -1,0 +1,17 @@
+version: '3'
+services:
+  frontend:
+    container_name: chimeraFrontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - '3000:80'
+  backend:
+    container_name: chimeraBackend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+
