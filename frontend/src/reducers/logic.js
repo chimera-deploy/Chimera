@@ -89,9 +89,36 @@ export const readGeneralOptions = (clusterName, region) => {
 
 export const readSpecificOptions = (clusterName, originalECSServiceName, meshName, region) => {
   return async dispatch => {
-    const ecsResponse = await ecs.getECSDetails(clusterName, originalECSServiceName, region);
-    const meshResponse = await mesh.getMeshDetails(meshName, region);
-    const cwResponse = await cloudwatch.getCWMetricNamespace(clusterName, region);
+    let ecsResponse, meshResponse, cwResponse;
+
+    const ecsPromise = new Promise(async (resolve, reject) => {
+      try {
+        ecsResponse = await ecs.getECSDetails(clusterName, originalECSServiceName, region);
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    const meshPromise = new Promise(async (resolve, reject) => {
+      try {
+        meshResponse = await mesh.getMeshDetails(meshName, region);
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    const cwPromise = new Promise(async (resolve, reject) => {
+      try {
+        cwResponse = await cloudwatch.getCWMetricNamespace(clusterName, region);
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    await Promise.all([ecsPromise, meshPromise, cwPromise]);
     dispatch({ type: "GET_ADDITIONAL_USER_OPTIONS_SUCCESS", payload: { ecsResponse, meshResponse, cwResponse } });
   };
 };
