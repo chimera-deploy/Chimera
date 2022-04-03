@@ -26,6 +26,7 @@ const Chimera = {
   shiftWeight: 25,
   clientList: [],
   events: [],
+  metricsWidget: "",
 
   async registerClient(client) {
     this.clientList.push(client);
@@ -36,7 +37,8 @@ const Chimera = {
     this.events.push(message);
     this.clientList.forEach(client => {
       console.log(`sending event to client ${client.id}`)
-      client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+      const data = { events: this.events, metricsWidget: this.metricsWidget };
+      client.response.write(`data: ${JSON.stringify(data)}\n\n`);
     });
   },
 
@@ -168,7 +170,7 @@ const Chimera = {
       this.config.clientRegion,
       this.config.awslogsStreamPrefix
     );
-    
+
     this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
     this.writeToClient('created ECS service');
@@ -236,7 +238,7 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
       [
         {
           virtualNode: this.virtualNode.virtualNodeName,
@@ -257,7 +259,7 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
         [
           {
             virtualNode: this.config.originalNodeName,
