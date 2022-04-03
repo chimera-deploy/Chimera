@@ -94,7 +94,7 @@ const awsInfoRouter = (chimera) => {
     }
   });
 
-  router.post('/cw-metric-widget', async (request, response) => {
+  router.get('/cw-metric-widget', async (request, response) => {
     const clientRegion = { region: chimera.config.region };
     try {
       const metricWidgetImage = await CloudWatch.getMetricWidgetImage(chimera.config, clientRegion);

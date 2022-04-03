@@ -198,18 +198,20 @@ const DeployDispatchAndTrackProgress = () => {
       const eventListener = new EventSource('http://localhost:5000/events');
       eventListener.onmessage = (event) => {
         console.log(event);
-
-        const parsedEvent = JSON.parse(event.data);
-        setEvents(parsedEvent);
-        if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
+        const data = JSON.parse(event.data);
+        const events = data.events;
+        const metricWidget = data.metricWidget;
+        setEvents(events);
+        if (events[events.length - 1] === 'closing connection') {
+          console.log("got 'closing connection' message")
           eventListener.close();
-          dispatch(readMetricWidget(shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region));
+          dispatch(readMetricWidget());
         }
       };
 
       setListening(true);
     }
-  }, [listening, events, dispatch, shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region]);
+  }, [listening, events, dispatch]);
 
   return (
     <div>

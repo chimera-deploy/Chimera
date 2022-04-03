@@ -24,10 +24,10 @@ const image = (state = init, action) => {
   };
 };
 
-export const readMetricWidget = (shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region) => {
+export const readMetricWidget = () => {
   return async dispatch => {
-
-    const metricWidget = await cloudwatch.getCWMetricWidget(metricInput, region);
+    console.log("requesting image")
+    const metricWidget = await cloudwatch.getCWMetricWidget();
     dispatch({ type: "GET_METRIC_WIDGET_SUCCESS", payload: { metricWidget } });
   };
 };

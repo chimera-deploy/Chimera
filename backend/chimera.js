@@ -37,8 +37,8 @@ const Chimera = {
     this.events.push(message);
     this.clientList.forEach(client => {
       console.log(`sending event to client ${client.id}`)
-      const data = { events: this.events, metricsWidget: this.metricsWidget };
-      client.response.write(`data: ${JSON.stringify(data)}\n\n`);
+      const data = JSON.stringify({ events: this.events, metricsWidget: this.metricsWidget });
+      client.response.write(`data: ${data}\n\n`);
     });
   },
 
@@ -226,26 +226,27 @@ const Chimera = {
           reject(err);
         }
       }, routeUpdateInterval);
+
+      healthCheckLoop = setInterval(async () =>{
+        try {
+          if (healthCheck !== undefined) {
+            await healthCheck(
+              routeUpdateInterval,
+              this.config.metricNamespace,
+              this.config.clusterName,
+              this.taskName,
+              maxFailures,
+              this.config.clientRegion
+            );
+          }
+        } catch (err) {
+          clearInterval(routeUpdateLoop);
+          clearInterval(healthCheckLoop);
+          reject(err);
+        }
+      }, 1000 * 60);
     });
 
-    healthCheckLoop = setInterval(async () =>{
-      try {
-        if (healthCheck !== undefined) {
-          await healthCheck(
-            routeUpdateInterval,
-            this.config.metricNamespace,
-            this.config.clusterName,
-            this.taskName,
-            maxFailures,
-            this.config.clientRegion
-          );
-        }
-      } catch (err) {
-        clearInterval(routeUpdateLoop);
-        clearInterval(healthCheckLoop);
-        reject(err);
-      }
-    }, 1000 * 60);
     await p;
   },
 
