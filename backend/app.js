@@ -18,7 +18,7 @@ if (process.env.NODE_ENV !== 'test') {
 app.use('/events', eventsRouter(Chimera));
 app.use('/deploy', deployRouter(Chimera));
 app.use('/setup', setupRouter(Chimera));
-app.use('/awsinfo', awsInfoRouter);
+app.use('/awsinfo', awsInfoRouter(Chimera));
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
