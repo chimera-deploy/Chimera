@@ -9,6 +9,8 @@ const IAM = require('./services/IAM');
 const CloudWatch = require('./services/CloudWatch');
 const EC2 = require('./services/EC2');
 
+const HEALTHCHECK_INTERVAL = 1000 * 60;
+
 const Chimera = {
   virtualNode: null,
   taskDefinition: null,
@@ -232,7 +234,7 @@ const Chimera = {
         try {
           if (healthCheck !== undefined) {
             await healthCheck(
-              routeUpdateInterval,
+              HEALTHCHECK_INTERVAL,
               this.config.metricNamespace,
               this.config.clusterName,
               this.taskName,
@@ -247,7 +249,7 @@ const Chimera = {
           clearInterval(healthCheckLoop);
           reject(err);
         }
-      }, 1000 * 60);
+      }, HEALTHCHECK_INTERVAL);
     });
 
     await p;
