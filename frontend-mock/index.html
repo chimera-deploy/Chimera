@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="reset.css">
+  <link rel="stylesheet" href="styles.css">
+  <title>Chimera</title>
+</head>
+<body>
+  <header>
+    <div class="banner">
+      <img src="img/logo.png" alt="Chimera logo">
+      <img src="img/logo_name.png" alt="Chimera Logo Name">
+    </div>
+  </header>
+  <main>
+    <div class="main-row">
+      <div class="form-box no-border" id="basic-info-form">
+        <h1>AWS Base Infrastructure Information</h1>
+        <form>
+            <dl>
+              <div class="input-line">
+                <dt><label>AWS Account ID:</label></dt>
+                <dd><input type="text" /></dd>
+              </div>
+            </dl>
+            <dl>
+              <div class="input-line">
+                <dt><label>AWS Region:</label></dt>
+                <dd><input type="text" /></dd>
+              </div>
+            </dl>
+            <dl>
+              <div class="input-line">
+                <dt><label>App Mesh Name:</label></dt>
+                <dd><input type="text" /></dd>
+              </div>
+            </dl>
+            <dl>
+              <div class="input-line">
+                <dt><label>ECS Cluster Name:</label></dt>
+                <dd><input type="text" /></dd>
+              </div>
+            </dl>
+            <div class="input-line">
+              <dt></dt>
+              <dd><input class="button" type="submit" /></dd>
+            </div>
+        </form>
+      </div>
+      <div class="form-box no-border" id="main-button-container">
+        <button>Setup</button>
+        <button>Deploy</button>
+      </div>
+    </div>
+    
+    <div class="main-row">
+      <div class="form-box no-border" id="setup-info-form">
+        <h1>Chimera Setup Configuration</h1>
+        <form>
+          <dl>
+            <div class="input-line">
+              <dt><label>Metric Namespace Name:</label></dt>
+              <dd><input type="text" /></dd>
+            </div>
+          </dl>
+          <dl>
+            <div class="input-line">
+              <dt><label>VPC ID:</label></dt>
+              <dd><input type="text" /></dd>
+            </div>
+          </dl>
+          <div class="input-line">
+            <dt>Subnet IDs:</dt>
+            <div class="subnet-inputs">
+              <dd><input type="text"/></dd>
+              <dd><input type="text"/></dd>
+              <dd><input type="text"/></dd>
+              <dd><input type="text"/></dd>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- <div class="form-box no-border" id="service-selection-form">
+        <h1>ECS Service Selection</h1>
+        <form>
+          <dl>
+            <div class="input-line">
+              <dt>Select the ECS service to update:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt><label>Enter the name of the updated service:</label></dt>
+              <dd><input type="text" /></dd>
+            </div>
+          </dl>
+        </form>
+      </div>
+      <div class="form-box no-border" id="deployment-config-form">
+        <h1>Deployment Configuration</h1>
+        <form>
+          <dl>
+            <div class="input-line">
+              <dt>
+                <label>New Task Definition Family Name:</label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>
+                <label>AWS Log Stream Prefix:</label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>Service Registry ID:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>Envoy Container Name:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>App Container Name:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>
+                <label>New Container Image URI: </label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>Virtual Node to Replace:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>
+                <label>New Virtual Node Name:</label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>Select a Virtual Router:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>Select a Virtual Route:</dt>
+              <dd>
+                <select>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>
+                <label>Canary Interval Duration in Minutes:</label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>
+                <label>Traffic Shift Percentage:</label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt>
+                <label>5xx Response Threshold:</label>
+              </dt>
+              <dd>
+                <input type="text"/>
+              </dd>
+            </div>
+            <div class="input-line">
+              <dt></dt>
+              <dd><input class="button" type="submit" /></dd>
+            </div>
+          </dl>
+        </form>
+      </div>
+    </div> -->
+  </main>
+  <div>
+
+  </div>
+</body>
+</html>

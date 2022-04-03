@@ -13,18 +13,33 @@ const App = () => {
       <Header />
       <div className="main">
         <div className="forms">
+          <Welcome />
           {
-            page === "welcome"
-              ? <Welcome />
-              : page === "setup"
-                ? <Setup />
-                : <Deploy />
+            page === 'setup' ? <Setup /> : page === 'deploy' ? <Deploy /> : null
           }
         </div>
       </div>
       <Footer />
     </div>
   );
+
+  // return (
+  //   <div>
+  //     <Header />
+  //     <div className="main">
+  //       <div className="forms">
+  //         {
+  //           page === "welcome"
+  //             ? <Welcome />
+  //             : page === "setup"
+  //               ? <Setup />
+  //               : <Deploy />
+  //         }
+  //       </div>
+  //     </div>
+  //     <Footer />
+  //   </div>
+  // );
 };
 
 export default App;

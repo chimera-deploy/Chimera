@@ -13,23 +13,22 @@ const SetupInfoForm = () => {
 
   return (
     <>
-      <h1>Setup Prometheus-configured CloudWatch Agent</h1>
-      <div className="form-box">
-        <p>Please enter some additional information.</p>
+      <div className="form-box half-width">
+        <h1>Prepare Cluster for Chimera</h1>
         <form onSubmit={handleSubmit}>
           <dl>
             <InputLabel
-              message={"Enter some text for the metric namespace associated with the CloudWatch agent"}
+              message={"New metric namespace name:"}
               name={"metricNamespace"}
               required={true}
             />
             <InputLabel
-              message={"Enter the ID of VPC"}
+              message={"VPC ID:"}
               name={"vpcID"}
               required={true}
             />
             <div className="input-line">
-              <dt>Enter at least one subnet within which the CloudWatch agent may be deployed:</dt>
+              <dt>Enter subnet(s) for the CloudWatch agent:</dt>
               <div className="subnet-inputs">
                 <dd><input type="text" name="subnet1" required={true} /></dd>
                 <dd><input type="text" name="subnet2" required={false} /></dd>
@@ -49,8 +48,8 @@ const SetupDispatchAndTrackProgress = () => {
   const { setup } = useSelector(state => state);
   axios.post('http://localhost:5000/setup', setup)
   return (
-    <div>
-      <p>Setting up cloudwatch agent!</p>
+    <div className="form-box">
+      <h1 className="no-border">CloudWatch Agent configured. Ready for deployment.</h1>
     </div>
   );
 };
@@ -60,11 +59,7 @@ const Setup = () => {
   const dispatch = useDispatch();
 
   return (
-    <div>
-      <h2>Here you will deploy a prometheus-configured cloudwatch agent!</h2>
-      <button onClick={() => dispatch({ type: "TO_WELCOME" })}>
-        Take me back!
-      </button>
+    <div className="main-row">
       {
         !setupInfoEntered
           ? <SetupInfoForm />

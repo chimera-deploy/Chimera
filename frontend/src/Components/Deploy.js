@@ -213,7 +213,7 @@ const DeployDispatchAndTrackProgress = () => {
 
   return (
     <div>
-      <p>Deploying!</p>
+      <h1 className="no-border">Deploying!</h1>
       <ul className="deployment-event-list">
         {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
         <li><img className="loading-gif" src="../../loading.gif" /></li>
@@ -235,10 +235,6 @@ const Deploy = () => {
 
   return (
     <div>
-      <h2>Here you will deploy a canary! Good luck little guy!</h2>
-      <button onClick={() => dispatch({ type: "TO_WELCOME" })}>
-        Take me back!
-      </button>
       {
         !deployInfoEntered
           ? ecsServices

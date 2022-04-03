@@ -8,12 +8,7 @@ html {
   height: 100%;
 }
 
-#root {
-  position: relative;
-  padding-bottom: 100px;
-}
-
-.header {
+header {
   box-shadow: #0C0E21 0 0 20px -10px;
   background-color: white;
   padding: 0 5%;
@@ -21,43 +16,20 @@ html {
   justify-content: center;
 }
 
-.header-container {
+.banner {
   max-width: 1000px;
   width: 100%;
 }
 
-.header img {
-  display: inline-block;
+.banner img {
   height: 100px;
-}
-
-.main {
-  display: flex;
-  justify-content: center;
+  display: inline-block;
 }
 
 .main-row {
   display: flex;
   justify-content: center;
   width: 100%;
-}
-
-.forms {
-  /* box-shadow: #0C0E21 0 0 10px 0px; */
-  max-width: 1000px;
-  display: flex;
-  flex-direction: column;
-  margin: 25px;
-  width: 100%;
-}
-
-#main-button-container {
-  justify-content: space-between;
-}
-
-#main-button-container button {
-  max-width: 150px;
-  height: 50px;
 }
 
 h1 {
@@ -67,24 +39,40 @@ h1 {
   letter-spacing: 0.1rem;
   line-height: 1;
   padding: 15px 0 0 15px;
+  width: 100%;
 }
 
 .form-box {
   padding: 10px;
   box-shadow: #0C0E21 0 0 10px 0px;
+  max-width: 40%;
   display: flex;
-  border-radius: 5px;
   flex-direction: column;
   align-items: center;
   margin-top: 25px;
   width: 100%;
 }
 
-.form-box p {
-  border-bottom: 2px solid #0C0E21;
-  font-size: 1.2rem;
-  text-align: center;
-  padding: 10px;
+form {
+  width: 100%;
+}
+
+.no-border {
+  box-shadow: none;
+}
+
+#setup-info-form {
+  width: 80%;
+  max-width: 80%;
+}
+
+#main-button-container {
+  justify-content: center;
+}
+
+#main-button-container button {
+  max-width: 150px;
+  height: 50px;
 }
 
 dl {
@@ -112,6 +100,7 @@ input, select {
   border-radius: 5px;
   box-shadow: rgba(0, 0, 0, 0.3) 0 2px 4px;
   padding: 7px;
+  width: 100%;
 }
 
 input:-webkit-autofill,
@@ -149,11 +138,6 @@ input:-internal-autofill-previewed {
   box-shadow: rgba(253, 76, 0, 0.5) 0 3px 8px;
 }
 
-.no-border {
-  box-shadow: none;
-  border: none;
-}
-
 button:disabled {
   cursor: default;
   background-image: none;
@@ -170,61 +154,4 @@ button:disabled {
 .subnet-inputs > dd {
   width: 100%;
   margin-top: 5px;
-}
-
-input, select {
-  width: 100%;
-}
-
-.deployment-event-list {
-  border: 5px solid #69163e;
-  max-width: 1000px;
-  display: flex;
-  flex-direction: column;
-  padding: 25px;
-  width: 100%;
-}
-
-.deployment-event-list :nth-last-child(2) {
-  font-weight: bold;
-}
-
-.deployment-event {
-  display: block;
-  width: 50%;
-  margin-bottom: 10px;
-}
-
-.loading-gif {
-  max-height: 250px;
-}
-
-.footer {
-  box-shadow: #0C0E21 0 0 20px -10px;
-  position: fixed;
-  left:0;
-  bottom:0;
-  right:0;
-  background-color: white;
-  padding: 15px 0;
-  text-align: center;
-}
-
-.footer a {
-  color: #cb4a25;
-  text-decoration: none;
-}
-
-.mainButtonContainer {
-  display: flex;
-  justify-content: center;
-}
-
-.mainButtonContainer button {
-  max-width: 150px;
-  height: 50px;
-}
-
-.half-width {
-  min-width: 50%;
 }
