@@ -95,10 +95,9 @@ const awsInfoRouter = (chimera) => {
   });
 
   router.post('/cw-metric-widget', async (request, response) => {
-    const { metricInput } = request.body;
-    const clientRegion = { region: request.body.region };
+    const clientRegion = { region: chimera.config.region };
     try {
-      const metricWidgetImage = await CloudWatch.getMetricWidgetImage(metricInput, clientRegion);
+      const metricWidgetImage = await CloudWatch.getMetricWidgetImage(chimera.config, clientRegion);
       const u8 = new Uint8Array(metricWidgetImage);
       const b64 = Buffer.from(u8).toString('base64');
       response.status(200).json({
