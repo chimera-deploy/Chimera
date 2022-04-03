@@ -205,21 +205,13 @@ const Chimera = {
         reject(err);
       }
 
-      let intervalID;
-      intervalID = setInterval(async () => {
+      let healthCheckLoop;
+      let routeUpdateLoop;
+      routeUpdateLoop = setInterval(async () => {
         try {
-          if (healthCheck !== undefined) {
-            await healthCheck(
-              routeUpdateInterval,
-              this.config.metricNamespace,
-              this.config.clusterName,
-              this.taskName,
-              maxFailures,
-              this.config.clientRegion
-            );
-          }
           if (newVersionWeight === 100) {
-            clearInterval(intervalID);
+            clearInterval(routeUpdateLoop);
+            clearInterval(healthCheckLoop);
             resolve();
             return
           }
@@ -229,11 +221,31 @@ const Chimera = {
 
           await this.updateRoute(newVersionWeight, originalVersionWeight);
         } catch (err) {
-          clearInterval(intervalID);
+          clearInterval(routeUpdateLoop);
+          clearInterval(healthCheckLoop);
           reject(err);
         }
       }, routeUpdateInterval);
     });
+
+    healthCheckLoop = setInterval(async () =>{
+      try {
+        if (healthCheck !== undefined) {
+          await healthCheck(
+            routeUpdateInterval,
+            this.config.metricNamespace,
+            this.config.clusterName,
+            this.taskName,
+            maxFailures,
+            this.config.clientRegion
+          );
+        }
+      } catch (err) {
+        clearInterval(routeUpdateLoop);
+        clearInterval(healthCheckLoop);
+        reject(err);
+      }
+    }, 1000 * 60);
     await p;
   },
 
