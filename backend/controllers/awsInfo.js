@@ -94,23 +94,6 @@ const awsInfoRouter = (chimera) => {
     }
   });
 
-  router.get('/cw-metric-widget', async (request, response) => {
-    const clientRegion = { region: chimera.config.region };
-    try {
-      const metricWidgetImage = await CloudWatch.getMetricWidgetImage(chimera.config, clientRegion);
-      const u8 = new Uint8Array(metricWidgetImage);
-      const b64 = Buffer.from(u8).toString('base64');
-      response.status(200).json({
-        b64
-      });
-    } catch (err) {
-      logger.error(err);
-      response.status(404).json(
-        { error: `unable to fetch metric widget` }
-      );
-    }
-  });
-
   router.post('/ecs-services', async (request, response) => {
     const clusterName = request.body.clusterName;
     const clientRegion = { region: request.body.region };

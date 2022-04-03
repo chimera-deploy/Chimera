@@ -8,15 +8,8 @@ const getCWMetricNamespace = async (clusterName, region) => {
   return response.data;
 };
 
-const getCWMetricWidget = async () => {
-  const response = await axios.get(`${BASEURL}:${PORT}/awsinfo/cw-metric-widget`);
-  console.log("response from backend: ", response.data)
-  return response.data;
-};
-
 const cloudwatch = {
   getCWMetricNamespace,
-  getCWMetricWidget,
 };
 
 export default cloudwatch;

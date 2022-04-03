@@ -2,7 +2,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
-import { readMetricWidget } from "../reducers/image";
 import InputLabel from "./InputLabel";
 import SelectorLabel from "./SelectorLabel";
 import SubmitButton from "./SubmitButton";
@@ -176,7 +175,6 @@ const DeployInfo = ({ ecsServices }) => {
 
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
-  //const { metricWidget } = useSelector(state => state.image);
   const {
     region,
     shiftWeight,
@@ -208,7 +206,6 @@ const DeployDispatchAndTrackProgress = () => {
         }
         if (events[events.length - 1] === 'closing connection') {
           eventListener.close();
-          //dispatch(readMetricWidget());
         }
       };
 
