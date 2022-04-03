@@ -1,6 +1,6 @@
 const { CloudWatchClient, GetMetricDataCommand, GetMetricWidgetImageCommand } = require("@aws-sdk/client-cloudwatch");
 
-const getMetricWidgetImage = async (config, clientRegion) => {
+const getMetricWidgetImage = async (config) => {
   const metricInput = {
     MetricWidget: JSON.stringify({
       width: 1200,
@@ -47,10 +47,12 @@ const getMetricWidgetImage = async (config, clientRegion) => {
       ]
     })
   };
-  const client = new CloudWatchClient(clientRegion);
+  const client = new CloudWatchClient(config.clientRegion);
   const command = new GetMetricWidgetImageCommand(metricInput);
   const response = await client.send(command);
-  return response.MetricWidgetImage;
+  const u8 = new Uint8Array(response.MetricWidgetImage);
+  const b64 = Buffer.from(u8).toString('base64');
+  return b64;
 };
 
 const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, clientRegion) => {

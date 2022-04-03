@@ -176,7 +176,7 @@ const DeployInfo = ({ ecsServices }) => {
 
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
-  const { metricWidget } = useSelector(state => state.image);
+  //const { metricWidget } = useSelector(state => state.image);
   const {
     region,
     shiftWeight,
@@ -187,6 +187,7 @@ const DeployDispatchAndTrackProgress = () => {
   } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
+  const [ metricsWidget, setMetricsWidget ] = useState("");
   const [ listening, setListening ] = useState(false);
 
   useEffect(() => {
@@ -199,19 +200,21 @@ const DeployDispatchAndTrackProgress = () => {
       eventListener.onmessage = (event) => {
         console.log(event);
         const data = JSON.parse(event.data);
-        const events = data.events;
-        const metricWidget = data.metricWidget;
+        const events = data.events
         setEvents(events);
+
+        if (data.metricsWidget !== "") {
+          setMetricsWidget(data.metricsWidget);
+        }
         if (events[events.length - 1] === 'closing connection') {
-          console.log("got 'closing connection' message")
           eventListener.close();
-          dispatch(readMetricWidget());
+          //dispatch(readMetricWidget());
         }
       };
 
       setListening(true);
     }
-  }, [listening, events, dispatch]);
+  }, [listening, events, metricsWidget, dispatch]);
 
   return (
     <div>
@@ -221,8 +224,8 @@ const DeployDispatchAndTrackProgress = () => {
         <li><img className="loading-gif" src="../../loading.gif" /></li>
       </ul>
       {
-        metricWidget
-          ? <img width="1200" height="600" src={`data:image/png;base64,${metricWidget}`} />
+        metricsWidget
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}`} />
           : ""
       }
     </div>

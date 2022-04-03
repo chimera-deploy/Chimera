@@ -39,6 +39,7 @@ const Chimera = {
       console.log(`sending event to client ${client.id}`)
       const data = JSON.stringify({ events: this.events, metricsWidget: this.metricsWidget });
       client.response.write(`data: ${data}\n\n`);
+      this.metricsWidget = "";
     });
   },
 
@@ -239,6 +240,8 @@ const Chimera = {
               this.config.clientRegion
             );
           }
+          this.metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
+          this.writeToClient("Chart updated");
         } catch (err) {
           clearInterval(routeUpdateLoop);
           clearInterval(healthCheckLoop);
