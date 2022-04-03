@@ -7,11 +7,11 @@ const getMetricWidgetImage = async (metricInput, clientRegion) => {
   return response.MetricWidgetImage;
 };
 
-const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, clientRegion) => {
+const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, meshName, openTelemetryNamespace, callers, virtualService, target, clientRegion) => {
   const client = new CloudWatchClient(clientRegion);
   const MetricDataQueries = [
     {
-      Id: "id1",
+      Id: "id0",
       MetricStat: {
         Metric: {
           Namespace: `${metricNamespace}`,
@@ -39,8 +39,41 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
         Stat: "Sum"
       },
       ReturnData: true
-    }
+    },
+    ...callers.map((caller, idx) =>
+      ({
+        Id: `id${idx+1}`,
+        MetricStat: {
+          Metric: {
+            Namespace: openTelemetryNamespace,
+            MetricName: "envoy.appmesh.TargetResponseTime",
+            Dimensions: [
+              {
+                Name: "Mesh",
+                Value: meshName
+              },
+              {
+                Name: caller.type === "gateway" ? "VirtualGateway": "VirtualNode",
+                Value: caller.name
+              },
+              {
+                Name: "TargetVirtualService",
+                Value: virtualService
+              },
+              {
+                Name: "TargetVirtualNode",
+                Value: target
+              }
+            ]
+          },
+          Period: 60,
+          Stat: "Average"
+        },
+        ReturnData: true
+      })
+    )
   ];
+
   const input = {
     StartTime,
     EndTime,
@@ -51,14 +84,19 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
   return await client.send(command);
 };
 
-const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, maxFailures, clientRegion) => {
+const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, meshName, openTelemetryNamespace, callers, virtualService, target, maxFailures, maxResponseTime, clientRegion) => {
   const millisecondsNow = Date.now();
   const now = new Date(millisecondsNow);
-  const start = new Date(millisecondsNow - (failureThresholdTime * 1));
-  const response = await getMetricData(start, now, metricNamespace, clusterName, taskName, clientRegion);
-  const values = response.MetricDataResults[0].Values;
-  console.log("values downstream/ingress 500:", values);
-  if (values.reduce((a, v) => a + v, 0) > maxFailures) {
+  const start = new Date(millisecondsNow - failureThresholdTime);
+  const response = await getMetricData(start, now, metricNamespace, clusterName, taskName, meshName, openTelemetryNamespace, callers, virtualService, target, clientRegion);
+  const serviceErrors = response.MetricDataResults[0].Values;
+  console.log("downstream/ingress 5xxs:", serviceErrors);
+  const responseTimes =
+    response.MetricDataResults
+      .slice(1)
+      .flatMap(result => result.Values);
+  console.log("response times:", responseTimes);
+  if (serviceErrors.reduce((a, v) => a + v, 0) > maxFailures || (responseTimes.reduce((a, v) => a + v, 0) / responseTimes.length) > maxResponseTime) {
     throw new Error("the canary is not healthy");
   }
 };

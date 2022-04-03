@@ -127,7 +127,8 @@ const Chimera = {
         1000 * 60 * Number(config.routeUpdateInterval),
         Number(config.shiftWeight),
         CloudWatch.getHealthCheck,
-        Number(config.maxFailures)
+        Number(config.maxFailures),
+        Number(config.maxResponseTime)
       );
       this.writeToClient('canary successfully deployed and stable')
       newVersionDeployed = true;
@@ -168,7 +169,7 @@ const Chimera = {
       this.config.clientRegion,
       this.config.awslogsStreamPrefix
     );
-    
+
     this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
     this.writeToClient('created ECS service');
@@ -192,7 +193,7 @@ const Chimera = {
     this.writeToClient(`shifted traffic: Stable: ${originalVersionWeight} || Canary: ${newVersionWeight}`);
   },
 
-  async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck, maxFailures) {
+  async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck, maxFailures, maxResponseTime) {
     let p = new Promise(async (resolve, reject) => {
       let originalVersionWeight = Math.max(0, 100 - shiftWeight);
       let newVersionWeight = Math.min(100, 0 + shiftWeight);
@@ -212,7 +213,13 @@ const Chimera = {
               this.config.metricNamespace,
               this.config.clusterName,
               this.taskName,
+              this.config.meshName,
+              this.config.openTelemetryNamespace,
+              this.config.callers,
+              this.config.virtualService,
+              this.config.newNodeName,
               maxFailures,
+              maxResponseTime,
               this.config.clientRegion
             );
           }
@@ -236,7 +243,7 @@ const Chimera = {
   },
 
   async removeOldVersion() {
-    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
       [
         {
           virtualNode: this.virtualNode.virtualNodeName,
@@ -257,7 +264,7 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
         [
           {
             virtualNode: this.config.originalNodeName,
