@@ -84,10 +84,11 @@ const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, t
   return await client.send(command);
 };
 
-const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, meshName, openTelemetryNamespace, callers, virtualService, target, maxFailures, maxResponseTime, clientRegion) => {
+const getHealthCheck = async (failureThresholdTime, metricNamespace, clusterName, taskName, meshName, openTelemetryNamespace, arrOfCallers, virtualService, target, maxFailures, maxResponseTime, clientRegion) => {
   const millisecondsNow = Date.now();
   const now = new Date(millisecondsNow);
   const start = new Date(millisecondsNow - failureThresholdTime);
+  const callers = arrOfCallers || [];
   const response = await getMetricData(start, now, metricNamespace, clusterName, taskName, meshName, openTelemetryNamespace, callers, virtualService, target, clientRegion);
   const serviceErrors = response.MetricDataResults[0].Values;
   console.log("downstream/ingress 5xxs:", serviceErrors);
