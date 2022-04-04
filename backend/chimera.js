@@ -9,6 +9,8 @@ const IAM = require('./services/IAM');
 const CloudWatch = require('./services/CloudWatch');
 const EC2 = require('./services/EC2');
 
+const HEALTHCHECK_INTERVAL = 1000 * 60;
+
 const Chimera = {
   virtualNode: null,
   taskDefinition: null,
@@ -26,6 +28,7 @@ const Chimera = {
   shiftWeight: 25,
   clientList: [],
   events: [],
+  metricsWidget: "",
 
   async registerClient(client) {
     this.clientList.push(client);
@@ -36,7 +39,9 @@ const Chimera = {
     this.events.push(message);
     this.clientList.forEach(client => {
       console.log(`sending event to client ${client.id}`)
-      client.response.write(`data: ${JSON.stringify(this.events)}\n\n`);
+      const data = JSON.stringify({ events: this.events, metricsWidget: this.metricsWidget });
+      client.response.write(`data: ${data}\n\n`);
+      this.metricsWidget = "";
     });
   },
 
@@ -168,7 +173,7 @@ const Chimera = {
       this.config.clientRegion,
       this.config.awslogsStreamPrefix
     );
-    
+
     this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
     this.writeToClient('created ECS service');
@@ -203,21 +208,13 @@ const Chimera = {
         reject(err);
       }
 
-      let intervalID;
-      intervalID = setInterval(async () => {
+      let healthCheckLoop;
+      let routeUpdateLoop;
+      routeUpdateLoop = setInterval(async () => {
         try {
-          if (healthCheck !== undefined) {
-            await healthCheck(
-              routeUpdateInterval,
-              this.config.metricNamespace,
-              this.config.clusterName,
-              this.taskName,
-              maxFailures,
-              this.config.clientRegion
-            );
-          }
           if (newVersionWeight === 100) {
-            clearInterval(intervalID);
+            clearInterval(routeUpdateLoop);
+            clearInterval(healthCheckLoop);
             resolve();
             return
           }
@@ -227,16 +224,39 @@ const Chimera = {
 
           await this.updateRoute(newVersionWeight, originalVersionWeight);
         } catch (err) {
-          clearInterval(intervalID);
+          clearInterval(routeUpdateLoop);
+          clearInterval(healthCheckLoop);
           reject(err);
         }
       }, routeUpdateInterval);
+
+      healthCheckLoop = setInterval(async () =>{
+        try {
+          if (healthCheck !== undefined) {
+            await healthCheck(
+              HEALTHCHECK_INTERVAL,
+              this.config.metricNamespace,
+              this.config.clusterName,
+              this.taskName,
+              maxFailures,
+              this.config.clientRegion
+            );
+          }
+          this.metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
+          this.writeToClient("Chart updated");
+        } catch (err) {
+          clearInterval(routeUpdateLoop);
+          clearInterval(healthCheckLoop);
+          reject(err);
+        }
+      }, HEALTHCHECK_INTERVAL);
     });
+
     await p;
   },
 
   async removeOldVersion() {
-    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+    await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
       [
         {
           virtualNode: this.virtualNode.virtualNodeName,
@@ -257,7 +277,7 @@ const Chimera = {
 
   async rollbackToOldVersion() {
     try {
-      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 
+      await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
         [
           {
             virtualNode: this.config.originalNodeName,
