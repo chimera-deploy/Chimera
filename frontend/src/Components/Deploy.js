@@ -206,6 +206,11 @@ const DeployDispatchAndTrackProgress = () => {
 
         const parsedEvent = JSON.parse(event.data);
         setEvents(parsedEvent);
+        // need to create new reducer / store to keep rollback state
+        // add all of deploy, plus new virtual node, new ECS Service, new Task definition
+        // then pass the new rollback state to POST in abortDeployment instead of deploy
+
+
         if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
           eventListener.close();
           dispatch(readMetricWidget(shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region));
