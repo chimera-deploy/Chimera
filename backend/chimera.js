@@ -255,6 +255,11 @@ const Chimera = {
     await TaskDefinition.deregister(this.config.originalTaskDefinition, this.config.clientRegion);
   },
 
+  async abort(config) {
+    this.config = config;
+    this.rollbackToOldVersion();
+  },
+
   async rollbackToOldVersion() {
     try {
       await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, 

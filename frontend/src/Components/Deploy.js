@@ -188,8 +188,13 @@ const DeployDispatchAndTrackProgress = () => {
   const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
   const [ listening, setListening ] = useState(false);
+  // const [ controller, setController ] = useState(null)
+
 
   useEffect(() => {
+    // const controller = new AbortController();
+    // setController(controller)
+    // axios.post('http://localhost:5000/deploy', deploy, { signal: controller.signal });
     axios.post('http://localhost:5000/deploy', deploy);
   }, [deploy]);
 
@@ -211,16 +216,26 @@ const DeployDispatchAndTrackProgress = () => {
     }
   }, [listening, events, dispatch, shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region]);
 
+  const abortDeployment = () => {
+    // console.log('attempting to abort')
+    // controller.abort();
+    // console.log(controller.signal)
+    // console.log('abort triggered')
+    const abortResponse = axios.post('http://localhost:5000/abort', deploy)
+    console.log('Abort Response:', abortResponse)
+  }
+
   return (
     <div>
       <p>Deploying!</p>
+      <button onClick={abortDeployment}>ABORT</button>
       <ul className="deployment-event-list">
         {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
-        <li><img className="loading-gif" src="../../loading.gif" /></li>
+        <li><img className="loading-gif" src="../../loading.gif" alt='loading gif' /></li>
       </ul>
       {
         metricWidget
-          ? <img width="1200" height="600" src={`data:image/png;base64,${metricWidget}`} />
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricWidget}`} alt='widget'/>
           : ""
       }
     </div>
