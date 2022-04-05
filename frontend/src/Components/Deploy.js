@@ -188,13 +188,8 @@ const DeployDispatchAndTrackProgress = () => {
   const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
   const [ listening, setListening ] = useState(false);
-  // const [ controller, setController ] = useState(null)
-
 
   useEffect(() => {
-    // const controller = new AbortController();
-    // setController(controller)
-    // axios.post('http://localhost:5000/deploy', deploy, { signal: controller.signal });
     axios.post('http://localhost:5000/deploy', deploy);
   }, [deploy]);
 
@@ -206,10 +201,7 @@ const DeployDispatchAndTrackProgress = () => {
 
         const parsedEvent = JSON.parse(event.data);
         setEvents(parsedEvent);
-        // need to create new reducer / store to keep rollback state
-        // add all of deploy, plus new virtual node, new ECS Service, new Task definition
-        // then pass the new rollback state to POST in abortDeployment instead of deploy
-
+        console.log(parsedEvent)
 
         if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
           eventListener.close();
@@ -221,12 +213,55 @@ const DeployDispatchAndTrackProgress = () => {
     }
   }, [listening, events, dispatch, shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region]);
 
+  // const buildRollback = (event) => {
+  //   let newRollback;
+
+  //   switch (event) {
+  //     case 'created virtual node':
+  //       newRollback = {
+  //         ...rollback,
+  //         virtualNode: deploy.newNodeName,
+  //       };
+  //       setRollback(newRollback);
+  //       break;
+  //     case 'registered task definition':
+  //       newRollback = {
+  //         ...rollback,
+  //         // ${this.taskDefinition.family}:${this.taskDefinition.revision} taskDefinition.family = deploy.newTaskDefinitionName, 
+  //       };
+  //       setRollback(newRollback);
+  //       break;
+  //     default:
+  //       console.log('default');
+  //   }
+  // }
+
+  const buildRollbackData = () => {
+    let newRollback = {...deploy};
+
+    events.map(event => {
+      switch (event.message) {
+        case 'created virtual node':
+          newRollback['virtualNode'] = event.rollback.virtualNode;
+          break;
+        case 'registered task definition':
+          newRollback['taskDefinition'] = event.rollback.taskDefinition;
+          break;
+        case 'created ECS service':
+          newRollback['newECSService'] = event.rollback.newECSService;
+        default:
+          console.log('default');
+      }
+    });
+
+    return newRollback;
+  }
+
   const abortDeployment = () => {
-    // console.log('attempting to abort')
-    // controller.abort();
-    // console.log(controller.signal)
-    // console.log('abort triggered')
-    const abortResponse = axios.post('http://localhost:5000/abort', deploy)
+    const rollback = buildRollbackData()
+    console.log(rollback)
+    console.log('Requesting abort:')
+    const abortResponse = axios.post('http://localhost:5000/abort', rollback)
     console.log('Abort Response:', abortResponse)
   }
 
@@ -235,7 +270,7 @@ const DeployDispatchAndTrackProgress = () => {
       <p>Deploying!</p>
       <button onClick={abortDeployment}>ABORT</button>
       <ul className="deployment-event-list">
-        {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
+        {events.map(event => <li key={event.message} className="deployment-event">{event.message}</li>)}
         <li><img className="loading-gif" src="../../loading.gif" alt='loading gif' /></li>
       </ul>
       {
