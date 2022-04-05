@@ -198,12 +198,11 @@ const DeployDispatchAndTrackProgress = () => {
       const eventListener = new EventSource('http://localhost:5000/events');
       eventListener.onmessage = (event) => {
         console.log(event);
-
         const parsedEvent = JSON.parse(event.data);
         setEvents(parsedEvent);
         console.log(parsedEvent)
 
-        if (parsedEvent[parsedEvent.length - 1] === 'closing connection') {
+        if (parsedEvent[parsedEvent.length - 1].message === 'closing connection') {
           eventListener.close();
           dispatch(readMetricWidget(shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region));
         }
@@ -212,29 +211,6 @@ const DeployDispatchAndTrackProgress = () => {
       setListening(true);
     }
   }, [listening, events, dispatch, shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region]);
-
-  // const buildRollback = (event) => {
-  //   let newRollback;
-
-  //   switch (event) {
-  //     case 'created virtual node':
-  //       newRollback = {
-  //         ...rollback,
-  //         virtualNode: deploy.newNodeName,
-  //       };
-  //       setRollback(newRollback);
-  //       break;
-  //     case 'registered task definition':
-  //       newRollback = {
-  //         ...rollback,
-  //         // ${this.taskDefinition.family}:${this.taskDefinition.revision} taskDefinition.family = deploy.newTaskDefinitionName, 
-  //       };
-  //       setRollback(newRollback);
-  //       break;
-  //     default:
-  //       console.log('default');
-  //   }
-  // }
 
   const buildRollbackData = () => {
     let newRollback = {...deploy};
@@ -253,7 +229,6 @@ const DeployDispatchAndTrackProgress = () => {
           console.log('default');
       }
     });
-
     return newRollback;
   }
 
