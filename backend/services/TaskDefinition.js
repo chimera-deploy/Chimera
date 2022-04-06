@@ -33,6 +33,19 @@ const register = async (appImageURL, appContainerName, virtualNodeName, envoyCon
     "ECS_PROMETHEUS_EXPORTER_PORT": "9901"
   };
 
+  envoyContainerDef.portMappings =
+    envoyContainerDef.portMappings
+      .some(m => m.containerPort === 9901 && m.hostPort === 9901 && m.protocol === "tcp")
+        ? envoyContainerDef.portMappings
+        : [
+          ...envoyContainerDef.portMappings,
+          {
+            hostPort: 9901,
+            containerPort: 9901,
+            protocol: "tcp"
+          }
+        ];
+
   envoyContainerDef.environment = envoyContainerDef.environment.map(env => {
     if (env.name !== "APPMESH_VIRTUAL_NODE_NAME" && env.name !== "APPMESH_RESOURCE_ARN") {
       return env;
