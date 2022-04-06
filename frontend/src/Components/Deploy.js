@@ -233,11 +233,16 @@ const DeployDispatchAndTrackProgress = () => {
   }
 
   const abortDeployment = () => {
-    const rollback = buildRollbackData()
-    console.log(rollback)
-    console.log('Requesting abort:')
-    const abortResponse = axios.post('http://localhost:5000/abort', rollback)
-    console.log('Abort Response:', abortResponse)
+
+    if (window.confirm("Warning: A forced 'ABORT' can result in unexepected results. Are you certain you wish to force ABORT this deployment?") === true ) {
+      const rollback = buildRollbackData();
+      console.log(rollback);
+      console.log('Requesting abort:');
+      const abortResponse = axios.post('http://localhost:5000/abort', rollback);
+      console.log('Abort Response:', abortResponse)
+    } else {
+      console.log('Abort cancelled');
+    }
   }
 
   return (
