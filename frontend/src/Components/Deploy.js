@@ -213,16 +213,50 @@ const DeployDispatchAndTrackProgress = () => {
     }
   }, [listening, events, metricsWidget, dispatch]);
 
+  const buildRollbackData = () => {
+    let newRollback = {...deploy};
+
+    events.map(event => {
+      switch (event.message) {
+        case 'created virtual node':
+          newRollback['virtualNode'] = event.rollback.virtualNode;
+          break;
+        case 'registered task definition':
+          newRollback['taskDefinition'] = event.rollback.taskDefinition;
+          break;
+        case 'created ECS service':
+          newRollback['newECSService'] = event.rollback.newECSService;
+        default:
+          console.log('default');
+      }
+    });
+    return newRollback;
+  }
+
+  const abortDeployment = () => {
+
+    if (window.confirm("Warning: A forced 'ABORT' can result in unexepected results. Are you certain you wish to force ABORT this deployment?") === true ) {
+      const rollback = buildRollbackData();
+      console.log(rollback);
+      console.log('Requesting abort:');
+      const abortResponse = axios.post('http://localhost:5000/abort', rollback);
+      console.log('Abort Response:', abortResponse)
+    } else {
+      console.log('Abort cancelled');
+    }
+  }
+
   return (
     <div>
       <p>Deploying!</p>
+      <button onClick={abortDeployment}>ABORT</button>
       <ul className="deployment-event-list">
-        {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
-        <li><img className="loading-gif" src="../../loading.gif" /></li>
+        {events.map(event => <li key={event.message} className="deployment-event">{event.message}</li>)}
+        <li><img className="loading-gif" src="../../loading.gif" alt='loading gif' /></li>
       </ul>
       {
         metricsWidget
-          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}`} />
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}` alt='widget'} />
           : ""
       }
     </div>
