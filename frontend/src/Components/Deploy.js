@@ -256,7 +256,7 @@ const DeployDispatchAndTrackProgress = () => {
       </ul>
       {
         metricsWidget
-          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}` alt='widget'} />
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}`} alt='widget' />
           : ""
       }
     </div>
