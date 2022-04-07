@@ -1,10 +1,58 @@
 const { CloudWatchClient, GetMetricDataCommand, GetMetricWidgetImageCommand } = require("@aws-sdk/client-cloudwatch");
 
-const getMetricWidgetImage = async (metricInput, clientRegion) => {
-  const client = new CloudWatchClient(clientRegion);
+const getMetricWidgetImage = async (config) => {
+  const metricInput = {
+    MetricWidget: JSON.stringify({
+      width: 1200,
+      height: 600,
+      title: "canary health",
+      start: `-PT${(100 / Number(config.shiftWeight)) * Number(config.routeUpdateInterval)}M`,
+      metrics: [
+        [
+          config.metricNamespace,
+          "envoy_http_downstream_rq_xx",
+          "TaskDefinitionFamily",
+          config.newTaskDefinitionName,
+          "envoy_http_conn_manager_prefix",
+          "ingress",
+          "envoy_response_code_class",
+          "5",
+          "ClusterName",
+          config.clusterName,
+          {
+            id: "m1",
+            stat: "Sum",
+            label: `5xx responses from ${config.newTaskDefinitionName}`,
+            period: 60
+          }
+        ],
+        [
+          config.metricNamespace,
+          "envoy_http_downstream_rq_xx",
+          "TaskDefinitionFamily",
+          config.newTaskDefinitionName,
+          "envoy_http_conn_manager_prefix",
+          "ingress",
+          "envoy_response_code_class",
+          "2",
+          "ClusterName",
+          config.clusterName,
+          {
+            id: "m2",
+            stat: "Sum",
+            label: `2xx responses from ${config.newTaskDefinitionName}`,
+            period: 60
+          }
+        ]
+      ]
+    })
+  };
+  const client = new CloudWatchClient(config.clientRegion);
   const command = new GetMetricWidgetImageCommand(metricInput);
   const response = await client.send(command);
-  return response.MetricWidgetImage;
+  const u8 = new Uint8Array(response.MetricWidgetImage);
+  const b64 = Buffer.from(u8).toString('base64');
+  return b64;
 };
 
 const getMetricData = async (StartTime, EndTime, metricNamespace, clusterName, taskName, clientRegion) => {

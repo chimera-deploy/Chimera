@@ -2,7 +2,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
-import { readMetricWidget } from "../reducers/image";
 import InputLabel from "./InputLabel";
 import SelectorLabel from "./SelectorLabel";
 import SubmitButton from "./SubmitButton";
@@ -176,7 +175,6 @@ const DeployInfo = ({ ecsServices }) => {
 
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
-  const { metricWidget } = useSelector(state => state.image);
   const {
     region,
     shiftWeight,
@@ -187,6 +185,7 @@ const DeployDispatchAndTrackProgress = () => {
   } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
+  const [ metricsWidget, setMetricsWidget ] = useState("");
   const [ listening, setListening ] = useState(false);
 
   useEffect(() => {
@@ -198,19 +197,21 @@ const DeployDispatchAndTrackProgress = () => {
       const eventListener = new EventSource('http://localhost:5000/events');
       eventListener.onmessage = (event) => {
         console.log(event);
-        const parsedEvent = JSON.parse(event.data);
-        setEvents(parsedEvent);
-        console.log(parsedEvent)
+        const data = JSON.parse(event.data);
+        const events = data.events
+        setEvents(events);
 
-        if (parsedEvent[parsedEvent.length - 1].message === 'closing connection') {
+        if (data.metricsWidget !== "") {
+          setMetricsWidget(data.metricsWidget);
+        }
+        if (events[events.length - 1] === 'closing connection') {
           eventListener.close();
-          dispatch(readMetricWidget(shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region));
         }
       };
 
       setListening(true);
     }
-  }, [listening, events, dispatch, shiftWeight, routeUpdateInterval, metricNamespace, newTaskDefinitionName, clusterName, region]);
+  }, [listening, events, metricsWidget, dispatch]);
 
   const buildRollbackData = () => {
     let newRollback = {...deploy};
@@ -254,8 +255,8 @@ const DeployDispatchAndTrackProgress = () => {
         <li><img className="loading-gif" src="../../loading.gif" alt='loading gif' /></li>
       </ul>
       {
-        metricWidget
-          ? <img width="1200" height="600" src={`data:image/png;base64,${metricWidget}`} alt='widget'/>
+        metricsWidget
+          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}` alt='widget'} />
           : ""
       }
     </div>
