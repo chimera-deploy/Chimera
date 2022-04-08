@@ -29,14 +29,25 @@ const Chimera = {
   clientList: [],
   events: [],
   metricsWidget: "",
+  healthCheckLoop: null,
+  routeUpdateLoop: null,
 
-  async registerClient(client) {
+  registerClient(client) {
     this.clientList.push(client);
+  },
+
+  endEventStream() {
+    this.clientList.forEach(client =>{
+      this.writeToClient("closing connection");
+      client.response.end();
+    });
+    this.clientList = [];
+    this.events = [];
   },
 
   async writeToClient(message, rollback={}) {
     console.log(message);
-    this.events.push({ message, rollback });
+    this.events = [...this.events, { message, rollback }];
     this.clientList.forEach(client => {
       console.log(`sending event to client ${client.id}`)
       const data = JSON.stringify({ events: this.events, metricsWidget: this.metricsWidget });
@@ -45,12 +56,7 @@ const Chimera = {
     });
   },
 
-  clearEvents() {
-    this.events = [];
-  },
-
   async setup(config) {
-    this.clearEvents();
     this.config = config;
     this.config.clientRegion = {region: config.region };
 
@@ -59,17 +65,15 @@ const Chimera = {
       await this.createCWRoles();
       await this.createCWAgent();
     } catch (err) {
-      this.writeToClient('setup failed');
       logger.error(err);
       throw err
     }
   },
 
   async createCWSecurityGroup() {
-    this.writeToClient('creating security group for cloudwatch agent');
-    this.writeToClient()
+    logger.info('creating security group for cloudwatch agent');
     this.cwSecurityGroupID = await EC2.createCWSecurityGroup(this.config.vpcID, this.config.clientRegion);
-    this.writeToClient('created security group for cloudwatch agent');
+    logger.info('created security group for cloudwatch agent');
   },
 
   async createCWRoles() {
@@ -85,7 +89,7 @@ const Chimera = {
         }
       ]
     });
-    this.writeToClient('creating cloudwatch task role');
+    logger.info('creating cloudwatch task role');
     this.cwTaskRole = await IAM.createCWTaskRole(
       this.config.clusterName,
       assumeRolePolicyDocument,
@@ -93,14 +97,14 @@ const Chimera = {
       this.config.awsAccountID,
       this.config.clientRegion
     );
-    this.writeToClient('created cloudwatch task role');
-    this.writeToClient('creating cloudwatch execution role');
+    logger.info('created cloudwatch task role');
+    logger.info('creating cloudwatch execution role');
     this.cwExecutionRole = await IAM.createCWExecutionRole(this.config.clusterName, assumeRolePolicyDocument, this.config.clientRegion);
-    this.writeToClient('created cloudwatch execution role');
+    logger.info('created cloudwatch execution role');
   },
 
   async createCWAgent() {
-    this.writeToClient("registering cloudwatch agent task definition");
+    logger.info("registering cloudwatch agent task definition");
     this.cwTaskDefinition = await TaskDefinition.createCW(
       this.config.awsAccountID,
       this.config.metricNamespace,
@@ -108,8 +112,8 @@ const Chimera = {
       this.cwExecutionRole,
       this.config.clientRegion
     );
-    this.writeToClient('registered cloudwatch agent task definition');
-    this.writeToClient("creating cloudwatch agent ECS service");
+    logger.info('registered cloudwatch agent task definition');
+    logger.info("creating cloudwatch agent ECS service");
     this.cwECSService = await ECSService.createCW(
       this.config.clusterName,
       [ this.config.cwSecurityGroupID ],
@@ -117,11 +121,10 @@ const Chimera = {
       this.cwTaskDefinition,
       this.config.clientRegion
     );
-    this.writeToClient('created cloudwatch agent ECS service');
+    logger.info('created cloudwatch agent ECS service');
   },
 
   async deploy(config) {
-    this.clearEvents();
     let newVersionDeployed = false;
     this.config = config;
     this.config.clientRegion = { region: this.config.region }
@@ -140,16 +143,15 @@ const Chimera = {
       this.writeToClient('deployment failed');
       logger.error(err);
       await this.rollbackToOldVersion();
-      this.writeToClient('rollback succesfull')
-      this.writeToClient('closing connection')
+      this.writeToClient('rollback succesfull');
+      this.endEventStream();
     }
     if (newVersionDeployed) {
       try {
         await this.removeOldVersion();
         this.writeToClient('old version succesfully removed')
-        this.writeToClient('closing connection')
       } catch (err) {
-        this.writeToClient('closing connection');
+        this.endEventStream();
         throw new Error('Failed to remove original version of service', { cause: err });
       }
     }
@@ -208,13 +210,11 @@ const Chimera = {
         reject(err);
       }
 
-      let healthCheckLoop;
-      let routeUpdateLoop;
-      routeUpdateLoop = setInterval(async () => {
+      this.routeUpdateLoop = setInterval(async () => {
         try {
           if (newVersionWeight === 100) {
-            clearInterval(routeUpdateLoop);
-            clearInterval(healthCheckLoop);
+            clearInterval(this.routeUpdateLoop);
+            clearInterval(this.healthCheckLoop);
             resolve();
             return
           }
@@ -224,13 +224,13 @@ const Chimera = {
 
           await this.updateRoute(newVersionWeight, originalVersionWeight);
         } catch (err) {
-          clearInterval(routeUpdateLoop);
-          clearInterval(healthCheckLoop);
+          clearInterval(this.routeUpdateLoop);
+          clearInterval(this.healthCheckLoop);
           reject(err);
         }
       }, routeUpdateInterval);
 
-      healthCheckLoop = setInterval(async () =>{
+      this.healthCheckLoop = setInterval(async () =>{
         try {
           if (healthCheck !== undefined) {
             await healthCheck(
@@ -245,8 +245,8 @@ const Chimera = {
           this.metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
           this.writeToClient("Chart updated");
         } catch (err) {
-          clearInterval(routeUpdateLoop);
-          clearInterval(healthCheckLoop);
+          clearInterval(this.routeUpdateLoop);
+          clearInterval(this.healthCheckLoop);
           reject(err);
         }
       }, HEALTHCHECK_INTERVAL);
@@ -284,6 +284,9 @@ const Chimera = {
   },
 
   async rollbackToOldVersion() {
+    clearInterval(this.routeUpdateLoop);
+    clearInterval(this.healthCheckLoop);
+
     try {
       await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
         [
@@ -310,6 +313,7 @@ const Chimera = {
         await TaskDefinition.deregister(taskDefinitionName, this.config.clientRegion);
         this.writeToClient(`rollback to ${this.config.originalNodeName} complete`)
       }
+      this.endEventStream();
     } catch (err) {
       this.writeToClient('Failed to rollback to old version');
       logger.error(err);

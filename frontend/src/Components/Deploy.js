@@ -204,7 +204,7 @@ const DeployDispatchAndTrackProgress = () => {
         if (data.metricsWidget !== "") {
           setMetricsWidget(data.metricsWidget);
         }
-        if (events[events.length - 1] === 'closing connection') {
+        if (events[events.length - 1].message === 'closing connection') {
           eventListener.close();
         }
       };
@@ -234,7 +234,6 @@ const DeployDispatchAndTrackProgress = () => {
   }
 
   const abortDeployment = () => {
-
     if (window.confirm("Warning: A forced 'ABORT' can result in unexepected results. Are you certain you wish to force ABORT this deployment?") === true ) {
       const rollback = buildRollbackData();
       console.log(rollback);
