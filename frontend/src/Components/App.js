@@ -9,7 +9,7 @@ const App = () => {
   const { page } = useSelector(state => state.logic);
 
   return (
-    <div>
+    <>
       <Header />
       <div className="main">
         <div className="forms">
@@ -23,7 +23,7 @@ const App = () => {
         </div>
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 
