@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import Welcome from "./Welcome";
+import BaseInfoForm from "./BaseInfoForm";
 import Setup from "./Setup";
 import Deploy from "./Deploy";
 import Header from './Header';
@@ -15,7 +15,7 @@ const App = () => {
         <div className="forms">
           {
             page === "welcome"
-              ? <Welcome />
+              ? <BaseInfoForm />
               : page === "setup"
                 ? <Setup />
                 : <Deploy />
