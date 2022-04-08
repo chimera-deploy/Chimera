@@ -5,6 +5,8 @@ import SubmitButton from "./SubmitButton";
 
 const SetupInfoForm = () => {
   const dispatch = useDispatch();
+  const { setupInfoEntered } = useSelector(state => state.logic);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch({ type: "SETUP_INFO_SUBMITTED", payload: e.target })
@@ -12,24 +14,23 @@ const SetupInfoForm = () => {
   }
 
   return (
-    <>
-      <h1>Setup Prometheus-configured CloudWatch Agent</h1>
-      <div className="form-box">
-        <p>Please enter some additional information.</p>
+    <div className="row">
+      <div className="col-50">
+        <h1>Prepare ECS Cluster</h1>
         <form onSubmit={handleSubmit}>
           <dl>
             <InputLabel
-              message={"Enter some text for the metric namespace associated with the CloudWatch agent"}
+              message={"New Metric Namespace"}
               name={"metricNamespace"}
               required={true}
             />
             <InputLabel
-              message={"Enter the ID of VPC"}
+              message={"VPC ID"}
               name={"vpcID"}
               required={true}
             />
             <div className="input-line">
-              <dt>Enter at least one subnet within which the CloudWatch agent may be deployed:</dt>
+              <dt>VPC Subnet IDs</dt>
               <div className="subnet-inputs">
                 <dd><input type="text" name="subnet1" required={true} /></dd>
                 <dd><input type="text" name="subnet2" required={false} /></dd>
@@ -37,11 +38,14 @@ const SetupInfoForm = () => {
                 <dd><input type="text" name="subnet4" required={false} /></dd>
               </div>
             </div>
-            <SubmitButton value={"Submit"} />
+            <SubmitButton value={"Prepare Cluster"} />
           </dl>
         </form>
       </div>
-    </>
+      <div className="col-50 no-border">
+        { setupInfoEntered ? <SetupDispatchAndTrackProgress /> : null}
+      </div>
+    </div>
   );
 };
 
@@ -55,23 +59,4 @@ const SetupDispatchAndTrackProgress = () => {
   );
 };
 
-const Setup = () => {
-  const { setupInfoEntered } = useSelector(state => state.logic);
-  const dispatch = useDispatch();
-
-  return (
-    <div>
-      <h2>Here you will deploy a prometheus-configured cloudwatch agent!</h2>
-      <button onClick={() => dispatch({ type: "TO_WELCOME" })}>
-        Take me back!
-      </button>
-      {
-        !setupInfoEntered
-          ? <SetupInfoForm />
-          : <SetupDispatchAndTrackProgress />
-      }
-    </div>
-  );
-};
-
-export default Setup;
+export default SetupInfoForm;

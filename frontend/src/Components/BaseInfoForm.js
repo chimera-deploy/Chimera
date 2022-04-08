@@ -44,7 +44,7 @@ const BaseInfoForm = () => {
           <SubmitButton value={"Submit"} />
         </form>
       </div>
-      {baseInfoEntered ? <ActionButtons /> : null}
+      {baseInfoEntered ? <ActionButtons /> : <div className="col-50 no-border" />}
     </div>
   );
 };
