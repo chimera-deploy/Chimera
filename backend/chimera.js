@@ -45,9 +45,9 @@ const Chimera = {
     this.events = [];
   },
 
-  async writeToClient(message, rollback={}) {
+  async writeToClient(message) {
     console.log(message);
-    this.events = [...this.events, { message, rollback }];
+    this.events = [...this.events, message];
     this.clientList.forEach(client => {
       console.log(`sending event to client ${client.id}`)
       const data = JSON.stringify({ events: this.events, metricsWidget: this.metricsWidget });
@@ -161,7 +161,7 @@ const Chimera = {
     const virtualNodeName = this.config.newNodeName;
     this.taskName = this.config.newTaskDefinitionName;
     this.virtualNode = await VirtualNode.create(this.config.meshName, virtualNodeName, this.config.originalNodeName, this.taskName, this.config.clientRegion);
-    this.writeToClient('created virtual node', { virtualNode: this.virtualNode});
+    this.writeToClient('created virtual node');
     this.taskDefinition = await TaskDefinition.register(
       this.config.imageURL,
       this.config.containerName,
@@ -176,9 +176,9 @@ const Chimera = {
       this.config.awslogsStreamPrefix
     );
 
-    this.writeToClient('registered task definition', { taskDefinition: this.taskDefinition });
+    this.writeToClient('registered task definition');
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
-    this.writeToClient('created ECS service', { newECSService: this.newECSService });
+    this.writeToClient('created ECS service');
     this.writeToClient('waiting for cloudmap');
     await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName, this.config.clientRegion);
     this.writeToClient('canary running on ECS');
@@ -275,11 +275,7 @@ const Chimera = {
     await TaskDefinition.deregister(this.config.originalTaskDefinition, this.config.clientRegion);
   },
 
-  async abort(config) {
-    this.config = config;
-    this.virtualNode = config.virtualNode;
-    this.newECSService = config.newECSService;
-    this.taskDefinition = config.taskDefinition;
+  async abort() {
     this.rollbackToOldVersion();
   },
 
