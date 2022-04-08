@@ -8,6 +8,7 @@ const logger = require('./utils/logger');
 const IAM = require('./services/IAM');
 const CloudWatch = require('./services/CloudWatch');
 const EC2 = require('./services/EC2');
+const { LaunchTemplateHibernationOptions } = require('@aws-sdk/client-ec2');
 
 const HEALTHCHECK_INTERVAL = 1000 * 60;
 
@@ -23,12 +24,8 @@ const Chimera = {
   cwTaskDefinition: null,
   cwECSService: null,
   cwSecurityGroupID: null,
-  newVersionWeight: 0,
-  oldVersionWeight: 100,
-  shiftWeight: 25,
   clientList: [],
   events: [],
-  metricsWidget: "",
   healthCheckLoop: null,
   routeUpdateLoop: null,
 
@@ -37,22 +34,29 @@ const Chimera = {
   },
 
   endEventStream() {
+    this.writeToClient("closing connection");
     this.clientList.forEach(client =>{
-      this.writeToClient("closing connection");
       client.response.end();
     });
     this.clientList = [];
     this.events = [];
   },
 
-  async writeToClient(message) {
+  sendMetricsWidget(metricsWidget) {
+    this.clientList.forEach(client => {
+      console.log("Sending updated Widget Image");
+      const data = JSON.stringify({ metricsWidget });
+      client.response.write(`data: ${data}\n\n`);
+    });
+  },
+
+  writeToClient(message) {
     console.log(message);
     this.events = [...this.events, message];
     this.clientList.forEach(client => {
       console.log(`sending event to client ${client.id}`)
-      const data = JSON.stringify({ events: this.events, metricsWidget: this.metricsWidget });
+      const data = JSON.stringify({events: this.events});
       client.response.write(`data: ${data}\n\n`);
-      this.metricsWidget = "";
     });
   },
 
@@ -150,6 +154,7 @@ const Chimera = {
       try {
         await this.removeOldVersion();
         this.writeToClient('old version succesfully removed')
+        this.endEventStream();
       } catch (err) {
         this.endEventStream();
         throw new Error('Failed to remove original version of service', { cause: err });
@@ -242,8 +247,8 @@ const Chimera = {
               this.config.clientRegion
             );
           }
-          this.metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
-          this.writeToClient("Chart updated");
+          const metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
+          this.sendMetricsWidget(metricsWidget);
         } catch (err) {
           clearInterval(this.routeUpdateLoop);
           clearInterval(this.healthCheckLoop);
@@ -276,7 +281,8 @@ const Chimera = {
   },
 
   async abort() {
-    this.rollbackToOldVersion();
+    await this.rollbackToOldVersion();
+    this.endEventStream();
   },
 
   async rollbackToOldVersion() {
@@ -309,7 +315,6 @@ const Chimera = {
         await TaskDefinition.deregister(taskDefinitionName, this.config.clientRegion);
         this.writeToClient(`rollback to ${this.config.originalNodeName} complete`)
       }
-      this.endEventStream();
     } catch (err) {
       this.writeToClient('Failed to rollback to old version');
       logger.error(err);

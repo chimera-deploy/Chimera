@@ -198,14 +198,16 @@ const DeployDispatchAndTrackProgress = () => {
       eventListener.onmessage = (event) => {
         console.log(event);
         const data = JSON.parse(event.data);
-        const events = data.events
-        setEvents(events);
 
-        if (data.metricsWidget !== "") {
-          setMetricsWidget(data.metricsWidget);
+        if (data.events) {
+          setEvents(data.events);
+          const newEvent = data.events[data.events.length - 1];
+          if (newEvent === 'closing connection') {
+            eventListener.close();
+          }
         }
-        if (events[events.length - 1] === 'closing connection') {
-          eventListener.close();
+        if (data.metricsWidget) {
+          setMetricsWidget(data.metricsWidget);
         }
       };
 
