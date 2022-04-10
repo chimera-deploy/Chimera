@@ -204,6 +204,7 @@ const DeployDispatchAndTrackProgress = () => {
           const newEvent = data.events[data.events.length - 1];
           if (newEvent === 'closing connection') {
             eventListener.close();
+            console.log("stream ended");
           }
         }
         if (data.metricsWidget) {

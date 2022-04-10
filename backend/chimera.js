@@ -28,6 +28,9 @@ const Chimera = {
   events: [],
   healthCheckLoop: null,
   routeUpdateLoop: null,
+  cloudMapLoop: null,
+  cloudMapPromiseReject: null,
+  shiftTrafficPromiseReject: null,
 
   registerClient(client) {
     this.clientList.push(client);
@@ -58,6 +61,21 @@ const Chimera = {
       const data = JSON.stringify({events: this.events});
       client.response.write(`data: ${data}\n\n`);
     });
+  },
+
+  rejectOpenPromises() {
+    if (this.shiftTrafficPromiseReject) {
+      this.shiftTrafficPromiseReject();
+    }
+    if (this.cloudMapPromiseReject) {
+      this.cloudMapPromiseReject();
+    }
+  },
+
+  clearAllIntervals() {
+    clearInterval(this.healthCheckLoop);
+    clearInterval(this.routeUpdateLoop);
+    clearInterval(this.cloudMapLoop);
   },
 
   async setup(config) {
@@ -147,13 +165,11 @@ const Chimera = {
       this.writeToClient('deployment failed');
       logger.error(err);
       await this.rollbackToOldVersion();
-      this.writeToClient('rollback succesfull');
       this.endEventStream();
     }
     if (newVersionDeployed) {
       try {
         await this.removeOldVersion();
-        this.writeToClient('old version succesfully removed')
         this.endEventStream();
       } catch (err) {
         this.endEventStream();
@@ -185,8 +201,31 @@ const Chimera = {
     this.newECSService = await ECSService.create(this.config.clusterName, this.config.originalECSServiceName, virtualNodeName, this.taskName, this.config.clientRegion)
     this.writeToClient('created ECS service');
     this.writeToClient('waiting for cloudmap');
-    await ServiceDiscovery.cloudMapHealthy(this.config.serviceDiscoveryID, this.config.clusterName, this.taskName, this.config.clientRegion);
+    await this.allServicesDiscoverable();
     this.writeToClient('canary running on ECS');
+  },
+
+  async allServicesDiscoverable() {
+    const cloudMapCheckInterval = 5 * 1000;
+
+    const p = new Promise((resolve, reject) => {
+      let taskIDs = [];
+      this.cloudMapPromiseReject = reject;
+      this.cloudMapLoop = setInterval(async () => {
+        const instanceStates = await ServiceDiscovery.getCloudMapHealth(this.config.serviceDiscoveryID, this.config.clientRegion);
+        if (taskIDs.length === 0) {
+          const taskArns = await TaskDefinition.listTasks(this.config.clusterName, this.taskName, this.config.clientRegion);
+          taskIDs = taskArns.map(taskArn => {
+            const parts = taskArn.split('/');
+            return parts[parts.length - 1];
+          });
+        } else if (ServiceDiscovery.allHealthy(instanceStates, taskIDs)) {
+          clearInterval(this.cloudMapLoop);
+          resolve();
+        }
+      }, cloudMapCheckInterval);
+    });
+    await p
   },
 
   async updateRoute(newVersionWeight, originalVersionWeight) {
@@ -208,6 +247,7 @@ const Chimera = {
     let p = new Promise(async (resolve, reject) => {
       let originalVersionWeight = Math.max(0, 100 - shiftWeight);
       let newVersionWeight = Math.min(100, 0 + shiftWeight);
+      this.shiftTrafficPromiseReject = reject;
 
       try {
         await this.updateRoute(newVersionWeight, originalVersionWeight);
@@ -218,8 +258,7 @@ const Chimera = {
       this.routeUpdateLoop = setInterval(async () => {
         try {
           if (newVersionWeight === 100) {
-            clearInterval(this.routeUpdateLoop);
-            clearInterval(this.healthCheckLoop);
+            this.clearAllIntervals();
             resolve();
             return
           }
@@ -229,8 +268,7 @@ const Chimera = {
 
           await this.updateRoute(newVersionWeight, originalVersionWeight);
         } catch (err) {
-          clearInterval(this.routeUpdateLoop);
-          clearInterval(this.healthCheckLoop);
+          this.clearAllIntervals();
           reject(err);
         }
       }, routeUpdateInterval);
@@ -250,8 +288,7 @@ const Chimera = {
           const metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
           this.sendMetricsWidget(metricsWidget);
         } catch (err) {
-          clearInterval(this.routeUpdateLoop);
-          clearInterval(this.healthCheckLoop);
+          this.clearAllIntervals();
           reject(err);
         }
       }, HEALTHCHECK_INTERVAL);
@@ -278,16 +315,15 @@ const Chimera = {
     await ECSService.destroy(this.config.clusterName, this.config.originalECSServiceName, this.config.clientRegion);
     this.writeToClient(`deregistering task definition ${this.config.originalTaskDefinition}`);
     await TaskDefinition.deregister(this.config.originalTaskDefinition, this.config.clientRegion);
+    this.writeToClient('old version succesfully removed');
   },
 
-  async abort() {
-    await this.rollbackToOldVersion();
-    this.endEventStream();
+  abort() {
+    this.rejectOpenPromises();
   },
 
   async rollbackToOldVersion() {
-    clearInterval(this.routeUpdateLoop);
-    clearInterval(this.healthCheckLoop);
+    this.clearAllIntervals();
 
     try {
       await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName,
@@ -302,18 +338,21 @@ const Chimera = {
       if (this.virtualNode !== null) {
         this.writeToClient(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
         await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName, this.config.clientRegion);
+        this.virtualNode = null;
       }
       if (this.newECSService !== null) {
         this.writeToClient(`setting desired count for service ${this.newECSService.serviceName} to 0`);
         await ECSService.update(this.config.clusterName, this.newECSService.serviceName, 0, this.config.clientRegion);
         this.writeToClient(`deleting ECS service ${this.newECSService.serviceName}`);
         await ECSService.destroy(this.config.clusterName, this.newECSService.serviceName, this.config.clientRegion);
+        this.newECSService = null;
       }
       if (this.taskDefinition !== null) {
         const taskDefinitionName = `${this.taskDefinition.family}:${this.taskDefinition.revision}`;
         this.writeToClient(`deregistering task definition ${taskDefinitionName}`);
         await TaskDefinition.deregister(taskDefinitionName, this.config.clientRegion);
         this.writeToClient(`rollback to ${this.config.originalNodeName} complete`)
+        this.taskDefinition = null;
       }
     } catch (err) {
       this.writeToClient('Failed to rollback to old version');
