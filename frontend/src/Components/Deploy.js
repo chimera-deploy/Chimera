@@ -190,6 +190,7 @@ const DeployInfo = ({ ecsServices }) => {
 
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
+
   useEffect(() => {
     axios.post('http://localhost:5000/deploy', deploy);
   }, [deploy]);
