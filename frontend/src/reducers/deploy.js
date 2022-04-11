@@ -91,6 +91,9 @@ const deploy = (state = init, action) => {
         metricNamespace,
       };
     }
+    case "RESET_ALL_FORMS": {
+      return init;
+    }
     default: {
       return state;
     }

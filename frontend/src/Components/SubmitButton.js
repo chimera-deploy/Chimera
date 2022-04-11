@@ -4,7 +4,7 @@ const SubmitButton = ({ value }) => {
       <dt>
       </dt>
       <dd>
-        <input className="button" type="submit" value={value} />
+        <button type="submit">{value}</button>
       </dd>
     </div>
   )

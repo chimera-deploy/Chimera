@@ -1,29 +1,42 @@
 import { useSelector } from 'react-redux';
-import Welcome from "./Welcome";
-import Setup from "./Setup";
+import BaseInfoForm from "./BaseInfoForm";
+import SetupInfoForm from "./SetupInfoForm";
 import Deploy from "./Deploy";
+import DeployProgressPanel from './DeployProgressPanel';
 import Header from './Header';
 import Footer from './Footer';
 
 const App = () => {
-  const { page } = useSelector(state => state.logic);
+  const { page, deployInfoEntered } = useSelector(state => state.logic);
+
+  let mainSection = <BaseInfoForm />;
+
+  if (deployInfoEntered) {
+    mainSection = <Deploy />;
+  } else if (page === 'deploy') {
+    mainSection = (
+      <>
+        <BaseInfoForm />
+        <Deploy />
+      </>
+    );
+  } else if (page === 'setup') {
+    mainSection = (
+      <>
+        <BaseInfoForm />
+        <SetupInfoForm />
+      </>
+    );
+  }
 
   return (
-    <div>
+    <>
       <Header />
-      <div className="main">
-        <div className="forms">
-          {
-            page === "welcome"
-              ? <Welcome />
-              : page === "setup"
-                ? <Setup />
-                : <Deploy />
-          }
-        </div>
-      </div>
+      <main>
+        {mainSection}
+      </main>
       <Footer />
-    </div>
+    </>
   );
 };
 

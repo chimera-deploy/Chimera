@@ -5,7 +5,7 @@ const InputLabel = ({ message, name, required }) => {
         <label htmlFor={name}>{message}</label>
       </dt>
       <dd>
-        <input required={required} type="text" name={name} id={name}/>
+        <input required={required} type="text" name={name} id={name} />
       </dd>
     </div>
   )
