@@ -198,14 +198,17 @@ const DeployDispatchAndTrackProgress = () => {
       eventListener.onmessage = (event) => {
         console.log(event);
         const data = JSON.parse(event.data);
-        const events = data.events
-        setEvents(events);
 
-        if (data.metricsWidget !== "") {
-          setMetricsWidget(data.metricsWidget);
+        if (data.events) {
+          setEvents(data.events);
+          const newEvent = data.events[data.events.length - 1];
+          if (newEvent === 'closing connection') {
+            eventListener.close();
+            console.log("stream ended");
+          }
         }
-        if (events[events.length - 1] === 'closing connection') {
-          eventListener.close();
+        if (data.metricsWidget) {
+          setMetricsWidget(data.metricsWidget);
         }
       };
 
@@ -213,33 +216,10 @@ const DeployDispatchAndTrackProgress = () => {
     }
   }, [listening, events, metricsWidget, dispatch]);
 
-  const buildRollbackData = () => {
-    let newRollback = {...deploy};
-
-    events.map(event => {
-      switch (event.message) {
-        case 'created virtual node':
-          newRollback['virtualNode'] = event.rollback.virtualNode;
-          break;
-        case 'registered task definition':
-          newRollback['taskDefinition'] = event.rollback.taskDefinition;
-          break;
-        case 'created ECS service':
-          newRollback['newECSService'] = event.rollback.newECSService;
-        default:
-          console.log('default');
-      }
-    });
-    return newRollback;
-  }
-
   const abortDeployment = () => {
-
     if (window.confirm("Warning: A forced 'ABORT' can result in unexepected results. Are you certain you wish to force ABORT this deployment?") === true ) {
-      const rollback = buildRollbackData();
-      console.log(rollback);
       console.log('Requesting abort:');
-      const abortResponse = axios.post('http://localhost:5000/abort', rollback);
+      const abortResponse = axios.post('http://localhost:5000/abort');
       console.log('Abort Response:', abortResponse)
     } else {
       console.log('Abort cancelled');
@@ -251,7 +231,7 @@ const DeployDispatchAndTrackProgress = () => {
       <p>Deploying!</p>
       <button onClick={abortDeployment}>ABORT</button>
       <ul className="deployment-event-list">
-        {events.map(event => <li key={event.message} className="deployment-event">{event.message}</li>)}
+        {events.map(event => <li key={event} className="deployment-event">{event}</li>)}
         <li><img className="loading-gif" src="../../loading.gif" alt='loading gif' /></li>
       </ul>
       {

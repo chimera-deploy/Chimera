@@ -6,9 +6,7 @@ const abortRouter = (chimera) => {
     if (!chimera) {
       response.status(500).json({ error: 'chimera not initialized' });
     } else {
-      const config = request.body;
-      logger.info(config);
-      chimera.abort(config);
+      chimera.abort();
       response.status(200).json({ data: 'abort request received'});
     }
   });
