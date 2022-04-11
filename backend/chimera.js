@@ -46,9 +46,19 @@ const Chimera = {
   },
 
   sendMetricsWidget(metricsWidget) {
+    logger.info("Sending updated Widget Image");
+    const data = JSON.stringify({ metricsWidget });
+
     this.clientList.forEach(client => {
-      console.log("Sending updated Widget Image");
-      const data = JSON.stringify({ metricsWidget });
+      client.response.write(`data: ${data}\n\n`);
+    });
+  },
+
+  sendWeights(stable, canary) {
+    this.writeToClient(`Updated Weights: stable: ${stable} | Canary ${canary}`);
+    const weights = { stable, canary };
+    const data = JSON.stringify({ weights })
+    this.clientList.forEach(client => {
       client.response.write(`data: ${data}\n\n`);
     });
   },
@@ -240,7 +250,7 @@ const Chimera = {
       },
     ];
     await VirtualRoute.update(this.config.meshName, this.config.routeName, this.config.routerName, weightedTargets, this.config.clientRegion);
-    this.writeToClient(`shifted traffic: Stable: ${originalVersionWeight} || Canary: ${newVersionWeight}`);
+    this.sendWeights(originalVersionWeight, newVersionWeight);
   },
 
   async shiftTraffic(routeUpdateInterval, shiftWeight, healthCheck, maxFailures) {

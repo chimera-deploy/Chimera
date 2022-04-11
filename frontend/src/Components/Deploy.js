@@ -186,6 +186,7 @@ const DeployDispatchAndTrackProgress = () => {
   const dispatch = useDispatch();
   const [ events, setEvents ] = useState([]);
   const [ metricsWidget, setMetricsWidget ] = useState("");
+  const [ weights, setWeights ] = useState({stable: 100, canary: 0});
   const [ listening, setListening ] = useState(false);
 
   useEffect(() => {
@@ -209,6 +210,9 @@ const DeployDispatchAndTrackProgress = () => {
         }
         if (data.metricsWidget) {
           setMetricsWidget(data.metricsWidget);
+        }
+        if (data.weights) {
+          setWeights(data.weights);
         }
       };
 
