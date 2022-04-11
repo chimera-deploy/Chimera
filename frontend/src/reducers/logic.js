@@ -74,6 +74,9 @@ const logic = (state = init, action) => {
         cwDetails: action.payload.cwResponse,
       }
     }
+    case "RESET_ALL_FORMS": {
+      return init;
+    }
     default: {
       return state;
     }

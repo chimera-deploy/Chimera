@@ -36,6 +36,9 @@ const setup = (state = init, action) => {
         ]
       }
     }
+    case "RESET_ALL_FORMS": {
+      return init;
+    }
     default: {
       return state;
     }

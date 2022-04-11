@@ -12,6 +12,9 @@ const ActionButtons = () => {
       <button onClick={() => dispatch({ type: "TO_DEPLOY" })}>
         Deploy
       </button>
+      <button onClick={() => dispatch({ type: "RESET_ALL_FORMS" })}>
+        Reset
+      </button>
     </div>
   );
 };

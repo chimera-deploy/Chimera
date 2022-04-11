@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { readGeneralOptions, readSpecificOptions } from "../reducers/logic";
+import DeployProgressPanel from "./DeployProgressPanel";
 import InputLabel from "./InputLabel";
 import SelectorLabel from "./SelectorLabel";
 import SubmitButton from "./SubmitButton";
@@ -15,28 +16,31 @@ const SelectGeneralOptions = ({ ecsServices }) => {
   }
 
   return (
-    <>
-      <h1>Basic ECS Information</h1>
-      <div className="form-box">
-        <form onSubmit={handleSubmit}>
-          <dl>
-            <SelectorLabel
-              message={"Pick the ECS Service to update:"}
-              array={ecsServices.ECSServiceNames}
-              condition={true}
-              alternative={""}
-              changeHandler={() => undefined}
-            />
-            <InputLabel
-              message={"Enter a new name for the updated ECS Service"}
-              name={"newECSServiceName"}
-              required={true}
-            />
-            <SubmitButton value={"Submit"} />
-          </dl>
-        </form>
+    <div className="row">
+      <div className="col-50">
+        <h1>Service Selection</h1>
+        <div className="form-box">
+          <form onSubmit={handleSubmit}>
+            <dl>
+              <SelectorLabel
+                message={"ECS Service to update:"}
+                array={ecsServices.ECSServiceNames}
+                condition={true}
+                alternative={""}
+                changeHandler={() => undefined}
+              />
+              <InputLabel
+                message={"New ECS Service Name"}
+                name={"newECSServiceName"}
+                required={true}
+              />
+              <SubmitButton value={"Submit"} />
+            </dl>
+          </form>
+        </div>
       </div>
-    </>
+      <div className="col-50 no-border"></div>
+    </div>
   );
 };
 
@@ -50,93 +54,98 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
   }
 
   return (
-    <>
-      <h1>Detailed ECS and App Mesh Information</h1>
-      <div className="form-box">
+    <div className="row">
+      <div className="col-100">
+        <h1>Configure New Service</h1>
         <form onSubmit={handleSubmit}>
+          <div className="deploy-config-container">
+            <dl>
+              <InputLabel
+                message={'New Task Definition Name'}
+                name={"newTaskDefinitionName"}
+                required={true}
+              />
+              <InputLabel
+                message={'AWS Log Stream Prefix (optional)'}
+                name={"awslogsStreamPrefix"}
+                required={false}
+              />
+              <SelectorLabel
+                message={"Service Discovery ID"}
+                array={ecsDetails.serviceRegistryIds}
+                condition={true}
+                alternative={""}
+                changeHandler={() => undefined}
+              />
+              <SelectorLabel
+                message={"Envoy Container Name"}
+                array={ecsDetails.containerNames}
+                condition={true}
+                alternative={""}
+                changeHandler={() => undefined}
+              />
+              <SelectorLabel
+                message={"App Container Name"}
+                array={ecsDetails.containerNames}
+                condition={true}
+                alternative={""}
+                changeHandler={() => undefined}
+              />
+              <InputLabel
+                message={"New Container Image URI"}
+                name={"imageURL"}
+                required={true}
+              />
+              <SelectorLabel
+                message={"Virtual Node to Replace"}
+                array={meshDetails.nodes}
+                condition={true}
+                alternative={""}
+                changeHandler={() => undefined}
+              />
+              <InputLabel
+                message={"New Virtual Node Name"}
+                name={"newNodeName"}
+                required={true}
+              />
+              <SelectorLabel
+                message={"Select Virtual Router"}
+                array={meshDetails.routers}
+                condition={true}
+                alternative={""}
+                changeHandler={e => setRouter(e.target.value)}
+              />
+              <SelectorLabel
+                message={"Select Route to Update"}
+                array={meshDetails.routes[router]}
+                condition={router}
+                alternative={"Select a router first"}
+                changeHandler={() => undefined}
+              />
+            </dl>
+          </div>
+          <h2>Deployment Options</h2>
           <dl>
             <InputLabel
-              message={`Enter a new task definition family name (the current one is ${ecsDetails.originalTaskDefinition.split(":")[0]})`}
-              name={"newTaskDefinitionName"}
-              required={true}
-            />
-            <InputLabel
-              message={`If a container definition on ${ecsDetails.originalTaskDefinition.split(":")[0]} is currently configured with an awslogs driver, enter an awslogs-stream-prefix for your new task definition; otherwise, leave this blank`}
-              name={"awslogsStreamPrefix"}
-              required={false}
-            />
-            <SelectorLabel
-              message={"Choose the service discovery id the new task should use"}
-              array={ecsDetails.serviceRegistryIds}
-              condition={true}
-              alternative={""}
-              changeHandler={() => undefined}
-            />
-            <SelectorLabel
-              message={"Pick the name of the envoy container:"}
-              array={ecsDetails.containerNames}
-              condition={true}
-              alternative={""}
-              changeHandler={() => undefined}
-            />
-            <SelectorLabel
-              message={"Pick the name of the app container:"}
-              array={ecsDetails.containerNames}
-              condition={true}
-              alternative={""}
-              changeHandler={() => undefined}
-            />
-            <InputLabel
-              message={"Enter the URL of the new image for the app container"}
-              name={"imageURL"}
-              required={true}
-            />
-            <SelectorLabel
-              message={"Pick the corresponding virtual node to replace:"}
-              array={meshDetails.nodes}
-              condition={true}
-              alternative={""}
-              changeHandler={() => undefined}
-            />
-            <InputLabel
-              message={"Enter a name for your new virtual node"}
-              name={"newNodeName"}
-              required={true}
-            />
-            <SelectorLabel
-              message={"Pick a virtual router:"}
-              array={meshDetails.routers}
-              condition={true}
-              alternative={""}
-              changeHandler={e => setRouter(e.target.value)}
-            />
-            <SelectorLabel
-              message={"Pick a virtual route:"}
-              array={meshDetails.routes[router]}
-              condition={router}
-              alternative={"Select a router first"}
-              changeHandler={() => undefined}
-            />
-            <InputLabel
-              message={"Enter the minutes of each canary interval"}
+              message={"Canary Interval Duration (in minutes)"}
               name={"routeUpdateInterval"}
               required={true}
             />
             <InputLabel
-              message={"Enter the percentage of traffic to shift toward the canary for each interval"}
+              message={"Shift % per Interval"}
               name={"shiftWeight"}
               required={true}
             />
             <InputLabel
-              message={"How many 5xx responses from the canary are tolerable within an interval?"}
+              message={"Maximum Error per Minute Threshold"}
               name={"maxFailures"}
               required={true}
             />
-            <SubmitButton value={"Submit"} />
+            <SubmitButton value={"Begin Deployment"} />
           </dl>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -146,12 +155,14 @@ const DeployInfo = ({ ecsServices }) => {
     ecsDetails,
     meshDetails
   } = useSelector(state => state.logic);
+
   const {
     clusterName,
     originalECSServiceName,
     meshName,
     region
   } = useSelector(state => state.deploy);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -167,7 +178,11 @@ const DeployInfo = ({ ecsServices }) => {
           ? <SelectGeneralOptions ecsServices={ecsServices} />
           : ecsDetails && meshDetails
               ? <SelectSpecificOptions ecsDetails={ecsDetails} meshDetails={meshDetails} />
-              : <>Please Wait</>
+              : <div className="row">
+                  <div className="col-100">
+                    <img src="../../loading-circle.gif" width="200" style={{margin: "0 auto"}} alt="loading"></img>
+                  </div>
+                </div>
       }
     </>
   );
@@ -175,91 +190,12 @@ const DeployInfo = ({ ecsServices }) => {
 
 const DeployDispatchAndTrackProgress = () => {
   const { deploy } = useSelector(state => state);
-  const {
-    region,
-    shiftWeight,
-    routeUpdateInterval,
-    metricNamespace,
-    newTaskDefinitionName,
-    clusterName
-  } = useSelector(state => state.deploy);
-  const dispatch = useDispatch();
-  const [ events, setEvents ] = useState([]);
-  const [ metricsWidget, setMetricsWidget ] = useState("");
-  const [ listening, setListening ] = useState(false);
-
   useEffect(() => {
     axios.post('http://localhost:5000/deploy', deploy);
   }, [deploy]);
 
-  useEffect(() => {
-    if (!listening) {
-      const eventListener = new EventSource('http://localhost:5000/events');
-      eventListener.onmessage = (event) => {
-        console.log(event);
-        const data = JSON.parse(event.data);
-        const events = data.events
-        setEvents(events);
-
-        if (data.metricsWidget !== "") {
-          setMetricsWidget(data.metricsWidget);
-        }
-        if (events[events.length - 1] === 'closing connection') {
-          eventListener.close();
-        }
-      };
-
-      setListening(true);
-    }
-  }, [listening, events, metricsWidget, dispatch]);
-
-  const buildRollbackData = () => {
-    let newRollback = {...deploy};
-
-    events.map(event => {
-      switch (event.message) {
-        case 'created virtual node':
-          newRollback['virtualNode'] = event.rollback.virtualNode;
-          break;
-        case 'registered task definition':
-          newRollback['taskDefinition'] = event.rollback.taskDefinition;
-          break;
-        case 'created ECS service':
-          newRollback['newECSService'] = event.rollback.newECSService;
-        default:
-          console.log('default');
-      }
-    });
-    return newRollback;
-  }
-
-  const abortDeployment = () => {
-
-    if (window.confirm("Warning: A forced 'ABORT' can result in unexepected results. Are you certain you wish to force ABORT this deployment?") === true ) {
-      const rollback = buildRollbackData();
-      console.log(rollback);
-      console.log('Requesting abort:');
-      const abortResponse = axios.post('http://localhost:5000/abort', rollback);
-      console.log('Abort Response:', abortResponse)
-    } else {
-      console.log('Abort cancelled');
-    }
-  }
-
   return (
-    <div>
-      <p>Deploying!</p>
-      <button onClick={abortDeployment}>ABORT</button>
-      <ul className="deployment-event-list">
-        {events.map(event => <li key={event.message} className="deployment-event">{event.message}</li>)}
-        <li><img className="loading-gif" src="../../loading.gif" alt='loading gif' /></li>
-      </ul>
-      {
-        metricsWidget
-          ? <img width="1200" height="600" src={`data:image/png;base64,${metricsWidget}`} alt='widget' />
-          : ""
-      }
-    </div>
+    <DeployProgressPanel />
   );
 };
 
@@ -270,19 +206,20 @@ const Deploy = () => {
   useEffect(() => dispatch(readGeneralOptions(clusterName, region)), [dispatch, clusterName, region]);
 
   return (
-    <div>
-      <h2>Here you will deploy a canary! Good luck little guy!</h2>
-      <button onClick={() => dispatch({ type: "TO_WELCOME" })}>
-        Take me back!
-      </button>
+    <>
       {
         !deployInfoEntered
           ? ecsServices
               ? <DeployInfo ecsServices={ecsServices} />
-              : <>Please wait</>
+              : <div className="row">
+                  <div className="col-50">
+                    <img src="../../loading-circle.gif" width="200" alt="loading" style={{margin: "0 auto"}}></img>
+                  </div>
+                  <div className="col-50 no-border"></div>
+                </div>
           : <DeployDispatchAndTrackProgress />
       }
-    </div>
+    </>
   );
 };
 
