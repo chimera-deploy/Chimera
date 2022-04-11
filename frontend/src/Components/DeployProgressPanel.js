@@ -30,16 +30,17 @@ const DeployProgressPanel = () => {
         const events = data.events;
 
         if (data.events) {
-          setEvents(data.events);
+          if (events[events.length - 1] === 'closing connection') {
+            eventListener.close();
+          } else {
+            setEvents(data.events);
+          }
         }
         if (data.metricsWidget) {
           setMetricsWidget(data.metricsWidget);
         }
         if (data.weights) {
           setWeights(data.weights);
-        }
-        if (events[events.length - 1] === 'closing connection') {
-          eventListener.close();
         }
       }
       
@@ -67,7 +68,7 @@ const DeployProgressPanel = () => {
             {
               events.length !== 0
                 ? <EventLine event={events[events.length - 1]} isCurrentStage={events[events.length - 1] !== 'closing connection'} />
-                : null
+                : <img src="../../loading-circle.gif" width="200" alt="loading" style={{margin: "0 auto"}}></img>
             }
           <AbortButton />
         </div>
