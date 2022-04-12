@@ -345,6 +345,7 @@ const Chimera = {
         ],
         this.config.clientRegion
       );
+      this.sendWeights(100, 0);
       if (this.virtualNode !== null) {
         this.writeToClient(`deleting virtual node ${this.virtualNode.virtualNodeName}`);
         await VirtualNode.destroy(this.config.meshName, this.virtualNode.virtualNodeName, this.config.clientRegion);
