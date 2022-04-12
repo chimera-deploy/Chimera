@@ -299,6 +299,7 @@ const Chimera = {
           this.sendMetricsWidget(metricsWidget);
         } catch (err) {
           this.clearAllIntervals();
+          const metricsWidget = await CloudWatch.getMetricWidgetImage(this.config);
           this.sendMetricsWidget(metricsWidget);
           reject(err);
         }
