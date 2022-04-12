@@ -55,8 +55,7 @@ const Chimera = {
   },
 
   sendWeights(stable, canary) {
-    // this.writeToClient(`Updated Weights: stable: ${stable} | Canary ${canary}`);
-    this.writeToClient(`Shifting Traffic...`);
+    this.writeToClient(`Updated Weights: stable: ${stable} | Canary ${canary}`);
     const weights = { stable, canary };
     const data = JSON.stringify({ weights })
     this.clientList.forEach(client => {

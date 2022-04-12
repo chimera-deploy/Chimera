@@ -46,6 +46,7 @@ const SelectGeneralOptions = ({ ecsServices }) => {
 
 const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
   let [ router, setRouter ] = useState("");
+  const { newECSServiceName } = useSelector(state => state.deploy);
   const dispatch = useDispatch();
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,7 +57,7 @@ const SelectSpecificOptions = ({ ecsDetails, meshDetails }) => {
   return (
     <div className="row">
       <div className="col-100">
-        <h1>Configure New Service</h1>
+        <h1>Configure {newECSServiceName}</h1>
         <form onSubmit={handleSubmit}>
           <div className="deploy-config-container">
             <dl>
