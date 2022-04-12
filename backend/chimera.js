@@ -299,6 +299,7 @@ const Chimera = {
           this.sendMetricsWidget(metricsWidget);
         } catch (err) {
           this.clearAllIntervals();
+          this.sendMetricsWidget(metricsWidget);
           reject(err);
         }
       }, HEALTHCHECK_INTERVAL);
