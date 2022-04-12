@@ -4,10 +4,36 @@ import { useEffect, useState } from 'react';
 import AbortButton from './AbortButton';
 
 const EventLine = ({ event, isCurrentStage }) => {
+  if (event.length > 40) {
+    event = event.slice(0, 40) + '...';
+  }
   return (
     <div className="status-update-line">
       <p>{event}</p>
-      {isCurrentStage ? <img id="loading-gif" src="../../loading.gif" alt="loading gif" /> : null}
+      {isCurrentStage ? <img id="loading-gif" src="../../loading.gif" alt="loading gif" /> : <img class="checkmark" src="../../checkmark.png" alt="checkmark" />}
+    </div>
+  );
+};
+
+const EventList = ({ events }) => {
+  if (!events || events.length === 0) {
+    return (
+    <div id='status-update-container'>
+      <img src="../../loading-circle.gif" width="200" alt="loading" style={{margin: "0 auto"}}></img>
+    </div>
+    );
+  }
+  let deployComplete = false;
+  if (events[events.length - 1] === 'closing connection') {
+    deployComplete = true;
+  }
+  console.log(events);
+  events = events.filter(event => event !== 'closing connection');
+  return (
+    <div id='status-update-container'>
+    {
+      events.reverse().map((event, idx) => <EventLine key={event} event={event} isCurrentStage={idx === 0 && !deployComplete} />)
+    }
     </div>
   );
 };
@@ -32,9 +58,8 @@ const DeployProgressPanel = () => {
         if (data.events) {
           if (events[events.length - 1] === 'closing connection') {
             eventListener.close();
-          } else {
-            setEvents(data.events);
           }
+          setEvents(data.events);
         }
         if (data.metricsWidget) {
           setMetricsWidget(data.metricsWidget);
@@ -64,12 +89,8 @@ const DeployProgressPanel = () => {
             <p className="traffic-weight-text">{`${weights.canary}%`}</p>
           </div>
         </div>
-        <div className="col-50 no-border action-button-container">
-            {
-              events.length !== 0
-                ? <EventLine event={events[events.length - 1]} isCurrentStage={events[events.length - 1] !== 'closing connection'} />
-                : <img src="../../loading-circle.gif" width="200" alt="loading" style={{margin: "0 auto"}}></img>
-            }
+        <div className="col-50 no-border event-container small-padding">
+          <EventList events={events}/>
           <AbortButton />
         </div>
       </div>

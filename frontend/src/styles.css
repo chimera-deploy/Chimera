@@ -170,6 +170,24 @@ button:disabled {
   height: 50px;
 }
 
+.small-padding {
+  padding: 5px;
+}
+
+.event-container {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.event-container button {
+  display: block;
+  max-width: 150px;
+  height: 50px;
+}
+
 .subnet-inputs {
   display: inline-block;
   width: 50%;
@@ -250,7 +268,8 @@ em {
   margin: 10px;
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  width: 95%;
+  background-color: white;
 }
 
 #loading-gif {
@@ -267,4 +286,22 @@ em {
   font-weight: 600;
   font-size: 18px !important;
   line-height: 2rem;
+}
+
+#status-update-container {
+  max-height: 180px;
+  font-size: 14px;
+  overflow-y: scroll;
+  overflow-x: auto;
+  margin-bottom: 15px;
+  padding: 10px;
+  box-shadow: #0C0E21 0 0 10px 0px;
+  border-radius: 5px;
+  width: 100%;
+  background-color: darkgray;
+}
+
+.checkmark {
+  width: 36px;
+  border-radius: 5px;
 }
