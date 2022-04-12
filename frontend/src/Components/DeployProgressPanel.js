@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import AbortButton from './AbortButton';
 
 const EventLine = ({ event, isCurrentStage }) => {
+  let truncatedMessage = event;
   if (event.length > 40) {
-    event = event.slice(0, 40) + '...';
+    truncatedMessage = truncatedMessage.slice(0, 40) + '...';
   }
   return (
-    <div className="status-update-line">
-      <p>{event}</p>
+    <div className="status-update-line" title={event}>
+      <p>{truncatedMessage}</p>
       {isCurrentStage ? <img id="loading-gif" src="../../loading.gif" alt="loading gif" /> : <img class="checkmark" src="../../checkmark.png" alt="checkmark" />}
     </div>
   );
