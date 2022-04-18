@@ -51,7 +51,7 @@ const SetupInfoForm = () => {
 
 const SetupDispatchAndTrackProgress = () => {
   const { setup } = useSelector(state => state);
-  axios.post('http://localhost:5000/setup', setup)
+  axios.post('/api/setup', setup)
   return (
     <div>
       <p>Setting up cloudwatch agent!</p>
