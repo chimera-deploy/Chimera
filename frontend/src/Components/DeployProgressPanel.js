@@ -49,7 +49,7 @@ const DeployProgressPanel = () => {
 
   useEffect(() => {
     if (!listening) {
-      const eventListener = new EventSource('http://localhost:5000/events');
+      const eventListener = new EventSource('/events');
 
       eventListener.onmessage = (event) => {
         console.log(event);
