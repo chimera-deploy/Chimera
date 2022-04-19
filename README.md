@@ -3,7 +3,7 @@
 (logo)
 
 Chimera automates canary deployments for containerized microservices that communicate synchronously.
-It reduces the risk of introducing bugs to production by gradually shifting traffic to a canary version of your service while automating simple threshold canary analysis.
+It reduces the risk of introducing bugs that propagate through your microservice infrastructure by gradually shifting traffic to a canary version of your service while automating simple threshold canary analysis.
 
 (diagram)
 
