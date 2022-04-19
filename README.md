@@ -37,7 +37,7 @@ docker-compose up
 
 Chimera will now be ready to set up the Prometheus-configured CloudWatch agent in your ECS cluster. You can access Chimera's UI at port 3000. Once there, have Chimera perform the automatic deployment of the CloudWatch agent unless you've already had Chimera do this before. After the CloudWatch agent is set up, your teams can perform canary deployments on your microservices.
 
-To remove Chimera from your machine, simple execute:
+To remove Chimera from your machine, simply execute:
 
 ```bash
 docker-compose down
