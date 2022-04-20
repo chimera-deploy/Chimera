@@ -50,14 +50,14 @@ docker-compose down
 ## Team
 
 **Ohio, USA**
-- Josh Leath (LinkedIn, GitHub)
+- Josh Leath (LinkedIn, [GitHub](https://github.com/jleath))
 
 **Pennsylvania, USA**
-- Trevor Kelly (LinkedIn, GitHub)
+- Trevor Kelly (LinkedIn, [GitHub](https://github.com/TrevorDKelly))
 
 **Massachusettes, USA**
-- Will Rossen (LinkedIn, GitHub)
-- Wes Anderson (LinkedIn, GitHub)
+- Will Rossen (LinkedIn, [GitHub](https://github.com/wor101))
+- Wes Anderson (LinkedIn, [GitHub](https://github.com/w-h-a))
 
 ## Show your support
 
