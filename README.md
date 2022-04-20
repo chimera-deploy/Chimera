@@ -8,7 +8,7 @@ Chimera automates canary deployments for containerized microservices that commun
 It reduces the risk of introducing bugs that propagate through your microservice infrastructure by gradually shifting traffic to a canary version of your service while automating simple threshold canary analysis.
 
 <p align="center">
-    <img src="./assets/chimera_diagram.png" alt="chimera diagram">
+    <img src="./assets/chimera_diagram.png" alt="chimera diagram" width="600" height="600">
 </p>
 
 Currently, Chimera supports canary deployments for microservices that run on ECS/Fargate and communicate via App Mesh.
