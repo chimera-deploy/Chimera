@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/Chimera_logo_on_dark.png" alt="Chimera logo" width="200" height="200">
+    <img src="./assets/Chimera_logo_on_dark.png" alt="chimera logo" width="200" height="200">
 </p>
 
 ## Chimera
@@ -7,7 +7,9 @@
 Chimera automates canary deployments for containerized microservices that communicate synchronously on AWS.
 It reduces the risk of introducing bugs that propagate through your microservice infrastructure by gradually shifting traffic to a canary version of your service while automating simple threshold canary analysis.
 
-(diagram)
+<p align="center">
+    <img src="./assets/chimera_diagram.png" alt="chimera diagram">
+</p>
 
 Currently, Chimera supports canary deployments for microservices that run on ECS/Fargate and communicate via App Mesh.
 For monitoring metrics, Chimera uses a Prometheus-configured CloudWatch agent that Chimera must set up before it can perform canary deployments.
