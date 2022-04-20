@@ -1,6 +1,6 @@
-## Chimera
+![chimera logo](/assets/Chimera_logo_on dark.png)
 
-(logo)
+## Chimera
 
 Chimera automates canary deployments for containerized microservices that communicate synchronously on AWS.
 It reduces the risk of introducing bugs that propagate through your microservice infrastructure by gradually shifting traffic to a canary version of your service while automating simple threshold canary analysis.
