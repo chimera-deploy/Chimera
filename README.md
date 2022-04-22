@@ -14,13 +14,13 @@ It reduces the risk of introducing bugs that propagate through your microservice
 Currently, Chimera supports canary deployments for microservices that run on ECS/Fargate and communicate via App Mesh.
 For monitoring metrics, Chimera uses a Prometheus-configured CloudWatch agent that Chimera must set up before it can perform canary deployments.
 
-For more information, please see Chimera's official webpage (link).
+For more information, please see [Chimera's official webpage](https://chimera-deploy.dev/).
 
 ## Installation and Setup
 
 Chimera is deployed with Docker-Compose. Please ensure that both [Docker](https://docs.docker.com/install/) and [Docker-Compose](https://docs.docker.com/compose/install/) are running on your machine.
 
-To install Chimera, clone *this* repository. You can use the following terminal command:
+To install Chimera, clone _this_ repository. You can use the following terminal command:
 
 ```bash
 git clone https://github.com/chimera-deploy/Chimera.git && cd Chimera
@@ -50,17 +50,20 @@ docker-compose down
 ## Team
 
 **Ohio, USA**
-- Josh Leath (LinkedIn, [GitHub](https://github.com/jleath))
+
+- Josh Leath ([LinkedIn](https://www.linkedin.com/in/joshua-leath/), [GitHub](https://github.com/jleath))
 
 **Pennsylvania, USA**
-- Trevor Kelly (LinkedIn, [GitHub](https://github.com/TrevorDKelly))
+
+- Trevor Kelly ([LinkedIn](https://linkedin.com/in/trevor-kelly-2a036770/), [GitHub](https://github.com/TrevorDKelly))
 
 **Massachusettes, USA**
-- Will Rossen (LinkedIn, [GitHub](https://github.com/wor101))
-- Wes Anderson (LinkedIn, [GitHub](https://github.com/w-h-a))
+
+- Will Rossen ([LinkedIn](https://www.linkedin.com/in/william-rossen-1ab5a320), [GitHub](https://github.com/wor101))
+- Wes Anderson ([LinkedIn](https://www.linkedin.com/in/wes-anderson-479087101/), [GitHub](https://github.com/w-h-a))
 
 ## Show your support
 
 Give a ⭐️ if you liked this project!
 
-***
+---
